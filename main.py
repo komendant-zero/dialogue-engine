@@ -853,39 +853,6 @@ class ScenarioEditor(tk.Tk):
         t_content.insert("1.0", node.content)
         t_content.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
         
-        # --- Функционал выделения слов ---
-        hl_frame = tk.LabelFrame(dialog, text="Выделение слов цветом", bg=COLORS['bg'], fg='white', padx=5, pady=5)
-        hl_frame.pack(fill=tk.X, padx=10, pady=5)
-
-        def highlight_selected_word():
-            try:
-                sel_start = t_content.index(tk.SEL_FIRST)
-                sel_end = t_content.index(tk.SEL_LAST)
-                selected_fragment = t_content.get(sel_start, sel_end) 
-                
-                if not selected_fragment:
-                    return
-
-                color = colorchooser.askcolor(title=f"Цвет для '{selected_fragment}'", parent=dialog)
-                if color[1]:
-                    if 'highlights' not in node.custom_data:
-                        node.custom_data['highlights'] = {}
-                    node.custom_data['highlights'][selected_fragment] = color[1]
-                    self.redraw()
-            except tk.TclError:
-                messagebox.showwarning("Внимание", "Сначала выделите фрагмент в тексте мышкой!", parent=dialog)
-
-        def clear_highlights():
-            if 'highlights' in node.custom_data:
-                node.custom_data['highlights'] = {}
-                self.redraw()
-
-        btn_hl_word = tk.Button(hl_frame, text="Окрасить фрагмент", command=highlight_selected_word, bg='#2d4a57', fg='white')
-        btn_hl_word.pack(side=tk.LEFT, padx=5, expand=True, fill=tk.X)
-
-        btn_cl_hl = tk.Button(hl_frame, text="Сбросить выделение", command=clear_highlights, bg='#a93226', fg='white')
-        btn_cl_hl.pack(side=tk.RIGHT, padx=5, expand=True, fill=tk.X)
-
         # --- Фрейм для плагинов ---
         plugin_frame = tk.Frame(dialog, bg=COLORS['bg'])
         plugin_frame.pack(fill=tk.X, padx=10, pady=10)

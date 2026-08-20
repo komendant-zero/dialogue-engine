@@ -7,13 +7,7 @@ class CoreNodesPlugin(Plugin):
     version = "1.0"
 
     def on_event(self, event_type, data=None):
-        if event_type == 'setup_ui':
-            toolbar = data
-            btn_cfg = {'bg': '#444', 'fg': 'white', 'relief': 'flat', 'padx': 10, 'pady': 5}
-            tk.Button(toolbar, text="Сюжет (story)", command=lambda: self.editor.add_node('story'), **btn_cfg).pack(side=tk.LEFT, padx=5, pady=5)
-            tk.Button(toolbar, text="Выбор (choice)", command=lambda: self.editor.add_node('choice'), **btn_cfg).pack(side=tk.LEFT, padx=5, pady=5)
-            
-        elif event_type == 'context_menu':
+        if event_type == 'context_menu':
             if not data['target']:
                 menu = data['menu']
                 menu.add_command(label="Сцена", command=lambda: self.editor.add_node('story', data['x'], data['y']))
