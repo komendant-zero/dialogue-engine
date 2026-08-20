@@ -38,8 +38,13 @@ class FadePlugin(Plugin):
             canvas.create_rectangle(x, y, x+w, y+header_height, fill='#000000', outline="", tags=("node", node_self.id))
             canvas.create_text(x+10, y+12, text="⬛ Затемнение", fill="white", anchor="w", font=("Segoe UI", 9, "bold"), tags=("node", node_self.id))
 
-            # Content
-            canvas.create_text(x + w/2, y + header_height + (h - header_height)/2, text="(Уход в черный экран)", fill="#cccccc", font=("Segoe UI", 8), justify="center", tags=("node", node_self.id))
+            try:
+                cfg = json.loads(node_self.content)
+                duration = cfg.get("duration", 0.5)
+            except:
+                duration = 0.5
+            info_text = f"(Уход в черный экран)\nДлительность: {duration}с"
+            canvas.create_text(x + w/2, y + header_height + (h - header_height)/2, text=info_text, fill="#cccccc", font=("Segoe UI", 8), justify="center", tags=("node", node_self.id))
 
             # Ports
             node_self.draw_input_port(canvas, x, y + h/2)
@@ -54,8 +59,7 @@ class FadePlugin(Plugin):
 
         def new_edit_node(editor_self, node):
             if node.node_type == 'fade_node':
-                # No complex edit needed, maybe just title
-                pass
+                FadeEditorDialog(editor_self, node, plugin_self.editor.redraw)
             else:
                 plugin_self.original_edit_node(editor_self, node)
 
@@ -84,7 +88,13 @@ class FadePlugin(Plugin):
                 f = data['file']
                 connections = data['connections']
                 
-                f.write('    scene black with fade\n')
+                try:
+                    cfg = json.loads(node.content)
+                    duration = float(cfg.get("duration", 0.5))
+                except:
+                    duration = 0.5
+                
+                f.write(f'    scene black with Dissolve({duration})\n')
                 
                 # Пишем переход к следующей ноде
                 out_conns = [c for c in connections if c['from'] == node.id]
@@ -100,5 +110,43 @@ class FadePlugin(Plugin):
         self.editor.add_node(
             ntype='fade_node',
             title="Затемнение",
-            content="{}"
+            content=json.dumps({"duration": 0.5})
         )
+
+class FadeEditorDialog:
+    def __init__(self, parent, node, callback):
+        self.node = node
+        self.callback = callback
+
+        try:
+            self.data = json.loads(node.content)
+        except Exception:
+            self.data = {"duration": 0.5}
+
+        self.win = tk.Toplevel(parent)
+        self.win.title("Настройки Затемнения")
+        self.win.geometry("300x200")
+        self.win.configure(bg='#2b2b2b')
+        self.win.transient(parent)
+        self.win.grab_set()
+
+        lbl_style = {'bg': '#2b2b2b', 'fg': 'white', 'font': ('Segoe UI', 10)}
+
+        tk.Label(self.win, text="Длительность (сек):", **lbl_style).pack(pady=(20, 5))
+        self.e_duration = tk.Entry(self.win, bg='#444', fg='white')
+        self.e_duration.insert(0, str(self.data.get("duration", 0.5)))
+        self.e_duration.pack(fill=tk.X, padx=40)
+
+        tk.Button(self.win, text="💾 Сохранить", command=self.save, bg='#27ae60', fg='white', width=20).pack(side=tk.BOTTOM, pady=20)
+
+    def save(self):
+        try:
+            self.data["duration"] = float(self.e_duration.get())
+        except ValueError:
+            self.data["duration"] = 0.5
+
+        self.node.content = json.dumps(self.data, ensure_ascii=False)
+        self.node.calculate_size()
+        self.callback()
+        self.win.destroy()
+
