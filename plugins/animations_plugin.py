@@ -76,16 +76,16 @@ class AnimationPlugin(Plugin):
 
     def on_event(self, event_type, data=None):
         if event_type == 'setup_ui':
-            if not hasattr(self.editor, 'plugin_menu'):
-                self.editor.plugin_menu_btn = tk.Menubutton(
-                    data, text="🧩 Компоненты ▾", bg='#444', fg='white',
+            if not hasattr(self.editor, 'anim_menu'):
+                self.editor.anim_menu_btn = tk.Menubutton(
+                    data, text="🎬 Анимации ▾", bg='#8e44ad', fg='white',
                     relief='flat', font=('Segoe UI', 9, 'bold'), padx=10, pady=5
                 )
-                self.editor.plugin_menu_btn.pack(side=tk.LEFT, padx=5, pady=5)
-                self.editor.plugin_menu = tk.Menu(self.editor.plugin_menu_btn, tearoff=0, bg='#444', fg='white')
-                self.editor.plugin_menu_btn["menu"] = self.editor.plugin_menu
+                self.editor.anim_menu_btn.pack(side=tk.LEFT, padx=5, pady=5)
+                self.editor.anim_menu = tk.Menu(self.editor.anim_menu_btn, tearoff=0, bg='#444', fg='white')
+                self.editor.anim_menu_btn["menu"] = self.editor.anim_menu
 
-            self.editor.plugin_menu.add_command(label="✨ Анимация", command=self.create_anim_node)
+            self.editor.anim_menu.add_command(label="✨ Анимация", command=self.create_anim_node)
 
     def create_anim_node(self):
         default_data = {
