@@ -96,23 +96,32 @@ class MediaBlockPlugin(Plugin):
                         cache_key = f"{img_path}_{target_w}"
 
                         if cache_key not in IMAGE_CACHE:
-                            if HAS_PIL:
-                                pil_img = Image.open(img_path)
+                            # Всегда пробуем PIL первым — inline import обходит
+                            # проблему HAS_PIL=False в динамически загруженном модуле
+                            try:
+                                from PIL import Image as _Image, ImageTk as _ImageTk
+                                pil_img = _Image.open(img_path)
                                 aspect = pil_img.height / pil_img.width
                                 target_h = int(target_w * aspect)
                                 if target_h > 300:
                                     target_h = 300
-                                pil_img = pil_img.resize((target_w, target_h), Image.Resampling.LANCZOS)
-                                tk_img = ImageTk.PhotoImage(pil_img)
-                                IMAGE_CACHE[cache_key] = tk_img
-                            else:
-                                img = tk.PhotoImage(file=img_path)
-                                if img.width() > target_w:
-                                    factor = int(img.width() / target_w)
-                                    if factor < 1:
-                                        factor = 1
-                                    img = img.subsample(factor, factor)
-                                IMAGE_CACHE[cache_key] = img
+                                pil_img = pil_img.resize((target_w, target_h), _Image.Resampling.LANCZOS)
+                                IMAGE_CACHE[cache_key] = _ImageTk.PhotoImage(pil_img)
+                            except ImportError:
+                                # PIL не установлен — tk.PhotoImage работает только для PNG/GIF
+                                ext_lower = os.path.splitext(img_path)[1].lower()
+                                if ext_lower in ('.png', '.gif'):
+                                    img = tk.PhotoImage(file=img_path)
+                                    if img.width() > target_w:
+                                        factor = max(1, int(img.width() / target_w))
+                                        img = img.subsample(factor, factor)
+                                    IMAGE_CACHE[cache_key] = img
+                                else:
+                                    raise RuntimeError(
+                                        f"Pillow not installed — JPG/WebP not supported. "
+                                        f"Run: pip install pillow"
+                                    )
+
 
                         tk_img = IMAGE_CACHE[cache_key]
                         img_h = tk_img.height()
