@@ -835,6 +835,16 @@ class ScenarioEditor(tk.Tk):
         btn_h_color.grid(row=0, column=0, padx=2, pady=2)
 
         # --- Режим (Только для Story) ---
+        mode_var = None
+        if node.node_type == 'story':
+            mode_frame = tk.LabelFrame(dialog, text="Режим узла", bg=COLORS['bg'], fg='white', padx=5, pady=5)
+            mode_frame.pack(fill=tk.X, padx=10, pady=5)
+            mode_var = tk.StringVar(value=getattr(node, 'mode', 'standard'))
+            tk.Radiobutton(mode_frame, text="Стандарт", variable=mode_var, value="standard",
+                           bg=COLORS['bg'], fg='white', selectcolor='#555').pack(side=tk.LEFT, padx=5)
+            tk.Radiobutton(mode_frame, text="Продолжение", variable=mode_var, value="continue",
+                           bg=COLORS['bg'], fg='white', selectcolor='#555').pack(side=tk.LEFT, padx=5)
+
         # --- Контент ---
         tk.Label(dialog, text="Текст / Контент:", bg=COLORS['bg'], fg='white').pack(pady=5)
         t_content = tk.Text(dialog, height=8, bg='#333', fg='white', insertbackground='white')
@@ -884,7 +894,7 @@ class ScenarioEditor(tk.Tk):
         def auto_save(event=None):
             node.title = e_title.get()
             node.content = t_content.get("1.0", tk.END).strip()
-            if node.node_type == 'story':
+            if node.node_type == 'story' and mode_var is not None:
                 node.mode = mode_var.get()
             node.calculate_size()
             self.redraw()
@@ -896,7 +906,7 @@ class ScenarioEditor(tk.Tk):
         def save():
             node.title = e_title.get()
             node.content = t_content.get("1.0", tk.END).strip()
-            if node.node_type == 'story':
+            if node.node_type == 'story' and mode_var is not None:
                 node.mode = mode_var.get()
             
             self.plugin_manager.notify('node_edit_save', {'node': node})
