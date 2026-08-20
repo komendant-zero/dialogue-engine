@@ -87,6 +87,42 @@ class AnimationPlugin(Plugin):
 
             self.editor.anim_menu.add_command(label="✨ Анимация", command=self.create_anim_node)
 
+        # Export logic
+        elif event_type == 'renpy_export_node':
+            node = data['node']
+            if node.node_type == 'animation':
+                f = data['file']
+                connections = data['connections']
+                
+                try:
+                    cfg = json.loads(node.content)
+                    target = cfg.get("target", "screen")
+                    anim = cfg.get("animation", "fade")
+                    duration = float(cfg.get("duration", 0.5))
+                except:
+                    target = "screen"
+                    anim = "fade"
+                    duration = 0.5
+                
+                if target == "black_screen (Затемнение)":
+                    f.write(f'    scene black with Dissolve({duration})\n')
+                else:
+                    # Generic screen transition
+                    if anim.lower() != 'none':
+                        if duration != 0.5 and (anim.lower() == 'dissolve' or anim.lower() == 'fade'):
+                            f.write(f'    with Dissolve({duration})\n')
+                        else:
+                            f.write(f'    with {anim}\n')
+                
+                out_conns = [c for c in connections if c['from'] == node.id]
+                if out_conns:
+                    target_id = out_conns[0]['to']
+                    f.write(f'    jump node_{target_id}\n')
+                else:
+                    f.write('    return\n')
+                
+                data['handled'] = True
+
     def create_anim_node(self):
         default_data = {
             "animation": "fade",
@@ -132,7 +168,7 @@ class AnimationEditorDialog:
         self.e_title.pack(fill=tk.X, padx=20)
         
         tk.Label(self.win, text="Что анимируем (Цель):", **lbl_style).pack(pady=(15,5))
-        self.e_target = ttk.Combobox(self.win, values=["screen", "master", "background", "sprite"])
+        self.e_target = ttk.Combobox(self.win, values=["screen", "black_screen (Затемнение)", "master", "background", "sprite"])
         self.e_target.set(self.data["target"])
         self.e_target.pack(fill=tk.X, padx=20)
 
