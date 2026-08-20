@@ -49,6 +49,10 @@ class RenpyExporterPlugin(Plugin):
             with open(rpy_path, 'w', encoding='utf-8') as f:
                 f.write("# --- Сгенерировано визуальным редактором (v2.0) ---\n\n")
                 
+                # ПЫТАЕМСЯ ДЕЛЕГИРОВАТЬ ЭКСПОРТ INIT БЛОКОВ (Анимации, ATL, настройки)
+                init_data = {'file': f, 'nodes': nodes, 'connections': connections}
+                self.editor.plugin_manager.notify('renpy_export_init', init_data)
+                
                 # Поиск стартового узла
                 to_ids = set(c['to'] for c in connections)
                 start_nodes = [n for n in nodes if n.id not in to_ids]
@@ -62,6 +66,11 @@ class RenpyExporterPlugin(Plugin):
                 f.write(f"    jump node_{start_node.id}\n\n")
                 
                 for node in nodes:
+                    check_data = {'node': node, 'skip': False}
+                    self.editor.plugin_manager.notify('renpy_export_check', check_data)
+                    if check_data['skip']:
+                        continue
+                        
                     f.write(f"# --- {node.title} ({node.node_type}) ---\n")
                     f.write(f"label node_{node.id}:\n")
                     
