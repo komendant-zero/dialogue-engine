@@ -17,7 +17,7 @@ class CoreNodesPlugin(Plugin):
             node = data
             if getattr(node, 'is_new', True):
                 if node.node_type == 'story':
-                    node.title = "ПерсонаѶ"
+                    node.title = "Сцена"
                     node.content = "Текст..."
                 elif node.node_type == 'choice':
                     node.title = "Выбор"

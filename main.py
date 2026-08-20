@@ -842,7 +842,7 @@ class ScenarioEditor(tk.Tk):
         dialog.attributes('-topmost', True) 
 
         # --- Заголовок ---
-        tk.Label(dialog, text="Заголовок (Имя персонажа, # - скрыть):", bg=COLORS['bg'], fg='white').pack(pady=5)
+        tk.Label(dialog, text="Заголовок (Сцена, # - скрыть):", bg=COLORS['bg'], fg='white').pack(pady=5)
         e_title = tk.Entry(dialog, bg='#333', fg='white')
         e_title.insert(0, node.title)
         e_title.pack(fill=tk.X, padx=10)
