@@ -104,7 +104,7 @@ class AnimationPlugin(Plugin):
                     anim = "fade"
                     duration = 0.5
                 
-                if target == "black_screen (Затемнение)":
+                if anim == "fade to black":
                     f.write(f'    scene black with Dissolve({duration})\n')
                 else:
                     # Generic screen transition
@@ -168,13 +168,13 @@ class AnimationEditorDialog:
         self.e_title.pack(fill=tk.X, padx=20)
         
         tk.Label(self.win, text="Что анимируем (Цель):", **lbl_style).pack(pady=(15,5))
-        self.e_target = ttk.Combobox(self.win, values=["screen", "black_screen (Затемнение)", "master", "background", "sprite"])
+        self.e_target = ttk.Combobox(self.win, values=["screen", "master", "background", "sprite"])
         self.e_target.set(self.data["target"])
         self.e_target.pack(fill=tk.X, padx=20)
 
         tk.Label(self.win, text="Тип анимации:", **lbl_style).pack(pady=(15, 5))
         transitions = [
-            "none", "dissolve", "fade", "pixellate",
+            "none", "fade to black", "dissolve", "fade", "pixellate",
             "move", "moveinright", "moveinleft", "moveintop", "moveinbottom",
             "moveoutright", "moveoutleft", "moveouttop", "moveoutbottom",
             "ease", "easeinright", "easeinleft", "easeintop", "easeinbottom",
