@@ -368,11 +368,21 @@ class MediaEditorDialog:
             ("All Files", "*.*")
         ])
         if path:
-            path = path.replace("\\", "/") 
+            path = path.replace("\\", "/")
+            
+            # Инвалидируем кэш СТАРОГО пути перед сменой
+            old_path = self.data.get("image_path", "")
+            if old_path:
+                if old_path in SIZE_CACHE:
+                    del SIZE_CACHE[old_path]
+                # Удаляем все записи IMAGE_CACHE для старого пути (любая ширина)
+                old_keys = [k for k in IMAGE_CACHE if k.startswith(old_path + "_")]
+                for k in old_keys:
+                    del IMAGE_CACHE[k]
+            
             self.data["image_path"] = path
             self.path_var.set(path)
-            if path in SIZE_CACHE:
-                del SIZE_CACHE[path]
+
 
     def save(self):
         self.node.title = self.e_title.get()
