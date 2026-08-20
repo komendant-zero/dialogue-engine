@@ -1069,5 +1069,8 @@ class ScenarioEditor(tk.Tk):
                 self.redraw()
 
 if __name__ == "__main__":
+    import sys
     app = ScenarioEditor()
+    if len(sys.argv) > 1 and sys.argv[1].endswith('.json'):
+        app.after(100, lambda: app.load_project(sys.argv[1]))
     app.mainloop()
