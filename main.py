@@ -321,8 +321,9 @@ class ScenarioEditor(tk.Tk):
         self.conn_drag = {"active": False, "start_node": None, "start_idx": 0, "line_id": None}
         self.pressed_keys = {}
 
-        # --- Новые переменные ---
+        # --- Свойства выделения ---
         self.selected_nodes = []
+        self.selected_connection = None
         self.clipboard = {}
         self.undo_stack = []
         self.redo_stack = []
@@ -558,12 +559,17 @@ class ScenarioEditor(tk.Tk):
         self.paste()
 
     def delete_selected(self, event=None):
-        if not self.selected_nodes: return
+        if not self.selected_nodes and not getattr(self, 'selected_connection', None): return
         self.save_state()
-        sel_ids = {n.id for n in self.selected_nodes}
-        self.nodes = [n for n in self.nodes if n not in self.selected_nodes]
-        self.connections = [c for c in self.connections if c["from"] not in sel_ids and c["to"] not in sel_ids]
-        self.selected_nodes = []
+        if getattr(self, 'selected_connection', None):
+            if self.selected_connection in self.connections:
+                self.connections.remove(self.selected_connection)
+            self.selected_connection = None
+        if self.selected_nodes:
+            sel_ids = {n.id for n in self.selected_nodes}
+            self.nodes = [n for n in self.nodes if n not in self.selected_nodes]
+            self.connections = [c for c in self.connections if c["from"] not in sel_ids and c["to"] not in sel_ids]
+            self.selected_nodes = []
         self.redraw()
 
     def add_node(self, ntype, x=None, y=None, title=None, content=None, custom_data=None, mode="standard", save_history=True):
@@ -608,13 +614,17 @@ class ScenarioEditor(tk.Tk):
         if from_node and to_node:
             start = from_node.get_output_pos(conn['out_idx'])
             end = to_node.get_input_pos()
-            self.draw_bezier(start, end)
+            is_selected = (getattr(self, 'selected_connection', None) == conn)
+            color = COLORS['line_active'] if is_selected else COLORS['line']
+            conn_tag = f"conn_{conn['from']}_{conn['out_idx']}_{conn['to']}"
+            self.draw_bezier(start, end, tags=("conn", conn_tag), fill=color)
 
-    def draw_bezier(self, start, end):
+    def draw_bezier(self, start, end, tags="conn", fill=None):
+        if fill is None: fill = COLORS['line']
         x1, y1 = start; x2, y2 = end
         dist = abs(x2 - x1) * 0.5
         self.canvas.create_line(x1, y1, x1+dist, y1, x2-dist, y2, x2, y2, 
-                                smooth=True, width=2, fill=COLORS['line'], arrow=tk.LAST, tags="conn")
+                                smooth=True, width=2, fill=fill, arrow=tk.LAST, tags=tags)
 
     def on_click(self, event):
         x, y = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
@@ -629,8 +639,23 @@ class ScenarioEditor(tk.Tk):
                 self.conn_drag["line_id"] = self.canvas.create_line(x, y, x, y, fill=COLORS['line_active'], width=2, dash=(2,2))
                 return
                 
+        for item in items:
+            tags = self.canvas.gettags(item)
+            if "conn" in tags and len(tags) > 1 and tags[1].startswith("conn_"):
+                parts = tags[1].split('_')
+                from_id = parts[1]
+                out_idx = int(parts[2])
+                to_id = parts[3]
+                for conn in self.connections:
+                    if conn['from'] == from_id and conn['out_idx'] == out_idx and conn['to'] == to_id:
+                        self.selected_connection = conn
+                        self.selected_nodes = []
+                        self.redraw()
+                        return
+                        
         for node in reversed(self.nodes):
             if node.is_inside(x, y):
+                self.selected_connection = None
                 if event.state & 0x0001: # Shift held
                     if node in self.selected_nodes:
                         self.selected_nodes.remove(node)
@@ -647,6 +672,7 @@ class ScenarioEditor(tk.Tk):
 
         if not (event.state & 0x0001):
             self.selected_nodes = []
+            self.selected_connection = None
             
         self.marquee_start = (x, y)
         self.marquee_id = self.canvas.create_rectangle(x, y, x, y, outline='#4a90e2', dash=(2, 2), tags="marquee")
