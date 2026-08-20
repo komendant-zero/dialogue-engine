@@ -84,15 +84,21 @@ class RenpyExporterPlugin(Plugin):
         if node.node_type == 'story':
             char_name = node.title
             text = node.content.replace('"', '\\"').replace('\n', '\\n')
+            
+            # Окраска текста
             if 'highlights' in node.custom_data:
                 for word, color in node.custom_data['highlights'].items():
                     if word: 
                         text = text.replace(word, f"{{color={color}}}{word}{{/color}}")
-                        char_name = char_name.replace(word, f"{{color={color}}}{word}{{/color}}")
+
+            # Окраска имени персонажа
+            header_color = node.custom_data.get('header_text_color', '')
+            if header_color and header_color.lower() not in ('#ffffff', 'white'):
+                char_name = f"{{color={header_color}}}{char_name}{{/color}}"
 
             if getattr(node, 'mode', 'standard') == 'continue':
                 f.write(f'    extend "{text}"\n')
-            elif char_name.startswith('#') or not char_name:
+            elif char_name.startswith('#') or not char_name or char_name == f"{{color={header_color}}}#{{/color}}":
                 f.write(f'    "{text}"\n')
             else:
                 f.write(f'    "{char_name}" "{text}"\n')
@@ -144,12 +150,19 @@ class RenpyExporterPlugin(Plugin):
             for i, opt in enumerate(options):
                 if not opt.strip(): continue
                 
-                opt_text = opt
+                # У выборов красим не текст, а добавляем аргумент обводки при наведении
+                hover_color = None
                 if 'highlights' in node.custom_data:
                     for word, color in node.custom_data['highlights'].items():
-                        if word: opt_text = opt_text.replace(word, f"{{color={color}}}{word}{{/color}}")
-                        
-                f.write(f'        "{opt_text}":\n')
+                        if word and word in opt: 
+                            hover_color = color
+                            break # берем первый найденный цвет для всей опции
+                
+                if hover_color:
+                    f.write(f'        "{opt}" (hover_outlines=[(2, "{hover_color}", 0, 0)]):\n')
+                else:
+                    f.write(f'        "{opt}":\n')
+                    
                 target_conn = next((c for c in out_conns if c['out_idx'] == i), None)
                 if target_conn: f.write(f'            jump node_{target_conn["to"]}\n')
                 else: f.write('            pass\n')
