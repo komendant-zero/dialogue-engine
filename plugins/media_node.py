@@ -79,13 +79,14 @@ class MediaBlockPlugin(Plugin):
                         canvas.create_text(x + w/2, y + h/2, text="🎥 VIDEO\n(Preview Unavailable)", fill="white", justify="center", font=("Segoe UI", 9, "bold"), tags=("node", node_self.id))
                         image_drawn = True
                     else:
-                        cache_key = f"{img_path}_{w}"
+                        # Нормализуем ширину до int для стабильного кэш-ключа
+                        target_w = int(w)
+                        cache_key = f"{img_path}_{target_w}"
                         
                         if cache_key not in IMAGE_CACHE:
                             if HAS_PIL:
                                 pil_img = Image.open(img_path)
                                 aspect = pil_img.height / pil_img.width
-                                target_w = int(w)
                                 target_h = int(target_w * aspect)
                                 if target_h > 300: target_h = 300
                                 
@@ -94,8 +95,8 @@ class MediaBlockPlugin(Plugin):
                                 IMAGE_CACHE[cache_key] = tk_img
                             else:
                                 img = tk.PhotoImage(file=img_path)
-                                if img.width() > w:
-                                    factor = int(img.width() / w)
+                                if img.width() > target_w:
+                                    factor = int(img.width() / target_w)
                                     if factor < 1: factor = 1
                                     img = img.subsample(factor, factor)
                                 IMAGE_CACHE[cache_key] = img
@@ -104,7 +105,13 @@ class MediaBlockPlugin(Plugin):
                         img_h = tk_img.height()
                         
                         # Отрисовка картинки
-                        canvas.create_image(x + w/2, y + header_height + img_h/2, image=tk_img, tags=("node", node_self.id))
+                        # ВАЖНО: держим жёсткую ссылку на объект на canvas,
+                        # иначе GC может уничтожить PhotoImage до/после перерисовки
+                        if not hasattr(canvas, '_media_image_refs'):
+                            canvas._media_image_refs = []
+                        canvas._media_image_refs.append(tk_img)
+                        
+                        canvas.create_image(x + target_w / 2, y + header_height + img_h / 2, image=tk_img, tags=("node", node_self.id))
                         image_drawn = True
 
                 except Exception as e:

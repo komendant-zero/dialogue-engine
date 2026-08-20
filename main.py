@@ -593,6 +593,8 @@ class ScenarioEditor(tk.Tk):
         self.canvas.delete("node")
         self.canvas.delete("port")
         self.canvas.delete("conn")
+        # Сбрасываем ссылки на изображения плагина media_node перед перерисовкой
+        self.canvas._media_image_refs = []
         
         for conn in self.connections:
             self.draw_connection(conn)
