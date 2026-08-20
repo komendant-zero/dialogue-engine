@@ -1,4 +1,4 @@
-﻿import tkinter as tk
+import tkinter as tk
 from plugin_system import Plugin
 import math
 
@@ -15,9 +15,9 @@ class CoreNodesPlugin(Plugin):
             
         elif event_type == 'context_menu':
             if not data['target']:
-                menu = data['menu7]
-                menu.add_command(label="Сцена", command=lambda: self.editor.add_node('story', data['x'], data['y7]))
-                menu.add_command(label="Выбор", command=lambda: self.editor.add_node('choice', data['x'], data['y7]))
+                menu = data['menu']
+                menu.add_command(label="Сцена", command=lambda: self.editor.add_node('story', data['x'], data['y']))
+                menu.add_command(label="Выбор", command=lambda: self.editor.add_node('choice', data['x'], data['y']))
 
         elif event_type == 'node_added':
             node = data
