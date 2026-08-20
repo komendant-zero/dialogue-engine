@@ -86,7 +86,9 @@ class RenpyExporterPlugin(Plugin):
             text = node.content.replace('"', '\\"').replace('\n', '\\n')
             if 'highlights' in node.custom_data:
                 for word, color in node.custom_data['highlights'].items():
-                    if word: text = text.replace(word, f"{{color={color}}}{word}{{/color}}")
+                    if word: 
+                        text = text.replace(word, f"{{color={color}}}{word}{{/color}}")
+                        char_name = char_name.replace(word, f"{{color={color}}}{word}{{/color}}")
 
             if getattr(node, 'mode', 'standard') == 'continue':
                 f.write(f'    extend "{text}"\n')
@@ -120,7 +122,6 @@ class RenpyExporterPlugin(Plugin):
                     if anim[0].isupper():
                         with_clause = f" with {anim}({dur})"
                     else:
-                        # Попытка определить, нужно ли использовать класс для кастомной длительности
                         if dur != 0.5:
                             with_clause = f" with {anim.capitalize()}({dur})"
                         else:
@@ -142,7 +143,13 @@ class RenpyExporterPlugin(Plugin):
             out_conns = [c for c in connections if c['from'] == node.id]
             for i, opt in enumerate(options):
                 if not opt.strip(): continue
-                f.write(f'        "{opt}":\n')
+                
+                opt_text = opt
+                if 'highlights' in node.custom_data:
+                    for word, color in node.custom_data['highlights'].items():
+                        if word: opt_text = opt_text.replace(word, f"{{color={color}}}{word}{{/color}}")
+                        
+                f.write(f'        "{opt_text}":\n')
                 target_conn = next((c for c in out_conns if c['out_idx'] == i), None)
                 if target_conn: f.write(f'            jump node_{target_conn["to"]}\n')
                 else: f.write('            pass\n')
