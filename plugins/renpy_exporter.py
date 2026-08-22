@@ -121,6 +121,8 @@ class RenpyExporterPlugin(Plugin):
                 char_name = f"{{color={header_color}}}{char_name}{{/color}}"
 
             if getattr(node, 'mode', 'standard') == 'continue':
+                if not text.startswith(' ') and not text.startswith('\\n'):
+                    text = ' ' + text
                 f.write(f'    extend "{text}"\n')
             elif char_name.startswith('#') or not char_name or char_name == f"{{color={header_color}}}#{{/color}}":
                 f.write(f'    "{text}"\n')
