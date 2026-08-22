@@ -19,9 +19,45 @@ IMAGE_CACHE = {}
 SIZE_CACHE = {}
 
 
+def resolve_media_path(path, editor=None):
+    """
+    Разрешает относительный или абсолютный путь к медиа-файлу.
+    Если путь относительный, ищет его относительно папки открытого проекта (current_file),
+    затем относительно 'game/' подпапки, затем относительно cwd.
+    """
+    if not path:
+        return ""
+
+    path_norm = os.path.normpath(path)
+    if os.path.exists(path_norm):
+        return path_norm
+
+    # Ищем относительно папки открытого проекта
+    if editor and getattr(editor, 'current_file', None):
+        proj_dir = os.path.dirname(editor.current_file)
+        cand = os.path.normpath(os.path.join(proj_dir, path))
+        if os.path.exists(cand):
+            return cand
+
+        cand_game = os.path.normpath(os.path.join(proj_dir, "game", path))
+        if os.path.exists(cand_game):
+            return cand_game
+
+        cand_images = os.path.normpath(os.path.join(proj_dir, "images", path))
+        if os.path.exists(cand_images):
+            return cand_images
+
+    # Ищем относительно cwd
+    cand_cwd = os.path.normpath(os.path.join(os.getcwd(), path))
+    if os.path.exists(cand_cwd):
+        return cand_cwd
+
+    return path
+
+
 class MediaBlockPlugin(Plugin):
     name = "MediaBlock"
-    version = "2.1"  # 2.1: fixed patch applied once in on_enable
+    version = "2.2"  # 2.2: relative path resolution & project-relative storage
 
     def __init__(self, editor):
         super().__init__(editor)
@@ -60,6 +96,7 @@ class MediaBlockPlugin(Plugin):
                 data = {}
 
             img_path = data.get("image_path", "")
+            resolved_img_path = resolve_media_path(img_path, plugin_self.editor)
             mode = data.get("mode", "sprite")
             pos = data.get("position", "center")
             anim = data.get("animation", "none")
@@ -74,8 +111,8 @@ class MediaBlockPlugin(Plugin):
             header_height = 25
             image_drawn = False
 
-            if img_path and os.path.exists(img_path):
-                ext = os.path.splitext(img_path)[1].lower()
+            if resolved_img_path and os.path.exists(resolved_img_path):
+                ext = os.path.splitext(resolved_img_path)[1].lower()
                 is_video = ext in ['.mp4', '.webm', '.mkv', '.ogv']
 
                 try:
@@ -93,14 +130,14 @@ class MediaBlockPlugin(Plugin):
                         image_drawn = True
                     else:
                         target_w = int(w)
-                        cache_key = f"{img_path}_{target_w}"
+                        cache_key = f"{resolved_img_path}_{target_w}"
 
                         if cache_key not in IMAGE_CACHE:
                             # Всегда пробуем PIL первым — inline import обходит
                             # проблему HAS_PIL=False в динамически загруженном модуле
                             try:
                                 from PIL import Image as _Image, ImageTk as _ImageTk
-                                pil_img = _Image.open(img_path)
+                                pil_img = _Image.open(resolved_img_path)
                                 aspect = pil_img.height / pil_img.width
                                 target_h = int(target_w * aspect)
                                 if target_h > 300:
@@ -109,9 +146,9 @@ class MediaBlockPlugin(Plugin):
                                 IMAGE_CACHE[cache_key] = _ImageTk.PhotoImage(pil_img)
                             except ImportError:
                                 # PIL не установлен — tk.PhotoImage работает только для PNG/GIF
-                                ext_lower = os.path.splitext(img_path)[1].lower()
+                                ext_lower = os.path.splitext(resolved_img_path)[1].lower()
                                 if ext_lower in ('.png', '.gif'):
-                                    img = tk.PhotoImage(file=img_path)
+                                    img = tk.PhotoImage(file=resolved_img_path)
                                     if img.width() > target_w:
                                         factor = max(1, int(img.width() / target_w))
                                         img = img.subsample(factor, factor)
@@ -121,7 +158,6 @@ class MediaBlockPlugin(Plugin):
                                         f"Pillow not installed — JPG/WebP not supported. "
                                         f"Run: pip install pillow"
                                     )
-
 
                         tk_img = IMAGE_CACHE[cache_key]
                         img_h = tk_img.height()
@@ -198,18 +234,20 @@ class MediaBlockPlugin(Plugin):
             fixed_width = 180
             header_h = 25
             footer_h = 25
+
             node_self.width = fixed_width
 
             try:
                 data = json.loads(node_self.content)
                 path = data.get("image_path", "")
+                resolved_path = resolve_media_path(path, plugin_self.editor)
 
-                if path and os.path.exists(path):
+                if resolved_path and os.path.exists(resolved_path):
                     if HAS_PIL:
-                        if path not in SIZE_CACHE:
-                            with Image.open(path) as img:
-                                SIZE_CACHE[path] = img.size
-                        orig_w, orig_h = SIZE_CACHE[path]
+                        if resolved_path not in SIZE_CACHE:
+                            with Image.open(resolved_path) as img:
+                                SIZE_CACHE[resolved_path] = img.size
+                        orig_w, orig_h = SIZE_CACHE[resolved_path]
                         aspect = orig_h / orig_w
                         img_display_h = int(fixed_width * aspect)
                         if img_display_h > 300:
@@ -225,7 +263,7 @@ class MediaBlockPlugin(Plugin):
         # --- Патч edit_node ---
         def new_edit_node(editor_self, node):
             if node.node_type == 'media':
-                MediaEditorDialog(editor_self, node, plugin_self.editor.redraw)
+                MediaEditorDialog(editor_self, node, plugin_self.editor.redraw, editor=plugin_self.editor)
             else:
                 plugin_self.original_edit_node(editor_self, node)
 
@@ -294,9 +332,11 @@ class MediaBlockPlugin(Plugin):
 
 
 class MediaEditorDialog:
-    def __init__(self, parent, node, callback):
+    def __init__(self, parent, node, callback, editor=None):
+        self.parent = parent
         self.node = node
         self.callback = callback
+        self.editor = editor
 
         try:
             self.data = json.loads(node.content)
@@ -418,24 +458,43 @@ class MediaEditorDialog:
             rb.config(state=state, fg=color if state == "normal" else "#555")
 
     def browse_file(self):
-        path = filedialog.askopenfilename(filetypes=[
-            ("All Media", "*.png;*.jpg;*.jpeg;*.webp;*.mp4;*.webm;*.ogv;*.mkv"),
-            ("Images", "*.png;*.jpg;*.jpeg;*.webp"),
-            ("Video", "*.mp4;*.webm;*.ogv;*.mkv"),
-            ("All Files", "*.*")
-        ])
+        init_dir = None
+        if self.editor and getattr(self.editor, 'current_file', None):
+            init_dir = os.path.dirname(self.editor.current_file)
+
+        path = filedialog.askopenfilename(
+            initialdir=init_dir,
+            filetypes=[
+                ("All Media", "*.png;*.jpg;*.jpeg;*.webp;*.mp4;*.webm;*.ogv;*.mkv"),
+                ("Images", "*.png;*.jpg;*.jpeg;*.webp"),
+                ("Video", "*.mp4;*.webm;*.ogv;*.mkv"),
+                ("All Files", "*.*")
+            ]
+        )
         if path:
             path = path.replace("\\", "/")
 
             # Инвалидируем кэш СТАРОГО пути перед сменой
             old_path = self.data.get("image_path", "")
             if old_path:
+                resolved_old = resolve_media_path(old_path, self.editor)
                 if old_path in SIZE_CACHE:
                     del SIZE_CACHE[old_path]
-                # Удаляем все записи IMAGE_CACHE для старого пути (любая ширина)
-                old_keys = [k for k in IMAGE_CACHE if k.startswith(old_path + "_")]
+                if resolved_old in SIZE_CACHE:
+                    del SIZE_CACHE[resolved_old]
+                old_keys = [k for k in IMAGE_CACHE if k.startswith(old_path + "_") or k.startswith(resolved_old + "_")]
                 for k in old_keys:
                     del IMAGE_CACHE[k]
+
+            # Преобразуем путь в относительный, если файл внутри папки проекта
+            if self.editor and getattr(self.editor, 'current_file', None):
+                proj_dir = os.path.dirname(self.editor.current_file).replace("\\", "/")
+                try:
+                    rel = os.path.relpath(path, proj_dir).replace("\\", "/")
+                    if not rel.startswith(".."):
+                        path = rel
+                except ValueError:
+                    pass
 
             self.data["image_path"] = path
             self.path_var.set(path)

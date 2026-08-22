@@ -6,7 +6,7 @@ import json
 
 class RenpyExporterPlugin(Plugin):
     name = "Renpy Exporter"
-    version = "2.0"
+    version = "2.1"
 
     def on_event(self, event_type, data=None):
         if event_type == 'setup_ui':
@@ -50,7 +50,7 @@ class RenpyExporterPlugin(Plugin):
                 f.write("# --- Сгенерировано визуальным редактором (v2.0) ---\n\n")
                 
                 # ПЫТАЕМСЯ ДЕЛЕГИРОВАТЬ ЭКСПОРТ INIT БЛОКОВ (Анимации, ATL, настройки)
-                init_data = {'file': f, 'nodes': nodes, 'connections': connections}
+                init_data = {'file': f, 'nodes': nodes, 'connections': connections, 'export_dir': export_dir}
                 self.editor.plugin_manager.notify('renpy_export_init', init_data)
                 
                 # Поиск стартового узла
@@ -75,12 +75,12 @@ class RenpyExporterPlugin(Plugin):
                     f.write(f"label node_{node.id}:\n")
                     
                     # ПЫТАЕМСЯ ДЕЛЕГИРОВАТЬ ЭКСПОРТ ПЛАГИНАМ
-                    export_data = {'node': node, 'file': f, 'connections': connections, 'handled': False}
+                    export_data = {'node': node, 'file': f, 'connections': connections, 'export_dir': export_dir, 'handled': False}
                     self.editor.plugin_manager.notify('renpy_export_node', export_data)
                     
                     if not export_data['handled']:
                         # Стандартная логика (фоллбэк)
-                        self.write_node_content_default(f, node, connections)
+                        self.write_node_content_default(f, node, connections, export_dir=export_dir)
                     
                     f.write("\n")
                 
@@ -88,7 +88,22 @@ class RenpyExporterPlugin(Plugin):
         except Exception as e:
             return False, f"Ошибка экспорта:\n{e}"
 
-    def write_node_content_default(self, f, node, connections):
+    def clean_rel_path(self, path, export_dir=""):
+        if not path:
+            return ""
+        path = path.replace('\\', '/')
+        if export_dir and os.path.isabs(path):
+            try:
+                rel = os.path.relpath(path, export_dir).replace('\\', '/')
+                if not rel.startswith('..'):
+                    path = rel
+            except ValueError:
+                pass
+        if path.startswith("game/"):
+            path = path[5:]
+        return path
+
+    def write_node_content_default(self, f, node, connections, export_dir=""):
         # 1. Текстовый узел (Story)
         if node.node_type == 'story':
             char_name = node.title
@@ -116,7 +131,7 @@ class RenpyExporterPlugin(Plugin):
         # 2. Узел Музыки/Звука
         elif node.node_type == 'music':
             mode = node.custom_data.get('music_mode', 'bg')
-            path = node.custom_data.get('music_file', '').replace('\\', '/')
+            path = self.clean_rel_path(node.custom_data.get('music_file', ''), export_dir)
             if path:
                 if mode == 'bg': f.write(f'    play music "{path}"\n')
                 else: f.write(f'    voice "{path}"\n')
@@ -127,7 +142,7 @@ class RenpyExporterPlugin(Plugin):
             try:
                 data = json.loads(node.content)
                 mode = data.get("mode", "sprite")
-                path = data.get("image_path", "").replace('\\', '/')
+                path = self.clean_rel_path(data.get("image_path", ""), export_dir)
                 
                 anim = data.get("animation", "none")
                 dur = data.get("animation_duration", 0.5)
