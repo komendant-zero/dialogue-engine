@@ -180,17 +180,29 @@ class MyPlugin(Plugin):
 
 ---
 
-## Roadmap
+## 🗺️ Roadmap & Development Status
 
-- [x] Zoom in/out on the canvas (`Ctrl + MouseWheel`, buttons, shortcuts)
-- [x] Conditional branching nodes (`If / Else` with True/False outlets)
-- [x] Scenario health check and graph validator
-- [x] Built-in lightweight dialogue playtester (in-editor runner)
-- [x] Sample demo project (`examples/demo_story.json`)
-- [x] Auto-layout / arrange nodes (`Ctrl+L`)
-- [ ] Character manager
-- [ ] Cross-platform support (macOS and Linux)
-- [ ] Export to other formats (Twine, Ink, custom JSON)
+<p align="center">
+  <b>Project Progress:</b>
+</p>
+<p align="center">
+  <code>[ ████████████████████████░░░░░░░░ ] 75% Complete</code>
+</p>
+
+<br>
+
+| Status | Feature | Description | Target |
+| :---: | :--- | :--- | :---: |
+| ![Done](https://img.shields.io/badge/Done-2ecc71?style=flat-square) | **Canvas Zoom (In / Out)** | Smooth mouse-wheel scaling (`Ctrl+Wheel`), toolbar buttons & shortcuts | `v1.0` |
+| ![Done](https://img.shields.io/badge/Done-2ecc71?style=flat-square) | **Condition Branching (`If/Else`)** | Visual decision nodes with `True`/`False` ports and `.rpy` code generation | `v1.0` |
+| ![Done](https://img.shields.io/badge/Done-2ecc71?style=flat-square) | **Scenario Health Check** | Graph diagnostics to detect dead ends, unreachable nodes & empty choices | `v1.0` |
+| ![Done](https://img.shields.io/badge/Done-2ecc71?style=flat-square) | **In-Editor Playtest** | Lightweight dialogue runner to test story branches without launching Ren'Py | `v1.0` |
+| ![Done](https://img.shields.io/badge/Done-2ecc71?style=flat-square) | **Interactive Demo Project** | Sample branching story (`examples/demo_story.json`) ready to load in 1 click | `v1.0` |
+| ![Done](https://img.shields.io/badge/Done-2ecc71?style=flat-square) | **Auto-Layout Graph** | Grid arrangement and automatic graph alignment (`Ctrl+L`) | `v1.0` |
+| ![Planned](https://img.shields.io/badge/Planned-f39c12?style=flat-square) | **Character Manager** | Global cast roster: character colors, avatars, and dropdown speaker selection | `v1.2` |
+| ![Planned](https://img.shields.io/badge/Planned-3498db?style=flat-square) | **Cross-Platform Support** | Verified native support and run scripts for macOS and Linux | `v1.2` |
+| ![Planned](https://img.shields.io/badge/Planned-3498db?style=flat-square) | **Minimap Navigation** | Canvas radar / minimap in the corner for massive story graphs | `v1.3` |
+| ![Idea](https://img.shields.io/badge/Idea-9b59b6?style=flat-square) | **Multi-Format Export** | Exporting dialogue graphs to Twine, Ink, and generic JSON formats | `v2.0` |
 
 ---
 
