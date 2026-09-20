@@ -173,7 +173,7 @@ class FileSystemPlugin(Plugin):
             self.cached_files = set(files)
             allowed = []
             if cat in ["backgrounds", "sprites"]:
-                allowed = ['.png', '.jpg', '.jpeg', '.webp', '.bmp']
+                allowed = ['.png', '.jpg', '.jpeg', '.webp', '.bmp', '.gif']
             elif cat in ["music", "sounds", "voice"]:
                 allowed = ['.mp3', '.ogg', '.wav']
                 

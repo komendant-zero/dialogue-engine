@@ -55,15 +55,18 @@ class AdvancedScriptingPlugin(Plugin):
                 data['handled'] = True
 
     def add_toolbar_menu(self, toolbar):
-        # Используем Menubutton для экономии места
-        mb = tk.Menubutton(toolbar, text="📜 Скрипты ▾", bg='#34495e', fg='white', 
-                          relief='flat', font=('Segoe UI', 9, 'bold'), padx=10, pady=5)
-        mb.pack(side=tk.LEFT, padx=5, pady=5)
-        
-        menu = tk.Menu(mb, tearoff=0, bg='#34495e', fg='white', activebackground='#2c3e50')
-        menu.add_command(label="🐍 Python Блок", command=lambda: self.editor.add_node('python_code'))
-        menu.add_command(label="📄 Сырой Ren'Py", command=lambda: self.editor.add_node('raw_rpy'))
-        mb["menu"] = menu
+        if hasattr(self.editor, 'plugin_menu'):
+            self.editor.plugin_menu.add_separator()
+            self.editor.plugin_menu.add_command(label="🐍 Python Блок", command=lambda: self.editor.add_node('python_code'))
+            self.editor.plugin_menu.add_command(label="📄 Сырой Ren'Py", command=lambda: self.editor.add_node('raw_rpy'))
+        else:
+            mb = tk.Menubutton(toolbar, text="📜 Скрипты ▾", bg='#34495e', fg='white', 
+                              relief='flat', font=('Segoe UI', 9, 'bold'), padx=8, pady=3)
+            mb.pack(side=tk.LEFT, padx=3)
+            menu = tk.Menu(mb, tearoff=0, bg='#34495e', fg='white', activebackground='#2c3e50')
+            menu.add_command(label="🐍 Python Блок", command=lambda: self.editor.add_node('python_code'))
+            menu.add_command(label="📄 Сырой Ren'Py", command=lambda: self.editor.add_node('raw_rpy'))
+            mb["menu"] = menu
 
     def write_jump(self, f, node_id, connections):
         out_conns = [c for c in connections if c['from'] == node_id]

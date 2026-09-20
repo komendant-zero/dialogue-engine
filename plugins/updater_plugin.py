@@ -11,15 +11,17 @@ class DevReloaderPlugin(Plugin):
 
     def on_event(self, event_type, data=None):
         if event_type == 'setup_ui':
-            toolbar = data
-            btn = tk.Button(
-                toolbar, text="🔄 Перезапустить (Dev)", 
-                command=self.restart_engine, 
-                bg='#c0392b', fg='white', relief='flat', 
-                padx=10, pady=5, font=('Segoe UI', 9, 'bold')
-            )
-            # Добавляем кнопку в правую часть тулбара
-            btn.pack(side=tk.RIGHT, padx=5, pady=5)
+            if hasattr(self.editor, 'dev_menu'):
+                self.editor.dev_menu.add_command(label="🔄 Перезапустить редактор (Dev)", command=self.restart_engine)
+            else:
+                toolbar = data
+                btn = tk.Button(
+                    toolbar, text="🔄 Перезапустить", 
+                    command=self.restart_engine, 
+                    bg='#c0392b', fg='white', relief='flat', 
+                    padx=8, pady=3, font=('Segoe UI', 9)
+                )
+                btn.pack(side=tk.RIGHT, padx=3)
 
     def restart_engine(self):
         # 1. Сначала сохраняем проект

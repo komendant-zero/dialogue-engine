@@ -14,18 +14,21 @@ class InteractivePlayerPlugin(Plugin):
 
     def on_event(self, event_type, data=None):
         if event_type == 'setup_ui':
-            toolbar = data
+            parent = getattr(self.editor, 'toolbar_right', data)
             tk.Button(
-                toolbar,
+                parent,
                 text="▶ Тест-Драйв",
                 command=self.start_play,
-                bg='#27ae60',
+                bg='#1e8449',
+                activebackground='#27ae60',
                 fg='white',
+                activeforeground='white',
                 relief='flat',
                 font=('Segoe UI', 9, 'bold'),
-                padx=10,
-                pady=5
-            ).pack(side=tk.RIGHT, padx=5, pady=5)
+                padx=8,
+                pady=3,
+                cursor='hand2'
+            ).pack(side=tk.RIGHT, padx=3)
 
     def load_settings(self):
         if os.path.exists(SETTINGS_FILE):

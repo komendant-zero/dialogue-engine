@@ -13,17 +13,21 @@ class RenpyExporterPlugin(Plugin):
             self.add_toolbar_button(data)
 
     def add_toolbar_button(self, toolbar):
+        parent = getattr(self.editor, 'toolbar_right', toolbar)
         tk.Button(
-            toolbar,
-            text="▶ Экспорт в Ren'Py",
+            parent,
+            text="⚙ Экспорт Ren'Py",
             command=self.export_project,
-            bg='#c0392b',
+            bg='#8a2318',
+            activebackground='#a93226',
             fg='white',
+            activeforeground='white',
             relief='flat',
             font=('Segoe UI', 9, 'bold'),
-            padx=10,
-            pady=5
-        ).pack(side=tk.RIGHT, padx=5, pady=5)
+            padx=8,
+            pady=3,
+            cursor='hand2'
+        ).pack(side=tk.RIGHT, padx=3)
 
     def export_project(self):
         nodes = self.editor.nodes
@@ -106,7 +110,7 @@ class RenpyExporterPlugin(Plugin):
     def write_node_content_default(self, f, node, connections, export_dir=""):
         # 1. Текстовый узел (Story)
         if node.node_type == 'story':
-            char_name = node.title
+            char_name = node.title.replace('"', '\\"')
             text = node.content.replace('"', '\\"').replace('\n', '\\n')
             
             # Окраска текста
@@ -175,6 +179,7 @@ class RenpyExporterPlugin(Plugin):
             out_conns = [c for c in connections if c['from'] == node.id]
             for i, opt in enumerate(options):
                 if not opt.strip(): continue
+                clean_opt = opt.replace('"', '\\"')
                 
                 # У выборов красим не текст, а добавляем аргумент обводки при наведении
                 hover_color = None
@@ -185,9 +190,9 @@ class RenpyExporterPlugin(Plugin):
                             break # берем первый найденный цвет для всей опции
                 
                 if hover_color:
-                    f.write(f'        "{opt}" (hover_outlines=[(2, "{hover_color}", 0, 0)]):\n')
+                    f.write(f'        "{clean_opt}" (hover_outlines=[(2, "{hover_color}", 0, 0)]):\n')
                 else:
-                    f.write(f'        "{opt}":\n')
+                    f.write(f'        "{clean_opt}":\n')
                     
                 target_conn = next((c for c in out_conns if c['out_idx'] == i), None)
                 if target_conn: f.write(f'            jump node_{target_conn["to"]}\n')

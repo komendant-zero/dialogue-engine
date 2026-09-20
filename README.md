@@ -59,19 +59,27 @@ The editor has a built-in plugin architecture. Drop a `.py` file into the `plugi
 | Plugin | Description |
 |---|---|
 | `renpy_exporter.py` | Exports the node graph to a valid `.rpy` script |
+| `condition_node.py` | Conditional branching (`If / Else`) with True and False ports |
+| `graph_validator.py` | Scenario health check & diagnostics (finds dead ends, orphans, missing connections) |
+| `quick_playtest.py` | Instant in-editor dialogue playtester (no Ren'Py installation needed) |
 | `interactive_player.py` | Launches Ren'Py for instant test-driving |
+| `media_node.py` | Image and animated GIF display in nodes |
 | `music_plugin.py` | Music/Audio nodes with BGM and Voice modes |
 | `fs_plugin.py` | File system sidebar with drag and drop for assets |
-| `grammar_plugin.py` | Grammar and punctuation checker (via LanguageTool API) |
+| `battle_plugin.py` | Battle / minigame node system |
+| `animations_plugin.py` | ATL visual animations and transitions |
 | `word_counter.py` | Live word count statistics |
-| `advanced_scripting.py` | Advanced scripting node types |
+| `advanced_scripting.py` | Advanced scripting node types (Python block, raw RPY) |
 | `core_nodes.py` | Core node behaviors and extensions |
-| `flow_nodes.py` | Flow control nodes (jumps, conditions) |
+| `flow_nodes.py` | Flow control nodes (labels, variables) |
+| `auto_layout.py` | Automatic node layout and grid alignment (Ctrl+L) |
 | `reload_plugin.py` | Hot-reload plugins without restarting |
+| `updater_plugin.py` | Checks for updates |
 
-### Save and Load
+### Save, Load and Demo Project
 - Projects saved as human-readable **JSON** files
 - Full node graph serialization (positions, content, connections, custom data)
+- **Sample project included**: Open `examples/demo_story.json` via **Project ▾ -> Демо-проект** to explore an interactive branching story with choices, condition checks, and audio!
 
 ---
 
@@ -174,13 +182,15 @@ class MyPlugin(Plugin):
 
 ## Roadmap
 
-- [ ] Cross-platform support (macOS and Linux)
-- [ ] Zoom in/out on the canvas
-- [ ] Conditional branching nodes (variables and flags)
+- [x] Zoom in/out on the canvas (`Ctrl + MouseWheel`, buttons, shortcuts)
+- [x] Conditional branching nodes (`If / Else` with True/False outlets)
+- [x] Scenario health check and graph validator
+- [x] Built-in lightweight dialogue playtester (in-editor runner)
+- [x] Sample demo project (`examples/demo_story.json`)
+- [x] Auto-layout / arrange nodes (`Ctrl+L`)
 - [ ] Character manager
-- [ ] Background and sprite preview in nodes
+- [ ] Cross-platform support (macOS and Linux)
 - [ ] Export to other formats (Twine, Ink, custom JSON)
-- [ ] Auto-layout / arrange nodes
 
 ---
 

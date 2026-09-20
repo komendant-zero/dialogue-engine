@@ -1,0 +1,4 @@
+# Dialogue Engine - Зависимости для разработки и сборки
+-r requirements.txt
+pytest>=7.0.0
+pyinstaller>=6.0.0

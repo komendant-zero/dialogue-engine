@@ -10,7 +10,9 @@ class AnimationPlugin(Plugin):
 
     def __init__(self, editor):
         super().__init__(editor)
-        main_module = sys.modules['__main__']
+        main_module = sys.modules.get('__main__')
+        if not hasattr(main_module, 'Node'):
+            main_module = sys.modules.get('main', main_module)
         self.NodeClass = getattr(main_module, 'Node', None)
         self.EditorClass = getattr(main_module, 'ScenarioEditor', None)
         self.COLORS = getattr(main_module, 'COLORS', {})
@@ -76,16 +78,19 @@ class AnimationPlugin(Plugin):
 
     def on_event(self, event_type, data=None):
         if event_type == 'setup_ui':
-            if not hasattr(self.editor, 'anim_menu'):
-                self.editor.anim_menu_btn = tk.Menubutton(
-                    data, text="🎬 Анимации ▾", bg='#8e44ad', fg='white',
-                    relief='flat', font=('Segoe UI', 9, 'bold'), padx=10, pady=5
-                )
-                self.editor.anim_menu_btn.pack(side=tk.LEFT, padx=5, pady=5)
-                self.editor.anim_menu = tk.Menu(self.editor.anim_menu_btn, tearoff=0, bg='#444', fg='white')
-                self.editor.anim_menu_btn["menu"] = self.editor.anim_menu
+            if hasattr(self.editor, 'plugin_menu'):
+                self.editor.plugin_menu.add_command(label="✨ Анимация (Переход)", command=self.create_anim_node)
+            else:
+                if not hasattr(self.editor, 'anim_menu'):
+                    self.editor.anim_menu_btn = tk.Menubutton(
+                        data, text="🎬 Анимации ▾", bg='#8e44ad', fg='white',
+                        relief='flat', font=('Segoe UI', 9, 'bold'), padx=8, pady=3
+                    )
+                    self.editor.anim_menu_btn.pack(side=tk.LEFT, padx=3)
+                    self.editor.anim_menu = tk.Menu(self.editor.anim_menu_btn, tearoff=0, bg='#444', fg='white')
+                    self.editor.anim_menu_btn["menu"] = self.editor.anim_menu
 
-            self.editor.anim_menu.add_command(label="✨ Анимация", command=self.create_anim_node)
+                self.editor.anim_menu.add_command(label="✨ Анимация", command=self.create_anim_node)
 
         # Export logic
         elif event_type == 'renpy_export_node':

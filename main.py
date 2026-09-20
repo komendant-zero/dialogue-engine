@@ -8,6 +8,18 @@ os.chdir(SCRIPT_DIR)
 if SCRIPT_DIR not in sys.path:
     sys.path.insert(0, SCRIPT_DIR)
 
+# --- DPI AWARENESS (Windows Fix for Crisp Fonts and Coordinates) ---
+if sys.platform == 'win32':
+    try:
+        import ctypes
+        ctypes.windll.shcore.SetProcessDpiAwareness(1)
+    except Exception:
+        try:
+            import ctypes
+            ctypes.windll.user32.SetProcessDPIAware()
+        except Exception:
+            pass
+
 import tkinter as tk
 from tkinter import filedialog, simpledialog, messagebox, colorchooser
 import tkinter.font as tkfont
@@ -294,12 +306,16 @@ class Node:
         canvas.create_oval(px-r, py-r, px+r, py+r, fill=COLORS['port'], outline="", tags=("port", "input", tag))
 
     def get_output_pos(self, index):
-        if self.node_type == 'choice':
+        if self.node_type in ('choice', 'battle', 'condition'):
+            if self.node_type == 'condition':
+                return (self.x + self.width, self.y + 35 + (15 if index == 0 else 40))
             return (self.x + self.width, self.y + 35 + (index * 25))
         return (self.x + self.width, self.y + self.height/2)
 
     def get_input_pos(self):
-        y_pos = self.y + 25 if self.node_type == 'choice' else self.y + self.height/2
+        if self.node_type == 'condition':
+            return (self.x, self.y + 35)
+        y_pos = self.y + 25 if self.node_type in ('choice', 'battle') else self.y + self.height/2
         return (self.x, y_pos)
     
     def is_inside(self, x, y):
@@ -346,6 +362,11 @@ class ScenarioEditor(tk.Tk):
         self.pan_start_x = 0
         self.pan_start_y = 0
         self.is_dirty = False # Флаг изменений
+        
+        # --- Масштабирование (Zoom) ---
+        self.zoom_level = 1.0
+        self.min_zoom = 0.4
+        self.max_zoom = 2.0
         # -----------------------------------------
 
         self.plugin_manager = PluginManager(self)
@@ -381,24 +402,72 @@ class ScenarioEditor(tk.Tk):
         self.title(f"Scenario Editor - {fname}{title_suffix}")
 
     def setup_ui(self):
-        self.toolbar = tk.Frame(self, bg=COLORS['bg'], height=40)
+        self.toolbar = tk.Frame(self, bg=COLORS['bg'], height=42)
         self.toolbar.pack(side=tk.TOP, fill=tk.X)
         
+        # Левая часть тулбара (Создание, компоненты, проект)
+        self.toolbar_left = tk.Frame(self.toolbar, bg=COLORS['bg'])
+        self.toolbar_left.pack(side=tk.LEFT, fill=tk.Y, padx=4, pady=3)
+
+        # Правая часть тулбара (Инструменты, экспорт, статистика)
+        self.toolbar_right = tk.Frame(self.toolbar, bg=COLORS['bg'])
+        self.toolbar_right.pack(side=tk.RIGHT, fill=tk.Y, padx=4, pady=3)
+
         # --- ПАНЕЛЬ НАВИГАЦИИ (Breadcrumbs) ---
-        self.nav_bar = tk.Frame(self, bg='#333', height=30)
+        self.nav_bar = tk.Frame(self, bg='#282828', height=26)
         self.nav_bar.pack(side=tk.TOP, fill=tk.X)
-        self.lbl_path = tk.Label(self.nav_bar, text="Root", bg='#333', fg='#4a90e2', font=("Segoe UI", 9, "bold"))
+        self.lbl_path = tk.Label(self.nav_bar, text="Root", bg='#282828', fg='#4a90e2', font=("Segoe UI", 9, "bold"))
         self.lbl_path.pack(side=tk.LEFT, padx=10)
         
-        btn_cfg = {'bg': '#444', 'fg': 'white', 'relief': 'flat', 'padx': 10, 'pady': 5}
-        
-        tk.Button(self.toolbar, text="Новый Сюжет", command=lambda: self.add_node('story'), **btn_cfg).pack(side=tk.LEFT, padx=5, pady=5)
-        tk.Button(self.toolbar, text="Новый Выбор", command=lambda: self.add_node('choice'), **btn_cfg).pack(side=tk.LEFT, padx=5, pady=5)
-        tk.Button(self.toolbar, text="Очистить", command=self.clear_all, **btn_cfg).pack(side=tk.LEFT, padx=20, pady=5)
-        
-        tk.Button(self.toolbar, text="Поиск/Замена", command=self.open_search_replace, **btn_cfg).pack(side=tk.RIGHT, padx=5, pady=5)
-        tk.Button(self.toolbar, text="Загрузить JSON", command=self.load_project, **btn_cfg).pack(side=tk.RIGHT, padx=5, pady=5)
-        tk.Button(self.toolbar, text="Сохранить JSON", command=self.save_project, **btn_cfg).pack(side=tk.RIGHT, padx=5, pady=5)
+        # --- Стили кнопок ---
+        btn_action = {'bg': '#2c3e50', 'fg': 'white', 'activebackground': '#34495e', 'activeforeground': 'white', 
+                      'relief': 'flat', 'font': ('Segoe UI', 9, 'bold'), 'padx': 9, 'pady': 3, 'cursor': 'hand2'}
+        btn_normal = {'bg': '#333333', 'fg': '#dddddd', 'activebackground': '#444444', 'activeforeground': 'white', 
+                      'relief': 'flat', 'font': ('Segoe UI', 9), 'padx': 8, 'pady': 3, 'cursor': 'hand2'}
+        menu_cfg = {'bg': '#252526', 'fg': 'white', 'activebackground': '#094771', 'activeforeground': 'white', 
+                    'font': ('Segoe UI', 9), 'relief': 'flat', 'tearoff': 0}
+
+        # --- Левая группа: Добавление нод ---
+        tk.Button(self.toolbar_left, text="📝 Сюжет", command=lambda: self.add_node('story'), **btn_action).pack(side=tk.LEFT, padx=3)
+        tk.Button(self.toolbar_left, text="🔀 Выбор", command=lambda: self.add_node('choice'), **btn_action).pack(side=tk.LEFT, padx=3)
+
+        # Централизованное меню компонентов (плагины добавляют свои пункты сюда)
+        self.plugin_menu_btn = tk.Menubutton(self.toolbar_left, text="🧩 Компоненты ▾", **btn_action)
+        self.plugin_menu_btn.pack(side=tk.LEFT, padx=3)
+        self.plugin_menu = tk.Menu(self.plugin_menu_btn, **menu_cfg)
+        self.plugin_menu_btn["menu"] = self.plugin_menu
+
+        # Разделитель
+        tk.Label(self.toolbar_left, text="|", bg=COLORS['bg'], fg='#555555').pack(side=tk.LEFT, padx=5)
+
+        # Меню Проект
+        self.project_menu_btn = tk.Menubutton(self.toolbar_left, text="📁 Проект ▾", **btn_normal)
+        self.project_menu_btn.pack(side=tk.LEFT, padx=3)
+        self.project_menu = tk.Menu(self.project_menu_btn, **menu_cfg)
+        self.project_menu_btn["menu"] = self.project_menu
+
+        self.project_menu.add_command(label="💾 Сохранить (Ctrl+S)", command=self.save_project)
+        self.project_menu.add_command(label="📂 Загрузить (Ctrl+O)", command=self.load_project)
+        self.project_menu.add_command(label="🌟 Демо-проект", command=self.load_demo_project)
+        self.project_menu.add_separator()
+        self.project_menu.add_command(label="⚠️ Очистить холст", command=self.clear_all)
+
+        # Поиск
+        tk.Button(self.toolbar_left, text="🔍 Поиск", command=self.open_search_replace, **btn_normal).pack(side=tk.LEFT, padx=3)
+
+        # Меню инструментов / Разработка на правой стороне
+        self.dev_menu_btn = tk.Menubutton(self.toolbar_right, text="⚙️ Меню ▾", **btn_normal)
+        self.dev_menu_btn.pack(side=tk.RIGHT, padx=3)
+        self.dev_menu = tk.Menu(self.dev_menu_btn, **menu_cfg)
+        self.dev_menu_btn["menu"] = self.dev_menu
+
+        # Виджет масштабирования (Zoom)
+        self.zoom_frame = tk.Frame(self.toolbar_right, bg=COLORS['bg'])
+        self.zoom_frame.pack(side=tk.RIGHT, padx=4)
+        tk.Button(self.zoom_frame, text="−", command=self.zoom_out, **btn_normal, width=2).pack(side=tk.LEFT, padx=1)
+        self.lbl_zoom = tk.Label(self.zoom_frame, text="100%", bg=COLORS['bg'], fg='#aaaaaa', font=("Segoe UI", 8), width=5)
+        self.lbl_zoom.pack(side=tk.LEFT, padx=1)
+        tk.Button(self.zoom_frame, text="+", command=self.zoom_in, **btn_normal, width=2).pack(side=tk.LEFT, padx=1)
 
         self.canvas = tk.Canvas(self, bg=COLORS['canvas_bg'], highlightthickness=0, xscrollincrement=1, yscrollincrement=1)
         self.canvas.pack(fill=tk.BOTH, expand=True)
@@ -408,6 +477,7 @@ class ScenarioEditor(tk.Tk):
         self.canvas.bind("<ButtonRelease-1>", self.on_release)
         self.canvas.bind("<Double-Button-1>", self.on_double_click)
         self.canvas.bind("<Button-3>", self.on_right_click)
+        self.canvas.bind("<MouseWheel>", self.on_mousewheel)
         
         self.canvas.bind("<ButtonPress-2>", self.start_pan)
         self.canvas.bind("<B2-Motion>", self.do_pan)
@@ -440,6 +510,16 @@ class ScenarioEditor(tk.Tk):
         self.bind("<Control-v>", self.paste)
         self.bind("<Control-d>", self.duplicate)
         self.bind("<Delete>", self.delete_selected)
+        self.bind("<Control-s>", lambda e: self.save_project())
+        self.bind("<Control-S>", lambda e: self.save_project())
+        self.bind("<Control-o>", lambda e: self.load_project())
+        self.bind("<Control-O>", lambda e: self.load_project())
+        self.bind("<Control-f>", lambda e: self.open_search_replace())
+        self.bind("<Control-F>", lambda e: self.open_search_replace())
+        self.bind("<Control-plus>", lambda e: self.zoom_in())
+        self.bind("<Control-equal>", lambda e: self.zoom_in())
+        self.bind("<Control-minus>", lambda e: self.zoom_out())
+        self.bind("<Control-0>", lambda e: self.zoom_reset())
 
     def on_key_press(self, event): self.pressed_keys[event.keysym] = True
     def on_key_release(self, event): self.pressed_keys[event.keysym] = False
@@ -493,7 +573,7 @@ class ScenarioEditor(tk.Tk):
         self.set_dirty(True)
 
     def restore_state(self, state):
-        self.clear_all()
+        self._reset_canvas()
         id_map = {}
         for nd in state["nodes"]:
             node = Node(self, nd["x"], nd["y"], nd["title"], nd["content"], nd["type"], dict(nd.get("custom_data", {})), nd.get("mode", "standard"))
@@ -588,6 +668,10 @@ class ScenarioEditor(tk.Tk):
             content = "Текст..." if ntype == 'story' else ("Вар 1\nВар 2" if ntype == 'choice' else "Нет файла")
         
         node = Node(self, x, y, title, content, ntype, custom_data, mode)
+        node.width = max(80, int(180 * self.zoom_level))
+        font_size = max(6, int(9 * self.zoom_level))
+        node.font_content.configure(size=font_size)
+        node.calculate_size()
         node.is_new = save_history
         self.nodes.append(node)
         self.redraw()
@@ -993,8 +1077,24 @@ class ScenarioEditor(tk.Tk):
             if n.id == nid: return n
         return None
     
+    def _reset_canvas(self):
+        """Внутренний сброс холста без диалогов (для Undo/Redo и чистой загрузки)."""
+        self.nodes = []
+        self.connections = []
+        self.selected_nodes = []
+        if hasattr(self, 'selected_connection'):
+            self.selected_connection = None
+        self.redraw()
+
     def clear_all(self):
-        self.nodes = []; self.connections = []; self.selected_nodes = []; self.redraw()
+        """Очистить холст по запросу пользователя из меню/кнопки."""
+        if self.nodes or self.connections:
+            res = messagebox.askyesno("Очистить холст", "Вы уверены, что хотите удалить ВСЕ ноды и связи?\nЭто действие можно будет отменить через Ctrl+Z.", parent=self)
+            if not res:
+                return
+        self.save_state()
+        self._reset_canvas()
+        self.set_dirty(True)
 
     def start_pan(self, event):
         self.is_panning = True
@@ -1050,10 +1150,70 @@ class ScenarioEditor(tk.Tk):
             self.current_file = f
             self.set_dirty(False)
 
+    def load_demo_project(self):
+        demo_path = os.path.join(SCRIPT_DIR, "examples", "demo_story.json")
+        if os.path.exists(demo_path):
+            self.load_project(demo_path)
+        else:
+            messagebox.showwarning("Демо-проект", f"Файл не найден:\n{demo_path}", parent=self)
+
+    def zoom_in(self, event=None):
+        self.apply_zoom(1.15, event)
+
+    def zoom_out(self, event=None):
+        self.apply_zoom(1 / 1.15, event)
+
+    def zoom_reset(self, event=None):
+        if self.zoom_level == 1.0:
+            return
+        self.apply_zoom(1.0 / self.zoom_level, event, target_zoom=1.0)
+
+    def on_mousewheel(self, event):
+        # Если зажат Ctrl - зумим
+        if event.state & 0x0004 or event.state & 0x0001:
+            if event.delta > 0:
+                self.zoom_in(event)
+            elif event.delta < 0:
+                self.zoom_out(event)
+
+    def apply_zoom(self, factor, event=None, target_zoom=None):
+        new_zoom = target_zoom if target_zoom is not None else round(self.zoom_level * factor, 3)
+        if new_zoom < self.min_zoom or new_zoom > self.max_zoom:
+            return
+        actual_factor = new_zoom / self.zoom_level
+        self.zoom_level = new_zoom
+
+        # Центр зума
+        if event and hasattr(event, 'x') and hasattr(event, 'y'):
+            cx = self.canvas.canvasx(event.x)
+            cy = self.canvas.canvasy(event.y)
+        else:
+            cx = self.canvas.canvasx(self.canvas.winfo_width() / 2)
+            cy = self.canvas.canvasy(self.canvas.winfo_height() / 2)
+
+        # Масштабируем ноды
+        for node in self.nodes:
+            node.x = cx + (node.x - cx) * actual_factor
+            node.y = cy + (node.y - cy) * actual_factor
+            node.width = max(80, int(180 * self.zoom_level))
+            font_size = max(6, int(9 * self.zoom_level))
+            node.font_content.configure(size=font_size)
+            node.calculate_size()
+
+        if hasattr(self, 'lbl_zoom'):
+            self.lbl_zoom.config(text=f"{int(self.zoom_level * 100)}%")
+        self.redraw()
+
     def load_project(self, file_path=None):
         f = file_path or filedialog.askopenfilename(filetypes=[("JSON", "*.json")])
         if f:
-            self.clear_all()
+            if getattr(self, 'is_dirty', False):
+                resp = messagebox.askyesnocancel("Несохранённые изменения", "В текущем проекте есть несохранённые изменения.\nСохранить их перед открытием?", parent=self)
+                if resp is None:
+                    return
+                if resp:
+                    self.save_project()
+            self._reset_canvas()
             self.undo_stack.clear()
             self.redo_stack.clear()
             with open(f, 'r', encoding='utf-8') as file:

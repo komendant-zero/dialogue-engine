@@ -9,18 +9,22 @@ class ReloadPlugin(Plugin):
 
     def on_event(self, event_type, data=None):
         if event_type == 'setup_ui':
-            toolbar = data
-            tk.Button(
-                toolbar,
-                text="🔄 Обновить из файла",
-                command=self.reload_file,
-                bg='#3498db',
-                fg='white',
-                relief='flat',
-                font=('Segoe UI', 9, 'bold'),
-                padx=10,
-                pady=5
-            ).pack(side=tk.RIGHT, padx=5, pady=5)
+            if hasattr(self.editor, 'project_menu'):
+                self.editor.project_menu.add_command(label="🔄 Обновить из файла (F5)", command=self.reload_file)
+                self.editor.bind("<F5>", lambda e: self.reload_file())
+            else:
+                toolbar = data
+                tk.Button(
+                    toolbar,
+                    text="🔄 Обновить",
+                    command=self.reload_file,
+                    bg='#3498db',
+                    fg='white',
+                    relief='flat',
+                    font=('Segoe UI', 9),
+                    padx=8,
+                    pady=3
+                ).pack(side=tk.RIGHT, padx=3)
 
     def reload_file(self):
         if not hasattr(self.editor, 'current_file') or not self.editor.current_file:
@@ -43,6 +47,8 @@ class ReloadPlugin(Plugin):
             if 'media_node' in sys.modules:
                 if hasattr(sys.modules['media_node'], 'IMAGE_CACHE'):
                     sys.modules['media_node'].IMAGE_CACHE.clear()
+                if hasattr(sys.modules['media_node'], 'ANIM_CACHE'):
+                    sys.modules['media_node'].ANIM_CACHE.clear()
                 if hasattr(sys.modules['media_node'], 'SIZE_CACHE'):
                     sys.modules['media_node'].SIZE_CACHE.clear()
                     

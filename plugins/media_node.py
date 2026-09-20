@@ -4,10 +4,11 @@ from plugin_system import Plugin
 import json
 import os
 import sys
+import time
 
 # Попытка импорта PIL (Pillow) для поддержки JPG и качественного ресайза
 try:
-    from PIL import Image, ImageTk
+    from PIL import Image, ImageTk, ImageSequence
     HAS_PIL = True
 except ImportError:
     HAS_PIL = False
@@ -15,8 +16,81 @@ except ImportError:
 
 # Глобальный кэш изображений (хранит {path: ImageTk/PhotoImage})
 IMAGE_CACHE = {}
+# Кэш анимаций кадров (хранит {cache_key: {"frames": [tk_img, ...], "durations": [ms, ...]}})
+ANIM_CACHE = {}
 # Кэш размеров изображений для calculate_size (хранит {path: (width, height)})
 SIZE_CACHE = {}
+
+
+def load_media_frames(resolved_img_path, target_w):
+    """
+    Загружает кадры и длительности для изображения (включая анимированные GIF).
+    Возвращает (frames, durations), где:
+      - frames: список PhotoImage / ImageTk.PhotoImage
+      - durations: список задержек в миллисекундах для каждого кадра
+    Для статичных картинок возвращает ([photo_img], [0]).
+    """
+    ext_lower = os.path.splitext(resolved_img_path)[1].lower()
+
+    if HAS_PIL:
+        try:
+            from PIL import Image as _Image, ImageTk as _ImageTk, ImageSequence as _ImageSequence
+            with _Image.open(resolved_img_path) as pil_img:
+                orig_w, orig_h = pil_img.size
+                aspect = (orig_h / orig_w) if orig_w > 0 else 1.0
+                target_h = max(1, int(target_w * aspect))
+                if target_h > 300:
+                    target_h = 300
+
+                is_animated = getattr(pil_img, 'is_animated', False) and getattr(pil_img, 'n_frames', 1) > 1
+                if is_animated:
+                    frames = []
+                    durations = []
+                    for frame in _ImageSequence.Iterator(pil_img):
+                        dur = frame.info.get('duration', 100)
+                        if not dur or dur < 20:
+                            dur = 100
+                        f_rgba = frame.convert('RGBA')
+                        f_resized = f_rgba.resize((target_w, target_h), _Image.Resampling.LANCZOS)
+                        frames.append(_ImageTk.PhotoImage(f_resized))
+                        durations.append(int(dur))
+                    if frames:
+                        return frames, durations
+
+                # Статичное изображение через PIL
+                f_resized = pil_img.convert('RGBA').resize((target_w, target_h), _Image.Resampling.LANCZOS)
+                return [_ImageTk.PhotoImage(f_resized)], [0]
+        except Exception as e:
+            print(f"[MediaBlock] PIL load error for {resolved_img_path}: {e}")
+
+    # Fallback без PIL (tk.PhotoImage)
+    if ext_lower == '.gif':
+        frames = []
+        idx = 0
+        while True:
+            try:
+                img = tk.PhotoImage(file=resolved_img_path, format=f'gif -index {idx}')
+                if img.width() > target_w:
+                    factor = max(1, int(img.width() / target_w))
+                    img = img.subsample(factor, factor)
+                frames.append(img)
+                idx += 1
+            except tk.TclError:
+                break
+        if frames:
+            return frames, [100] * len(frames)
+
+    if ext_lower in ('.png', '.gif'):
+        img = tk.PhotoImage(file=resolved_img_path)
+        if img.width() > target_w:
+            factor = max(1, int(img.width() / target_w))
+            img = img.subsample(factor, factor)
+        return [img], [0]
+
+    raise RuntimeError(
+        f"Pillow not installed or failed to load — format {ext_lower} not supported. "
+        f"Run: pip install pillow"
+    )
 
 
 def resolve_media_path(path, editor=None):
@@ -57,11 +131,16 @@ def resolve_media_path(path, editor=None):
 
 class MediaBlockPlugin(Plugin):
     name = "MediaBlock"
-    version = "2.2"  # 2.2: relative path resolution & project-relative storage
+    version = "2.3"  # 2.3: animated GIF preview in editor
 
     def __init__(self, editor):
         super().__init__(editor)
-        main_module = sys.modules['__main__']
+        self.animated_nodes = {}
+        self._anim_timer_id = None
+        self._anim_loop_running = False
+        main_module = sys.modules.get('__main__')
+        if not hasattr(main_module, 'Node'):
+            main_module = sys.modules.get('main', main_module)
         self.NodeClass = getattr(main_module, 'Node', None)
         self.EditorClass = getattr(main_module, 'ScenarioEditor', None)
         self.COLORS = getattr(main_module, 'COLORS', {})
@@ -72,7 +151,80 @@ class MediaBlockPlugin(Plugin):
             self.original_get_input_pos = getattr(self.NodeClass, 'get_input_pos', None)
             self.original_get_output_pos = getattr(self.NodeClass, 'get_output_pos', None)
         if self.EditorClass:
-            self.original_edit_node = self.EditorClass.edit_node
+            self.original_edit_node = getattr(self.EditorClass, 'edit_node', None)
+
+    def ensure_anim_loop(self):
+        if not self._anim_loop_running:
+            self._anim_loop_running = True
+            if hasattr(self, 'editor') and hasattr(self.editor, 'after'):
+                self._anim_timer_id = self.editor.after(30, self._anim_tick)
+
+    def _anim_tick(self):
+        self._anim_timer_id = None
+        if not hasattr(self, 'editor') or not getattr(self.editor, 'canvas', None):
+            self._anim_loop_running = False
+            return
+
+        canvas = self.editor.canvas
+        try:
+            if not canvas.winfo_exists():
+                self._anim_loop_running = False
+                return
+        except Exception:
+            self._anim_loop_running = False
+            return
+
+        now = time.time()
+        existing_nodes = getattr(self.editor, 'nodes', [])
+        existing_node_ids = {n.id for n in existing_nodes}
+
+        to_remove = []
+        for node_id, state in list(self.animated_nodes.items()):
+            if node_id not in existing_node_ids:
+                to_remove.append(node_id)
+                continue
+
+            cache_key = state.get("cache_key")
+            anim_data = ANIM_CACHE.get(cache_key)
+            if not anim_data or len(anim_data.get("frames", [])) <= 1:
+                to_remove.append(node_id)
+                continue
+
+            frames = anim_data["frames"]
+            durations = anim_data["durations"]
+
+            if now >= state.get("next_time", 0):
+                new_idx = (state["frame_idx"] + 1) % len(frames)
+                state["frame_idx"] = new_idx
+                dur = durations[new_idx] if new_idx < len(durations) else 100
+                state["next_time"] = now + (dur / 1000.0)
+
+                img_tag = f"media_img_{node_id}"
+                new_img = frames[new_idx]
+                try:
+                    canvas.itemconfig(img_tag, image=new_img)
+                except Exception:
+                    pass
+
+        for nid in to_remove:
+            self.animated_nodes.pop(nid, None)
+
+        if self.animated_nodes:
+            self._anim_loop_running = True
+            if hasattr(self, 'editor') and hasattr(self.editor, 'after'):
+                self._anim_timer_id = self.editor.after(30, self._anim_tick)
+        else:
+            self._anim_loop_running = False
+
+    def on_disable(self):
+        if self._anim_timer_id and hasattr(self, 'editor') and hasattr(self.editor, 'after_cancel'):
+            try:
+                self.editor.after_cancel(self._anim_timer_id)
+            except Exception:
+                pass
+        self._anim_timer_id = None
+        self._anim_loop_running = False
+        self.animated_nodes.clear()
 
     # ------------------------------------------------------------------ #
     # on_enable вызывается РОВНО ОДИН РАЗ при загрузке плагина.           #
@@ -132,46 +284,47 @@ class MediaBlockPlugin(Plugin):
                         target_w = int(w)
                         cache_key = f"{resolved_img_path}_{target_w}"
 
-                        if cache_key not in IMAGE_CACHE:
-                            # Всегда пробуем PIL первым — inline import обходит
-                            # проблему HAS_PIL=False в динамически загруженном модуле
-                            try:
-                                from PIL import Image as _Image, ImageTk as _ImageTk
-                                pil_img = _Image.open(resolved_img_path)
-                                aspect = pil_img.height / pil_img.width
-                                target_h = int(target_w * aspect)
-                                if target_h > 300:
-                                    target_h = 300
-                                pil_img = pil_img.resize((target_w, target_h), _Image.Resampling.LANCZOS)
-                                IMAGE_CACHE[cache_key] = _ImageTk.PhotoImage(pil_img)
-                            except ImportError:
-                                # PIL не установлен — tk.PhotoImage работает только для PNG/GIF
-                                ext_lower = os.path.splitext(resolved_img_path)[1].lower()
-                                if ext_lower in ('.png', '.gif'):
-                                    img = tk.PhotoImage(file=resolved_img_path)
-                                    if img.width() > target_w:
-                                        factor = max(1, int(img.width() / target_w))
-                                        img = img.subsample(factor, factor)
-                                    IMAGE_CACHE[cache_key] = img
+                        if cache_key not in ANIM_CACHE:
+                            frames, durations = load_media_frames(resolved_img_path, target_w)
+                            ANIM_CACHE[cache_key] = {"frames": frames, "durations": durations}
+                            IMAGE_CACHE[cache_key] = frames[0]
+
+                        anim_data = ANIM_CACHE[cache_key]
+                        frames = anim_data.get("frames", [])
+                        durations = anim_data.get("durations", [])
+
+                        if frames:
+                            if len(frames) > 1:
+                                node_state = plugin_self.animated_nodes.get(node_self.id)
+                                if node_state and node_state.get("cache_key") == cache_key:
+                                    current_idx = node_state["frame_idx"] % len(frames)
                                 else:
-                                    raise RuntimeError(
-                                        f"Pillow not installed — JPG/WebP not supported. "
-                                        f"Run: pip install pillow"
-                                    )
+                                    current_idx = 0
+                                    dur0 = durations[0] if durations else 100
+                                    plugin_self.animated_nodes[node_self.id] = {
+                                        "cache_key": cache_key,
+                                        "frame_idx": 0,
+                                        "next_time": time.time() + (dur0 / 1000.0)
+                                    }
+                                tk_img = frames[current_idx]
+                                plugin_self.ensure_anim_loop()
+                            else:
+                                plugin_self.animated_nodes.pop(node_self.id, None)
+                                tk_img = frames[0]
 
-                        tk_img = IMAGE_CACHE[cache_key]
-                        img_h = tk_img.height()
+                            img_h = tk_img.height()
 
-                        # Держим жёсткую ссылку — иначе GC уничтожит PhotoImage
-                        if not hasattr(canvas, '_media_image_refs'):
-                            canvas._media_image_refs = []
-                        canvas._media_image_refs.append(tk_img)
+                            # Держим жёсткую ссылку — иначе GC уничтожит PhotoImage
+                            if not hasattr(canvas, '_media_image_refs'):
+                                canvas._media_image_refs = []
+                            canvas._media_image_refs.append(tk_img)
 
-                        canvas.create_image(
-                            x + target_w / 2, y + header_height + img_h / 2,
-                            image=tk_img, tags=("node", node_self.id)
-                        )
-                        image_drawn = True
+                            img_tag = f"media_img_{node_self.id}"
+                            canvas.create_image(
+                                x + target_w / 2, y + header_height + img_h / 2,
+                                image=tk_img, tags=("node", node_self.id, img_tag)
+                            )
+                            image_drawn = True
 
                 except Exception as e:
                     import traceback
@@ -187,9 +340,11 @@ class MediaBlockPlugin(Plugin):
                 x, y, x + w, y + header_height,
                 fill='#9b59b6', outline="", tags=("node", node_self.id)
             )
+            is_gif = (os.path.splitext(resolved_img_path)[1].lower() == '.gif') if resolved_img_path else False
+            header_prefix = "[GIF]" if is_gif else "[IMG]"
             canvas.create_text(
                 x + 10, y + 12,
-                text=f"[IMG] {node_self.title}", fill="white", anchor="w",
+                text=f"{header_prefix} {node_self.title}", fill="white", anchor="w",
                 font=("Segoe UI", 9, "bold"), tags=("node", node_self.id)
             )
 
@@ -287,11 +442,11 @@ class MediaBlockPlugin(Plugin):
         self.NodeClass.calculate_size = new_calculate_size
         self.EditorClass.edit_node = new_edit_node
 
-        if self.original_get_input_pos:
+        if getattr(self, 'original_get_input_pos', None):
             self.NodeClass.get_input_pos = new_get_input_pos
             print(f"[{self.name}] Patched get_input_pos")
 
-        if self.original_get_output_pos:
+        if getattr(self, 'original_get_output_pos', None):
             self.NodeClass.get_output_pos = new_get_output_pos
             print(f"[{self.name}] Patched get_output_pos")
 
@@ -465,8 +620,8 @@ class MediaEditorDialog:
         path = filedialog.askopenfilename(
             initialdir=init_dir,
             filetypes=[
-                ("All Media", "*.png;*.jpg;*.jpeg;*.webp;*.mp4;*.webm;*.ogv;*.mkv"),
-                ("Images", "*.png;*.jpg;*.jpeg;*.webp"),
+                ("All Media", "*.png;*.jpg;*.jpeg;*.webp;*.gif;*.bmp;*.mp4;*.webm;*.ogv;*.mkv"),
+                ("Images", "*.png;*.jpg;*.jpeg;*.webp;*.gif;*.bmp"),
                 ("Video", "*.mp4;*.webm;*.ogv;*.mkv"),
                 ("All Files", "*.*")
             ]
@@ -485,6 +640,9 @@ class MediaEditorDialog:
                 old_keys = [k for k in IMAGE_CACHE if k.startswith(old_path + "_") or k.startswith(resolved_old + "_")]
                 for k in old_keys:
                     del IMAGE_CACHE[k]
+                old_anim_keys = [k for k in ANIM_CACHE if k.startswith(old_path + "_") or k.startswith(resolved_old + "_")]
+                for k in old_anim_keys:
+                    del ANIM_CACHE[k]
 
             # Преобразуем путь в относительный, если файл внутри папки проекта
             if self.editor and getattr(self.editor, 'current_file', None):

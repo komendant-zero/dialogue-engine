@@ -19,6 +19,7 @@ env/
 Save/
 *.json
 !plugins/fs_settings.json
+!examples/*.json
 
 # OS
 .DS_Store

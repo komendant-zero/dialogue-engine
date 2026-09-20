@@ -1,0 +1,154 @@
+{
+    "nodes": [
+        {
+            "id": "node_start",
+            "x": 60,
+            "y": 180,
+            "title": "start",
+            "content": "Вы стоите перед старинным особняком. Дверь слегка приоткрыта, а внутри мерцает слабый свет.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_color": "#27ae60",
+                "bg_color": "#1e4620"
+            },
+            "is_character": true
+        },
+        {
+            "id": "node_choice",
+            "x": 320,
+            "y": 140,
+            "title": "Выбор пути",
+            "content": "Войти внутрь особняка\nПостучать в дубовую дверь\nОбойти особняк к саду",
+            "type": "choice",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": true
+        },
+        {
+            "id": "node_hall",
+            "x": 620,
+            "y": 40,
+            "title": "Холл",
+            "content": "Вы осторожно переступаете порог. В тишине холла на столике поблёскивает старинный медный ключ.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": true
+        },
+        {
+            "id": "node_get_key",
+            "x": 880,
+            "y": 40,
+            "title": "# Получение ключа",
+            "content": "has_key = True\nplayer_bravery += 1",
+            "type": "variable",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#2980b9",
+                "header_color": "#1f618d",
+                "text_color": "#f4d03f"
+            },
+            "is_character": false
+        },
+        {
+            "id": "node_knock",
+            "x": 620,
+            "y": 200,
+            "title": "Стук",
+            "content": "Вы трижды стучите тяжёлым дверным кольцом. В ответ — лишь глухое эхо в коридорах.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": true
+        },
+        {
+            "id": "node_garden",
+            "x": 620,
+            "y": 380,
+            "title": "Заброшенный сад",
+            "content": "Тропинка приводит вас к кованой калитке в глубине сада. На ней висит массивный замок.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": true
+        },
+        {
+            "id": "node_cond_key",
+            "x": 880,
+            "y": 380,
+            "title": "Проверка ключа",
+            "content": "has_key == True",
+            "type": "condition",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": true
+        },
+        {
+            "id": "node_unlocked",
+            "x": 1160,
+            "y": 310,
+            "title": "Калитка открыта",
+            "content": "Медный ключ мягко поворачивается в замке! Калитка со скрипом распахивается.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": true
+        },
+        {
+            "id": "node_locked",
+            "x": 1160,
+            "y": 460,
+            "title": "Заперто",
+            "content": "Замок не поддаётся. Похоже, сначала нужно найти ключ.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": true
+        },
+        {
+            "id": "node_music",
+            "x": 1160,
+            "y": 90,
+            "title": "Атмосфера",
+            "content": "bgm/mystery_theme.ogg",
+            "type": "music",
+            "mode": "standard",
+            "custom_data": {
+                "music_mode": "bgm",
+                "bg_color": "#8e44ad",
+                "header_color": "#9b59b6"
+            },
+            "is_character": false
+        },
+        {
+            "id": "node_finale",
+            "x": 1460,
+            "y": 240,
+            "title": "Финал демо",
+            "content": "Это завершение демонстрационного сценария. Попробуйте отредактировать этот граф или добавить новые ветки!",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_color": "#d35400",
+                "bg_color": "#3c2a1e"
+            },
+            "is_character": true
+        }
+    ],
+    "connections": [
+        { "from": "node_start", "out_idx": 0, "to": "node_choice" },
+        { "from": "node_choice", "out_idx": 0, "to": "node_hall" },
+        { "from": "node_choice", "out_idx": 1, "to": "node_knock" },
+        { "from": "node_choice", "out_idx": 2, "to": "node_garden" },
+        { "from": "node_hall", "out_idx": 0, "to": "node_get_key" },
+        { "from": "node_get_key", "out_idx": 0, "to": "node_music" },
+        { "from": "node_knock", "out_idx": 0, "to": "node_music" },
+        { "from": "node_garden", "out_idx": 0, "to": "node_cond_key" },
+        { "from": "node_cond_key", "out_idx": 0, "to": "node_unlocked" },
+        { "from": "node_cond_key", "out_idx": 1, "to": "node_locked" },
+        { "from": "node_music", "out_idx": 0, "to": "node_finale" },
+        { "from": "node_unlocked", "out_idx": 0, "to": "node_finale" },
+        { "from": "node_locked", "out_idx": 0, "to": "node_finale" }
+    ]
+}
