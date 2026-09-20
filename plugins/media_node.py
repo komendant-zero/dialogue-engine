@@ -98,6 +98,8 @@ def resolve_media_path(path, editor=None):
     Разрешает относительный или абсолютный путь к медиа-файлу.
     Если путь относительный, ищет его относительно папки открытого проекта (current_file),
     затем относительно 'game/' подпапки, затем относительно cwd.
+    Если путь абсолютный, но файл не найден (например, проект перенесен на другой ПК),
+    пытается найти файл по подпутям ('game/...', 'bg/...', 'images/...') или имени файла.
     """
     if not path:
         return ""
@@ -106,25 +108,51 @@ def resolve_media_path(path, editor=None):
     if os.path.exists(path_norm):
         return path_norm
 
-    # Ищем относительно папки открытого проекта
+    search_dirs = []
     if editor and getattr(editor, 'current_file', None):
-        proj_dir = os.path.dirname(editor.current_file)
-        cand = os.path.normpath(os.path.join(proj_dir, path))
-        if os.path.exists(cand):
-            return cand
+        proj_dir = os.path.dirname(os.path.abspath(editor.current_file))
+        search_dirs.append(proj_dir)
+        search_dirs.append(os.path.join(proj_dir, "game"))
+        search_dirs.append(os.path.join(proj_dir, "images"))
+        search_dirs.append(os.path.join(proj_dir, "bg"))
+    
+    cwd = os.path.abspath(os.getcwd())
+    if cwd not in search_dirs:
+        search_dirs.append(cwd)
+        search_dirs.append(os.path.join(cwd, "game"))
+        search_dirs.append(os.path.join(cwd, "images"))
+        search_dirs.append(os.path.join(cwd, "bg"))
 
-        cand_game = os.path.normpath(os.path.join(proj_dir, "game", path))
-        if os.path.exists(cand_game):
-            return cand_game
+    # Относительные кандидаты
+    candidates = []
+    # 1. Если путь уже относительный
+    if not os.path.isabs(path):
+        candidates.append(path)
 
-        cand_images = os.path.normpath(os.path.join(proj_dir, "images", path))
-        if os.path.exists(cand_images):
-            return cand_images
+    # 2. Извлекаем подпути после типовых папок (game/, bg/, images/)
+    path_fwd = path.replace('\\', '/')
+    for marker in ['/game/', '/images/', '/bg/']:
+        if marker in path_fwd.lower():
+            idx = path_fwd.lower().find(marker)
+            sub = path_fwd[idx + len(marker):]
+            marker_name = marker.strip('/')
+            candidates.append(f"{marker_name}/{sub}")
+            candidates.append(sub)
 
-    # Ищем относительно cwd
-    cand_cwd = os.path.normpath(os.path.join(os.getcwd(), path))
-    if os.path.exists(cand_cwd):
-        return cand_cwd
+    # 3. Просто имя файла
+    basename = os.path.basename(path)
+    if basename:
+        candidates.append(basename)
+        candidates.append(f"bg/{basename}")
+        candidates.append(f"images/{basename}")
+        candidates.append(f"game/bg/{basename}")
+        candidates.append(f"game/images/{basename}")
+
+    for s_dir in search_dirs:
+        for cand in candidates:
+            full = os.path.normpath(os.path.join(s_dir, cand))
+            if os.path.exists(full):
+                return full
 
     return path
 

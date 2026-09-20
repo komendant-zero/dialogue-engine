@@ -29,9 +29,9 @@ class AdvancedScriptingPlugin(Plugin):
         elif event_type == 'draw_node':
             node = data['node']
             canvas = data['canvas']
-            if getattr(node, 'is_new', True) and node.node_type == 'python_code':
+            if node.node_type == 'python_code':
                 canvas.create_text(node.x + node.width - 20, node.y + 12, text="🐍", fill="white", tags=("node", node.id))
-            elif getattr(node, 'is_new', True) and node.node_type == 'raw_rpy':
+            elif node.node_type == 'raw_rpy':
                 canvas.create_text(node.x + node.width - 20, node.y + 12, text="📄", fill="white", tags=("node", node.id))
 
         elif event_type == 'renpy_export_node':
@@ -39,7 +39,7 @@ class AdvancedScriptingPlugin(Plugin):
             f = data['file']
             conns = data['connections']
             
-            if getattr(node, 'is_new', True) and node.node_type == 'python_code':
+            if node.node_type == 'python_code':
                 f.write("    python:\n")
                 lines = node.content.split('\n')
                 for line in lines:
@@ -47,7 +47,7 @@ class AdvancedScriptingPlugin(Plugin):
                 self.write_jump(f, node.id, conns)
                 data['handled'] = True
                 
-            elif getattr(node, 'is_new', True) and node.node_type == 'raw_rpy':
+            elif node.node_type == 'raw_rpy':
                 lines = node.content.split('\n')
                 for line in lines:
                     f.write(f"    {line}\n")

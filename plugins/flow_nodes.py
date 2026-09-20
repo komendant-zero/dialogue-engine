@@ -39,7 +39,7 @@ class FlowNodesPlugin(Plugin):
             node = data['node']
             canvas = data['canvas']
             # Иконки в заголовке
-            if getattr(node, 'is_new', True) and node.node_type == 'label':
+            if node.node_type == 'label':
                 canvas.create_text(node.x + node.width - 20, node.y + 12, text="🔖", fill="white", tags=("node", node.id))
-            elif getattr(node, 'is_new', True) and node.node_type == 'variable':
+            elif node.node_type == 'variable':
                 canvas.create_text(node.x + node.width - 20, node.y + 12, text="💲", fill="white", tags=("node", node.id))

@@ -133,8 +133,43 @@ class PlaytestWindow(tk.Toplevel):
             return
 
         elif node.node_type == 'music':
-            self.lbl_speaker.config(text="🎵 Аудио / Музыка")
-            self.lbl_dialogue.config(text=f"Воспроизведение: {node.content}\nРежим: {node.custom_data.get('music_mode', 'bgm')}")
+            mode = node.custom_data.get('music_mode', 'bg')
+            mode_names = {'bg': 'Фоновая музыка (Loop)', 'sfx': 'Звуковой эффект (SFX)', 'voice': 'Озвучка (Voice)'}
+            mode_label = mode_names.get(mode, mode.upper())
+            file_path = node.custom_data.get('music_file', '')
+            self.lbl_speaker.config(text=f"🎵 Аудио ({mode_label})")
+            file_name = file_path if file_path else "[Файл не выбран]"
+            self.lbl_dialogue.config(text=f"Режим: {mode_label}\nФайл: {file_name}")
+            self.show_next_button(0)
+
+        elif node.node_type == 'media':
+            self.lbl_speaker.config(text="🖼️ Медиа (Фон / Спрайт)")
+            try:
+                import json
+                mdata = json.loads(node.content)
+                img_path = mdata.get("image_path", "")
+                mode = mdata.get("mode", "sprite")
+                anim = mdata.get("animation", "none")
+                dur = mdata.get("animation_duration", 0.5)
+                desc = f"Тип: {mode.upper()}\nФайл: {img_path or '[Без файла]'}"
+                if anim != 'none':
+                    desc += f"\nПереход: {anim} ({dur} сек)"
+                self.lbl_dialogue.config(text=desc)
+            except Exception:
+                self.lbl_dialogue.config(text=f"Медиа-узел: {node.content}")
+            self.show_next_button(0)
+
+        elif node.node_type == 'animation':
+            self.lbl_speaker.config(text="✨ Анимация / Переход экрана")
+            try:
+                import json
+                adata = json.loads(node.content)
+                anim = adata.get("animation", "fade")
+                dur = adata.get("duration", 0.5)
+                target = adata.get("target", "screen")
+                self.lbl_dialogue.config(text=f"Переход: {anim}\nЦель: {target}\nДлительность: {dur} сек")
+            except Exception:
+                self.lbl_dialogue.config(text=f"Анимация: {node.content}")
             self.show_next_button(0)
 
         elif node.node_type == 'choice':
@@ -200,12 +235,17 @@ class PlaytestWindow(tk.Toplevel):
             self.current_node = target_node
             self.render_current_node()
         else:
+            prev_node = self.current_node
             self.current_node = None
-            self.show_ended()
+            if prev_node and prev_node.node_type == 'choice':
+                self.show_ended(reason="⚠️ Выбранный вариант не имеет следующего узла (ветка не достроена на холсте).")
+            else:
+                self.show_ended()
 
-    def show_ended(self):
+    def show_ended(self, reason=None):
         self.lbl_speaker.config(text="🏁 Конец сценария")
-        self.lbl_dialogue.config(text="Сюжетная линия дошла до финала. Нет следующих связей.")
+        msg = reason or "Сюжетная линия дошла до финала. Нет следующих связей."
+        self.lbl_dialogue.config(text=msg)
         for child in self.bottom_frame.winfo_children():
             child.destroy()
         tk.Button(self.bottom_frame, text="Закрыть", command=self.destroy, 

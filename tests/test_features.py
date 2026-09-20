@@ -79,5 +79,102 @@ class TestFeatures(unittest.TestCase):
         # Unreachable node
         self.assertEqual(len(incoming_map["orphan_1"]), 0)
 
+    def test_sfx_and_violant_compatibility(self):
+        from plugins.renpy_exporter import RenpyExporterPlugin
+        from plugins.media_node import resolve_media_path
+
+        exporter = RenpyExporterPlugin(editor=None)
+        
+        # Test SFX export
+        sfx_node = MockNode("sfx_1", "Sound", "SFX", "music", {"music_mode": "sfx", "music_file": "sound/chair-rolling.wav"})
+        conns = [{"from": "sfx_1", "out_idx": 0, "to": "story_1"}]
+        
+        with tempfile.NamedTemporaryFile(mode="w+", delete=False, encoding="utf-8") as tmp:
+            tmp_path = tmp.name
+
+        try:
+            with open(tmp_path, "w", encoding="utf-8") as f:
+                exporter.write_node_content_default(f, sfx_node, conns)
+            
+            with open(tmp_path, "r", encoding="utf-8") as f:
+                content = f.read()
+
+            self.assertIn('play sound "sound/chair-rolling.wav"', content)
+            self.assertIn('jump node_story_1', content)
+        finally:
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+
+        # Test resolve_media_path fallback
+        test_path = "D:/projects/Violant/game/bg/hello.jpg"
+        resolved = resolve_media_path(test_path, editor=None)
+        self.assertTrue(resolved)
+
+    def test_loaded_project_nodes_not_blocked_by_is_new(self):
+        from plugins.music_plugin import MusicPlugin
+        from plugins.advanced_scripting import AdvancedScriptingPlugin
+
+        # Create a mock editor
+        class MockEditor:
+            def __init__(self):
+                self.redraw_called = False
+                self.plugin_manager = None
+            def redraw(self):
+                self.redraw_called = True
+
+        editor = MockEditor()
+        music_plugin = MusicPlugin(editor)
+        music_plugin.on_enable()
+
+        # Node loaded from file (is_new is False)
+        loaded_music = MockNode("m_1", "Music", "bell.wav", "music", {"music_mode": "sfx", "music_file": "bell.wav"})
+        loaded_music.is_new = False
+
+        # In loaded project, node_edit_save should not be ignored
+        class MockVar:
+            def __init__(self, val):
+                self.val = val
+            def get(self):
+                return self.val
+
+        class MockEntry:
+            def __init__(self, val):
+                self.val = val
+            def get(self):
+                return self.val
+
+        music_plugin.edit_state[loaded_music.id] = {
+            'mode': MockVar('sfx'),
+            'file_entry': MockEntry('bell.wav')
+        }
+
+        music_plugin.on_event("node_edit_save", {"node": loaded_music})
+        self.assertEqual(loaded_music.custom_data.get("music_mode"), "sfx")
+        self.assertIn("SFX", loaded_music.content)
+
+        # Advanced scripting export with is_new = False
+        script_plugin = AdvancedScriptingPlugin(editor)
+        py_node = MockNode("py_1", "Code", "x = 42", "python_code")
+        py_node.is_new = False
+
+        with tempfile.NamedTemporaryFile(mode="w+", delete=False, encoding="utf-8") as tmp:
+            tmp_path = tmp.name
+
+        try:
+            with open(tmp_path, "w", encoding="utf-8") as f:
+                data = {"node": py_node, "file": f, "connections": [], "handled": False}
+                script_plugin.on_event("renpy_export_node", data)
+                self.assertTrue(data["handled"])
+
+            with open(tmp_path, "r", encoding="utf-8") as f:
+                content = f.read()
+
+            self.assertIn("python:", content)
+            self.assertIn("x = 42", content)
+        finally:
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+
 if __name__ == "__main__":
     unittest.main()
+

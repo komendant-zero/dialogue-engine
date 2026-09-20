@@ -139,8 +139,12 @@ class RenpyExporterPlugin(Plugin):
             mode = node.custom_data.get('music_mode', 'bg')
             path = self.clean_rel_path(node.custom_data.get('music_file', ''), export_dir)
             if path:
-                if mode == 'bg': f.write(f'    play music "{path}"\n')
-                else: f.write(f'    voice "{path}"\n')
+                if mode == 'bg':
+                    f.write(f'    play music "{path}"\n')
+                elif mode == 'sfx':
+                    f.write(f'    play sound "{path}"\n')
+                else:
+                    f.write(f'    voice "{path}"\n')
             self.write_jump(f, node.id, connections)
 
         # 3. Узел Медиа (Фон / Спрайт)

@@ -39,7 +39,7 @@ class MusicPlugin(Plugin):
         elif event_type == 'draw_node':
             node = data['node']
             canvas = data['canvas']
-            if getattr(node, 'is_new', True) and node.node_type == 'music':
+            if node.node_type == 'music':
                 canvas.create_text(node.x + node.width - 20, node.y + 12, text="🎵", fill="white", tags=("node", node.id))
 
         # --- 4. Интерфейс редактирования ---
@@ -49,7 +49,7 @@ class MusicPlugin(Plugin):
             # Получаем ссылку на само окно диалога, чтобы управлять его фокусом
             dialog_window = data.get('dialog')
             
-            if getattr(node, 'is_new', True) and node.node_type == 'music':
+            if node.node_type == 'music':
                 music_frame = tk.LabelFrame(frame, text="Настройки Аудио", bg=frame['bg'], fg='white', padx=5, pady=5)
                 music_frame.pack(fill=tk.X, pady=10)
 
@@ -70,7 +70,8 @@ class MusicPlugin(Plugin):
                             'activebackground': frame['bg'], 'activeforeground': 'white'}
                 
                 tk.Radiobutton(rb_frame, text="Фоновая музыка (Loop)", variable=mode_var, value="bg", **rb_style).pack(side=tk.LEFT)
-                tk.Radiobutton(rb_frame, text="Озвучка (Voice)", variable=mode_var, value="voice", **rb_style).pack(side=tk.LEFT, padx=10)
+                tk.Radiobutton(rb_frame, text="Звуковой эффект (SFX)", variable=mode_var, value="sfx", **rb_style).pack(side=tk.LEFT, padx=6)
+                tk.Radiobutton(rb_frame, text="Озвучка (Voice)", variable=mode_var, value="voice", **rb_style).pack(side=tk.LEFT, padx=6)
 
                 # Выбор файла
                 tk.Label(music_frame, text="Путь к файлу:", bg=frame['bg'], fg='#aaa').pack(anchor='w', pady=(5,0))
@@ -110,7 +111,7 @@ class MusicPlugin(Plugin):
                         node.custom_data['bg_color'] = '#196f3d'
                         node.custom_data['header_color'] = '#0d4528'
                         
-                        icon = "🔁" if mode == 'bg' else "🗣️"
+                        icon = "🔔" if mode == 'sfx' else ("🔁" if mode == 'bg' else "🗣️")
                         filename = os.path.basename(path)
                         node.content = f"{icon} {mode.upper()}\n📂: {filename}"
                         
@@ -123,7 +124,7 @@ class MusicPlugin(Plugin):
         # --- 5. Сохранение данных (кнопка Сохранить) ---
         elif event_type == 'node_edit_save':
             node = data['node']
-            if getattr(node, 'is_new', True) and node.node_type == 'music' and node.id in self.edit_state:
+            if node.node_type == 'music' and node.id in self.edit_state:
                 state = self.edit_state[node.id]
                 try:
                     mode = state['mode'].get()
@@ -132,7 +133,7 @@ class MusicPlugin(Plugin):
                     node.custom_data['music_mode'] = mode
                     node.custom_data['music_file'] = path
                     
-                    icon = "🔁" if mode == 'bg' else "🗣️"
+                    icon = "🔔" if mode == 'sfx' else ("🔁" if mode == 'bg' else "🗣️")
                     filename = os.path.basename(path) if path else "[Нет файла]"
                     node.content = f"{icon} {mode.upper()}\n📂: {filename}"
                     
