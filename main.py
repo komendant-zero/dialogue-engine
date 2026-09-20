@@ -489,7 +489,6 @@ class ScenarioEditor(tk.Tk):
 
         self.project_menu.add_command(label="💾 Сохранить (Ctrl+S)", command=self.save_project)
         self.project_menu.add_command(label="📂 Загрузить (Ctrl+O)", command=self.load_project)
-        self.project_menu.add_command(label="🌟 Демо-проект", command=self.load_demo_project)
         self.project_menu.add_separator()
         self.project_menu.add_command(label="⚠️ Очистить холст", command=self.clear_all)
 
@@ -1385,13 +1384,6 @@ class ScenarioEditor(tk.Tk):
             with open(f, 'w', encoding='utf-8') as file: json.dump(data, file, indent=4, ensure_ascii=False)
             self.current_file = f
             self.set_dirty(False)
-
-    def load_demo_project(self):
-        demo_path = os.path.join(SCRIPT_DIR, "examples", "demo_story.json")
-        if os.path.exists(demo_path):
-            self.load_project(demo_path)
-        else:
-            messagebox.showwarning("Демо-проект", f"Файл не найден:\n{demo_path}", parent=self)
 
     def zoom_in(self, event=None):
         self.apply_zoom(1.15, event)

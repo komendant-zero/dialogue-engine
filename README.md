@@ -76,10 +76,9 @@ The editor has a built-in plugin architecture. Drop a `.py` file into the `plugi
 | `reload_plugin.py` | Hot-reload plugins without restarting |
 | `updater_plugin.py` | Checks for updates |
 
-### Save, Load and Demo Project
+### Save and Load
 - Projects saved as human-readable **JSON** files
 - Full node graph serialization (positions, content, connections, custom data)
-- **Sample project included**: Open `examples/demo_story.json` via **Project ▾ -> Демо-проект** to explore an interactive branching story with choices, condition checks, and audio!
 
 ---
 
@@ -197,7 +196,6 @@ class MyPlugin(Plugin):
 | ![Done](https://img.shields.io/badge/Done-2ecc71?style=flat-square) | **Condition Branching (`If/Else`)** | Visual decision nodes with `True`/`False` ports and `.rpy` code generation | `v1.0` |
 | ![Done](https://img.shields.io/badge/Done-2ecc71?style=flat-square) | **Scenario Health Check** | Graph diagnostics to detect dead ends, unreachable nodes & empty choices | `v1.0` |
 | ![Done](https://img.shields.io/badge/Done-2ecc71?style=flat-square) | **In-Editor Playtest** | Lightweight dialogue runner to test story branches without launching Ren'Py | `v1.0` |
-| ![Done](https://img.shields.io/badge/Done-2ecc71?style=flat-square) | **Interactive Demo Project** | Sample branching story (`examples/demo_story.json`) ready to load in 1 click | `v1.0` |
 | ![Done](https://img.shields.io/badge/Done-2ecc71?style=flat-square) | **Auto-Layout Graph** | Grid arrangement and automatic graph alignment (`Ctrl+L`) | `v1.0` |
 | ![Planned](https://img.shields.io/badge/Planned-f39c12?style=flat-square) | **Character Manager** | Global cast roster: character colors, avatars, and dropdown speaker selection | `v1.2` |
 | ![Planned](https://img.shields.io/badge/Planned-3498db?style=flat-square) | **Cross-Platform Support** | Verified native support and run scripts for macOS and Linux | `v1.2` |
