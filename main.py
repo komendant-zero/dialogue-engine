@@ -81,6 +81,35 @@ COLORS = {
     'boundary_line': '#e74c3c', # Цвет границы (красный)
 }
 
+# --- ПРЕСЕТЫ ЦВЕТОВ ДЛЯ БЛОКОВ ---
+NODE_COLOR_PRESETS = [
+    ("🟠 Оранжевый", "#d35400", "#a04000"),
+    ("🟢 Зелёный", "#27ae60", "#1e8449"),
+    ("🔵 Синий", "#2980b9", "#1f618d"),
+    ("🟣 Фиолетовый", "#8e44ad", "#71368a"),
+    ("🔴 Красный", "#c0392b", "#922b21"),
+    ("💠 Бирюзовый", "#16a085", "#117a65"),
+    ("🟡 Золотой", "#d4ac0d", "#b7950b"),
+    ("🟤 Коричневый", "#795548", "#5d4037"),
+    ("⚫ Тёмно-серый", "#34495e", "#2c3e50"),
+]
+
+def darken_color(hex_color, factor=0.75):
+    """Генерирует гармоничный тёмный оттенок для заголовка блока."""
+    try:
+        hex_clean = hex_color.lstrip('#')
+        if len(hex_clean) == 6:
+            r = int(hex_clean[0:2], 16)
+            g = int(hex_clean[2:4], 16)
+            b = int(hex_clean[4:6], 16)
+            r = max(0, min(255, int(r * factor)))
+            g = max(0, min(255, int(g * factor)))
+            b = max(0, min(255, int(b * factor)))
+            return f"#{r:02x}{g:02x}{b:02x}"
+    except Exception:
+        pass
+    return hex_color
+
 # --- КЛАСС БЛОКА ---
 
 class Node:
@@ -880,6 +909,28 @@ class ScenarioEditor(tk.Tk):
         if target:
             menu.add_command(label="Редактировать", command=lambda: self.edit_node(target))
             menu.add_separator()
+            
+            # --- Подменю цвета блока (работает для одного или группы выделенных) ---
+            color_menu = tk.Menu(menu, tearoff=0, bg='#252526', fg='white', activebackground='#094771')
+            selected_targets = self.selected_nodes if (target in self.selected_nodes and len(self.selected_nodes) > 1) else [target]
+            
+            for name, bg_col, head_col in NODE_COLOR_PRESETS:
+                color_menu.add_command(
+                    label=name,
+                    command=lambda b=bg_col, h=head_col, tgts=selected_targets: self.set_nodes_color(tgts, b, h)
+                )
+            color_menu.add_separator()
+            color_menu.add_command(
+                label="🎨 Выбрать свой цвет...",
+                command=lambda tgts=selected_targets: self.pick_custom_color_for_nodes(tgts)
+            )
+            color_menu.add_command(
+                label="🔄 Сбросить к стандартному",
+                command=lambda tgts=selected_targets: self.reset_nodes_color(tgts)
+            )
+            menu.add_cascade(label="🎨 Цвет блока", menu=color_menu)
+            menu.add_separator()
+
             # Дополнительные опции удаления связей из самой ноды (на всякий случай)
             menu.add_command(label="Удалить все входящие", command=lambda: self.disconnect_input(target))
             menu.add_command(label="Удалить все исходящие", command=lambda: self.disconnect_output(target, -1)) # -1 значит все
@@ -921,7 +972,7 @@ class ScenarioEditor(tk.Tk):
         self.save_state()
         dialog = tk.Toplevel(self)
         dialog.title("Редактор блока")
-        dialog.geometry("500x700") # Увеличили высоту
+        dialog.geometry("520x760")
         dialog.configure(bg=COLORS['bg'])
         dialog.attributes('-topmost', True) 
 
@@ -931,20 +982,119 @@ class ScenarioEditor(tk.Tk):
         e_title.insert(0, node.title)
         e_title.pack(fill=tk.X, padx=10)
 
-        # Кнопка: Цвет заголовка
-        def pick_header_text_color():
-            current_color = node.custom_data.get('header_text_color', 'white')
-            color = colorchooser.askcolor(color=current_color, title="Цвет текста заголовка", parent=dialog)
-            if color[1]:
-                node.custom_data['header_text_color'] = color[1]
+        # --- Блок оформления / цветов ---
+        color_frame = tk.LabelFrame(dialog, text="🎨 Оформление блока", bg=COLORS['bg'], fg='white', padx=8, pady=8)
+        color_frame.pack(fill=tk.X, padx=10, pady=5)
+
+        # Превью блока
+        default_bg = COLORS.get(f'node_{node.node_type}', COLORS['node_story'])
+        default_head = COLORS.get(f'header_{node.node_type}', COLORS['header_story'])
+        
+        preview_box = tk.Frame(color_frame, bg=node.custom_data.get('bg_color', default_bg), relief='solid', bd=1, height=45)
+        preview_box.pack(fill=tk.X, pady=(0, 6))
+        preview_box.pack_propagate(False)
+
+        preview_head = tk.Frame(preview_box, bg=node.custom_data.get('header_color', default_head), height=20)
+        preview_head.pack(fill=tk.X, side=tk.TOP)
+        preview_head.pack_propagate(False)
+
+        lbl_head_title = tk.Label(preview_head, text=node.title or "Заголовок", 
+                                  bg=node.custom_data.get('header_color', default_head),
+                                  fg=node.custom_data.get('header_text_color', 'white'), 
+                                  font=("Segoe UI", 8, "bold"), anchor='w', padx=5)
+        lbl_head_title.pack(fill=tk.BOTH, expand=True)
+
+        lbl_body_preview = tk.Label(preview_box, text="Образец текста блока", 
+                                    bg=node.custom_data.get('bg_color', default_bg),
+                                    fg=node.custom_data.get('text_color', COLORS['text']), 
+                                    font=("Segoe UI", 8), anchor='w', padx=5)
+        lbl_body_preview.pack(fill=tk.BOTH, expand=True)
+
+        def update_preview():
+            bg_col = node.custom_data.get('bg_color', default_bg)
+            head_col = node.custom_data.get('header_color', default_head)
+            txt_col = node.custom_data.get('text_color', COLORS['text'])
+            head_txt_col = node.custom_data.get('header_text_color', 'white')
+
+            preview_box.config(bg=bg_col)
+            preview_head.config(bg=head_col)
+            lbl_head_title.config(text=e_title.get() or "Заголовок", bg=head_col, fg=head_txt_col)
+            lbl_body_preview.config(bg=bg_col, fg=txt_col)
+
+        # Палитра быстрых пресетов
+        palette_frame = tk.Frame(color_frame, bg=COLORS['bg'])
+        palette_frame.pack(fill=tk.X, pady=4)
+
+        for _, bg_c, head_c in NODE_COLOR_PRESETS:
+            tk.Button(
+                palette_frame,
+                bg=bg_c,
+                activebackground=head_c,
+                width=2,
+                height=1,
+                relief='flat',
+                cursor='hand2',
+                command=lambda b=bg_c, h=head_c: apply_preset(b, h)
+            ).pack(side=tk.LEFT, padx=2)
+
+        def apply_preset(b, h):
+            node.custom_data['bg_color'] = b
+            node.custom_data['header_color'] = h
+            update_preview()
+            self.redraw()
+
+        # Кнопки детального выбора цвета
+        btn_grid = tk.Frame(color_frame, bg=COLORS['bg'])
+        btn_grid.pack(fill=tk.X, pady=(4, 0))
+
+        def pick_bg():
+            cur = node.custom_data.get('bg_color', default_bg)
+            col = colorchooser.askcolor(color=cur, title="Цвет фона блока", parent=dialog)
+            if col and col[1]:
+                node.custom_data['bg_color'] = col[1]
+                node.custom_data['header_color'] = darken_color(col[1], 0.75)
+                update_preview()
                 self.redraw()
 
-        # --- Кнопки цветов ---
-        btn_frame = tk.Frame(dialog, bg=COLORS['bg'])
-        btn_frame.pack(fill=tk.X, padx=10, pady=5)
+        def pick_header_bg():
+            cur = node.custom_data.get('header_color', default_head)
+            col = colorchooser.askcolor(color=cur, title="Цвет шапки блока", parent=dialog)
+            if col and col[1]:
+                node.custom_data['header_color'] = col[1]
+                update_preview()
+                self.redraw()
 
-        btn_h_color = tk.Button(btn_frame, text="Цвет Заголовка", command=pick_header_text_color, bg='#555', fg='white', width=20)
-        btn_h_color.grid(row=0, column=0, padx=2, pady=2)
+        def pick_header_txt():
+            cur = node.custom_data.get('header_text_color', 'white')
+            col = colorchooser.askcolor(color=cur, title="Цвет текста заголовка", parent=dialog)
+            if col and col[1]:
+                node.custom_data['header_text_color'] = col[1]
+                update_preview()
+                self.redraw()
+
+        def pick_text_color():
+            cur = node.custom_data.get('text_color', COLORS['text'])
+            col = colorchooser.askcolor(color=cur, title="Цвет основного текста", parent=dialog)
+            if col and col[1]:
+                node.custom_data['text_color'] = col[1]
+                update_preview()
+                self.redraw()
+
+        def reset_colors():
+            node.custom_data.pop('bg_color', None)
+            node.custom_data.pop('header_color', None)
+            node.custom_data.pop('text_color', None)
+            node.custom_data.pop('header_text_color', None)
+            update_preview()
+            self.redraw()
+
+        btn_style = {'bg': '#333333', 'fg': 'white', 'relief': 'flat', 'font': ('Segoe UI', 8), 'padx': 6, 'pady': 2, 'cursor': 'hand2'}
+
+        tk.Button(btn_grid, text="Фон...", command=pick_bg, **btn_style).pack(side=tk.LEFT, padx=2)
+        tk.Button(btn_grid, text="Шапка...", command=pick_header_bg, **btn_style).pack(side=tk.LEFT, padx=2)
+        tk.Button(btn_grid, text="Текст заголовка...", command=pick_header_txt, **btn_style).pack(side=tk.LEFT, padx=2)
+        tk.Button(btn_grid, text="Текст...", command=pick_text_color, **btn_style).pack(side=tk.LEFT, padx=2)
+        tk.Button(btn_grid, text="🔄 Сброс", command=reset_colors, **btn_style).pack(side=tk.RIGHT, padx=2)
 
         # --- Контент ---
         tk.Label(dialog, text="Текст / Контент:", bg=COLORS['bg'], fg='white').pack(pady=5)
@@ -996,6 +1146,7 @@ class ScenarioEditor(tk.Tk):
             node.title = e_title.get()
             node.content = t_content.get("1.0", tk.END).strip()
             node.calculate_size()
+            update_preview()
             self.redraw()
 
         e_title.bind("<KeyRelease>", auto_save)
@@ -1071,6 +1222,36 @@ class ScenarioEditor(tk.Tk):
             if node in self.selected_nodes:
                 self.selected_nodes.remove(node)
             self.redraw()
+
+    def set_nodes_color(self, nodes, bg_color, header_color):
+        if not nodes: return
+        self.save_state()
+        for node in nodes:
+            node.custom_data['bg_color'] = bg_color
+            node.custom_data['header_color'] = header_color
+        self.redraw()
+        self.set_dirty(True)
+
+    def pick_custom_color_for_nodes(self, nodes):
+        if not nodes: return
+        default_bg = COLORS.get(f'node_{nodes[0].node_type}', COLORS['node_story'])
+        current_bg = nodes[0].custom_data.get('bg_color', default_bg)
+        color = colorchooser.askcolor(color=current_bg, title="Выберите цвет блоков", parent=self)
+        if color and color[1]:
+            bg_col = color[1]
+            head_col = darken_color(bg_col, 0.75)
+            self.set_nodes_color(nodes, bg_col, head_col)
+
+    def reset_nodes_color(self, nodes):
+        if not nodes: return
+        self.save_state()
+        for node in nodes:
+            node.custom_data.pop('bg_color', None)
+            node.custom_data.pop('header_color', None)
+            node.custom_data.pop('text_color', None)
+            node.custom_data.pop('header_text_color', None)
+        self.redraw()
+        self.set_dirty(True)
 
     def find_node_by_id(self, nid):
         for n in self.nodes:
