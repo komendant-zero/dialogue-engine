@@ -50,6 +50,7 @@ class RenpyExporterPlugin(Plugin):
     def do_export(self, export_dir, nodes, connections):
         try:
             rpy_path = os.path.join(export_dir, "script.rpy")
+            nodes_map = {n.id: n for n in nodes}
             with open(rpy_path, 'w', encoding='utf-8') as f:
                 f.write("# --- Сгенерировано визуальным редактором (v2.0) ---\n\n")
                 
@@ -84,7 +85,7 @@ class RenpyExporterPlugin(Plugin):
                     
                     if not export_data['handled']:
                         # Стандартная логика (фоллбэк)
-                        self.write_node_content_default(f, node, connections, export_dir=export_dir)
+                        self.write_node_content_default(f, node, connections, export_dir=export_dir, nodes_map=nodes_map)
                     
                     f.write("\n")
                 
@@ -96,18 +97,52 @@ class RenpyExporterPlugin(Plugin):
         if not path:
             return ""
         path = path.replace('\\', '/')
-        if export_dir and os.path.isabs(path):
+        
+        # 1. Если путь содержит /game/ (типично для проектов Ren'Py), извлекаем относительный путь
+        path_lower = path.lower()
+        if "/game/" in path_lower:
+            idx = path_lower.find("/game/")
+            path = path[idx + 6:]
+        elif path_lower.startswith("game/"):
+            path = path[5:]
+        elif export_dir and os.path.isabs(path):
             try:
                 rel = os.path.relpath(path, export_dir).replace('\\', '/')
                 if not rel.startswith('..'):
                     path = rel
             except ValueError:
                 pass
-        if path.startswith("game/"):
-            path = path[5:]
-        return path
+        return path.lstrip('/')
 
-    def write_node_content_default(self, f, node, connections, export_dir=""):
+    def should_pause_after_media(self, node, connections, nodes_map=None):
+        if not nodes_map:
+            return False
+        out_conns = [c for c in connections if c['from'] == node.id]
+        if not out_conns:
+            return True  # Тупиковый узел в конце сценария — нужна пауза перед return
+
+        curr_id = out_conns[0]['to']
+        visited = set()
+        while curr_id and curr_id not in visited:
+            visited.add(curr_id)
+            target = nodes_map.get(curr_id)
+            if not target:
+                break
+            # Если следующий узел — диалог (story) или выбор (choice), пауза не нужна (диалог сам ждёт игрока)
+            if target.node_type in ('story', 'choice'):
+                return False
+            # Если на пути встречается другое медиа или анимация — обязательно нужна пауза,
+            # иначе текущее медиа моментально перекроется следующим!
+            if target.node_type in ('media', 'animation'):
+                return True
+            next_outs = [c for c in connections if c['from'] == curr_id]
+            if not next_outs:
+                break
+            curr_id = next_outs[0]['to']
+
+        return False
+
+    def write_node_content_default(self, f, node, connections, export_dir="", nodes_map=None):
         # 1. Текстовый узел (Story)
         if node.node_type == 'story':
             char_name = node.title.replace('"', '\\"')
@@ -173,6 +208,10 @@ class RenpyExporterPlugin(Plugin):
                     else:
                         align = data.get("position", "center")
                         f.write(f'    show expression "{path}" at {align}{with_clause}\n')
+
+                # Проверяем, нужна ли пауза (явная или автоматическая перед следующим медиа)
+                if data.get("pause", False) or self.should_pause_after_media(node, connections, nodes_map):
+                    f.write('    pause\n')
             except: pass
             self.write_jump(f, node.id, connections)
 

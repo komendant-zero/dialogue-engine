@@ -175,6 +175,41 @@ class TestFeatures(unittest.TestCase):
             if os.path.exists(tmp_path):
                 os.remove(tmp_path)
 
+    def test_media_pause_and_clean_rel_path(self):
+        from plugins.renpy_exporter import RenpyExporterPlugin
+        exporter = RenpyExporterPlugin(editor=None)
+
+        # Test clean_rel_path with /game/ in absolute path
+        p1 = "D:/projects/Violant/game/sound/dustywind_double-fingersnap-reverb.ogg"
+        self.assertEqual(exporter.clean_rel_path(p1), "sound/dustywind_double-fingersnap-reverb.ogg")
+
+        p2 = "D:/projects/Violant/game/bg/hello.jpg"
+        self.assertEqual(exporter.clean_rel_path(p2), "bg/hello.jpg")
+
+        # Test media pause when followed by another media before dialogue
+        node_media1 = MockNode("m1", "Warning", '{"image_path": "bg/warning.gif"}', "media")
+        node_sfx = MockNode("sfx", "Sound", "SFX", "music")
+        node_media2 = MockNode("m2", "Hello", '{"image_path": "bg/hello.jpg"}', "media")
+        node_story = MockNode("story", "Narrator", "Hello world", "story")
+
+        nodes_map = {
+            "m1": node_media1,
+            "sfx": node_sfx,
+            "m2": node_media2,
+            "story": node_story
+        }
+        conns = [
+            {"from": "m1", "to": "sfx", "out_idx": 0},
+            {"from": "sfx", "to": "m2", "out_idx": 0},
+            {"from": "m2", "to": "story", "out_idx": 0}
+        ]
+
+        # m1 should pause because m2 is on the path before dialogue
+        self.assertTrue(exporter.should_pause_after_media(node_media1, conns, nodes_map))
+        # m2 should NOT pause because story directly follows
+        self.assertFalse(exporter.should_pause_after_media(node_media2, conns, nodes_map))
+
 if __name__ == "__main__":
     unittest.main()
+
 

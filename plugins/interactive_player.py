@@ -153,11 +153,32 @@ class InteractivePlayerPlugin(Plugin):
 
         # Создаем файл инициализации для путей
         project_dir = os.path.abspath(os.getcwd())
+        search_dirs = [project_dir]
+
+        # Ищем корень game/ из путей нод (где лежат bg, sound, music)
+        for n in nodes:
+            p = ""
+            if n.node_type == 'music':
+                p = n.custom_data.get('music_file', '')
+            elif n.node_type == 'media':
+                try:
+                    p = json.loads(n.content).get('image_path', '')
+                except:
+                    pass
+            if p and "/game/" in p.replace('\\', '/').lower():
+                idx = p.replace('\\', '/').lower().find("/game/")
+                g_dir = os.path.abspath(p[:idx+5].replace('/', os.sep))
+                if os.path.exists(g_dir) and g_dir not in search_dirs:
+                    search_dirs.append(g_dir)
+                    break
+
         init_file = os.path.join(game_dir, "test_drive_init.rpy")
         with open(init_file, "w", encoding="utf-8") as f:
             f.write("python early:\n")
-            f.write(f'    config.searchpath.append(r"{project_dir}")\n\n')
-            f.write("init python:\n")
+            for s_dir in search_dirs:
+                safe_s_dir = s_dir.replace('\\', '/')
+                f.write(f'    config.searchpath.append("{safe_s_dir}")\n')
+            f.write("\ninit python:\n")
             f.write("    # Отключаем подтверждение выхода и меню, так как в проекте пока нет экранов (screens.rpy)\n")
             f.write("    config.quit_action = Quit(confirm=False)\n")
             f.write("    config.game_menu_action = None\n")
