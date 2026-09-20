@@ -1,14 +1,33 @@
 import tkinter as tk
+from tkinter import ttk
+import sys
 from plugin_system import Plugin
-import os
 
 class PausePlugin(Plugin):
     name = "Pause & Timing"
-    version = "1.0"
+    version = "1.1"
 
     def __init__(self, editor):
         super().__init__(editor)
         self.edit_state = {}
+        main_module = sys.modules.get('__main__')
+        if not hasattr(main_module, 'ScenarioEditor'):
+            main_module = sys.modules.get('main', main_module)
+        self.EditorClass = getattr(main_module, 'ScenarioEditor', None)
+        if self.EditorClass:
+            self.original_edit_node = getattr(self.EditorClass, 'edit_node', None)
+
+    def on_enable(self):
+        plugin_self = self
+
+        def new_edit_node(editor_self, node):
+            if node.node_type == 'pause':
+                PauseEditorDialog(editor_self, node, plugin_self.editor.redraw)
+            else:
+                plugin_self.original_edit_node(editor_self, node)
+
+        if self.EditorClass:
+            self.EditorClass.edit_node = new_edit_node
 
     def on_event(self, event_type, data=None):
         # --- 1. Меню компонентов ---
@@ -38,13 +57,13 @@ class PausePlugin(Plugin):
         elif event_type == 'node_added':
             node = data
             if getattr(node, 'is_new', True) and node.node_type == 'pause':
-                node.width = 180
-                node.height = 90
+                node.width = 170
+                node.height = 80
                 node.custom_data['bg_color'] = '#4a235a'       # Глубокий пурпурный
                 node.custom_data['header_color'] = '#2e113a'   # Тёмная шапка
                 node.custom_data['text_color'] = '#d2b4de'     # Светло-лиловый текст
                 node.custom_data['pause_mode'] = 'click'       # 'click' или 'time'
-                node.custom_data['pause_duration'] = 1.0
+                node.custom_data['pause_duration'] = 0.0
                 node.title = "Пауза"
                 node.content = "Ожидание клика"
                 self.editor.redraw()
@@ -56,52 +75,40 @@ class PausePlugin(Plugin):
             if node.node_type == 'pause':
                 canvas.create_text(node.x + node.width - 20, node.y + 12, text="⏸️", fill="white", tags=("node", node.id))
 
-        # --- 4. Интерфейс редактирования (включая настройки в нодах сюжета) ---
+        # --- 4. Настройки в блоках сюжета (только выбор из списка) ---
         elif event_type == 'node_edit_dialog':
             node = data['node']
             frame = data.get('frame')
             dialog = data.get('dialog')
 
-            if node.node_type == 'pause':
-                self.setup_pause_node_ui(node, frame or dialog)
-            elif node.node_type == 'story':
+            if node.node_type == 'story':
                 self.setup_story_pause_ui(node, frame or dialog)
 
-        # --- 5. Сохранение настроек ---
+        # --- 5. Сохранение настроек в блоках сюжета ---
         elif event_type == 'node_edit_save':
             node = data['node']
             if node.id in self.edit_state:
                 state = self.edit_state.pop(node.id)
                 try:
-                    if node.node_type == 'pause':
-                        mode = state['mode'].get()
-                        node.custom_data['pause_mode'] = mode
-                        try:
-                            dur = float(state['duration'].get().strip())
-                        except ValueError:
-                            dur = 1.0
-                        node.custom_data['pause_duration'] = dur
-                        if mode == 'time':
-                            node.content = f"Задержка: {dur} сек"
-                        else:
-                            node.content = "Ожидание клика"
-                        node.calculate_size()
-
-                    elif node.node_type == 'story':
-                        enabled = state['enabled'].get()
-                        node.custom_data['pause_before'] = enabled
-                        if enabled:
-                            mode = state['mode'].get()
-                            node.custom_data['pause_before_mode'] = mode
-                            try:
-                                dur = float(state['duration'].get().strip())
-                            except ValueError:
-                                dur = 1.0
-                            node.custom_data['pause_before_duration'] = dur
-                        else:
+                    if node.node_type == 'story':
+                        val = state['story_combo_var'].get()
+                        if val == "Без паузы":
                             node.custom_data.pop('pause_before', None)
                             node.custom_data.pop('pause_before_mode', None)
                             node.custom_data.pop('pause_before_duration', None)
+                        elif "клика" in val.lower():
+                            node.custom_data['pause_before'] = True
+                            node.custom_data['pause_before_mode'] = 'click'
+                            node.custom_data['pause_before_duration'] = 0.0
+                        else:
+                            sec_str = val.replace("сек", "").strip()
+                            try:
+                                sec = float(sec_str)
+                            except ValueError:
+                                sec = 1.0
+                            node.custom_data['pause_before'] = True
+                            node.custom_data['pause_before_mode'] = 'time'
+                            node.custom_data['pause_before_duration'] = sec
                 except Exception as e:
                     print(f"[PausePlugin] Save error for node {node.id}: {e}")
 
@@ -112,7 +119,7 @@ class PausePlugin(Plugin):
                 f = data['file']
                 connections = data['connections']
                 mode = node.custom_data.get('pause_mode', 'click')
-                dur = node.custom_data.get('pause_duration', 1.0)
+                dur = node.custom_data.get('pause_duration', 0.0)
                 
                 if mode == 'time' and float(dur) > 0:
                     f.write(f'    pause {dur}\n')
@@ -134,96 +141,114 @@ class PausePlugin(Plugin):
             content="Ожидание клика"
         )
 
-    def setup_pause_node_ui(self, node, parent):
-        p_frame = tk.LabelFrame(parent, text="⏸️ Настройки паузы", bg='#2b2b2b', fg='#d2b4de', padx=8, pady=8)
-        p_frame.pack(fill=tk.X, padx=5, pady=5)
-
-        cur_mode = node.custom_data.get('pause_mode', 'click')
-        cur_dur = str(node.custom_data.get('pause_duration', 1.0))
-
-        mode_var = tk.StringVar(value=cur_mode)
-        dur_entry = tk.Entry(p_frame, bg='#333', fg='white', insertbackground='white', width=8)
-        dur_entry.insert(0, cur_dur)
-
-        self.edit_state[node.id] = {
-            'mode': mode_var,
-            'duration': dur_entry
-        }
-
-        r_style = {'bg': '#2b2b2b', 'fg': 'white', 'selectcolor': '#444', 
-                   'activebackground': '#2b2b2b', 'activeforeground': 'white'}
-
-        def update_entry_state():
-            if mode_var.get() == 'time':
-                dur_entry.config(state='normal')
-            else:
-                dur_entry.config(state='disabled')
-
-        rb_click = tk.Radiobutton(p_frame, text="Ожидание клика игрока", variable=mode_var, 
-                                  value="click", command=update_entry_state, **r_style)
-        rb_click.pack(anchor='w', pady=2)
-
-        row_time = tk.Frame(p_frame, bg='#2b2b2b')
-        row_time.pack(fill=tk.X, pady=2)
-
-        rb_time = tk.Radiobutton(row_time, text="Задержка по времени (сек):", variable=mode_var, 
-                                 value="time", command=update_entry_state, **r_style)
-        rb_time.pack(side=tk.LEFT)
-        dur_entry.pack(side=tk.LEFT, padx=5)
-
-        update_entry_state()
-
     def setup_story_pause_ui(self, node, parent):
         sp_frame = tk.LabelFrame(parent, text="⏱️ Пауза перед показом реплики", bg='#2b2b2b', fg='#d2b4de', padx=8, pady=6)
         sp_frame.pack(fill=tk.X, padx=5, pady=5)
 
+        options = [
+            "Без паузы",
+            "Ожидание клика игрока",
+            "0.5 сек",
+            "1.0 сек",
+            "1.5 сек",
+            "2.0 сек",
+            "3.0 сек",
+            "5.0 сек"
+        ]
+
         cur_enabled = bool(node.custom_data.get('pause_before', False))
         cur_mode = node.custom_data.get('pause_before_mode', 'click')
-        cur_dur = str(node.custom_data.get('pause_before_duration', 1.0))
+        cur_dur = node.custom_data.get('pause_before_duration', 1.0)
 
-        enabled_var = tk.BooleanVar(value=cur_enabled)
-        mode_var = tk.StringVar(value=cur_mode)
-        dur_entry = tk.Entry(sp_frame, bg='#333', fg='white', insertbackground='white', width=8)
-        dur_entry.insert(0, cur_dur)
+        if not cur_enabled:
+            current_val = "Без паузы"
+        elif cur_mode == 'click':
+            current_val = "Ожидание клика игрока"
+        else:
+            current_val = f"{cur_dur} сек"
+            if current_val not in options:
+                options.append(current_val)
+
+        combo_var = tk.StringVar(value=current_val)
+        combo = ttk.Combobox(sp_frame, textvariable=combo_var, values=options, state="readonly", font=("Segoe UI", 9))
+        combo.pack(fill=tk.X, padx=10, pady=5)
 
         self.edit_state[node.id] = {
-            'enabled': enabled_var,
-            'mode': mode_var,
-            'duration': dur_entry
+            'story_combo_var': combo_var
         }
 
-        r_style = {'bg': '#2b2b2b', 'fg': 'white', 'selectcolor': '#444', 
-                   'activebackground': '#2b2b2b', 'activeforeground': 'white'}
+class PauseEditorDialog:
+    """
+    Специализированное окно настроек блока паузы без текстового ввода контента — только выбор из списка.
+    """
+    def __init__(self, parent, node, callback):
+        self.node = node
+        self.callback = callback
 
-        opts_frame = tk.Frame(sp_frame, bg='#2b2b2b')
+        self.win = tk.Toplevel(parent)
+        self.win.title("Настройки Паузы")
+        self.win.geometry("340x260")
+        self.win.configure(bg='#222222')
+        self.win.transient(parent)
+        self.win.grab_set()
 
-        def toggle_enabled():
-            if enabled_var.get():
-                opts_frame.pack(fill=tk.X, pady=(4, 0))
-            else:
-                opts_frame.pack_forget()
+        lbl_style = {'bg': '#222222', 'fg': 'white', 'font': ('Segoe UI', 9)}
 
-        def update_entry_state():
-            if mode_var.get() == 'time':
-                dur_entry.config(state='normal')
-            else:
-                dur_entry.config(state='disabled')
+        tk.Label(self.win, text="Выберите тип паузы / задержки:", **lbl_style).pack(pady=(20, 8))
 
-        cb = tk.Checkbutton(sp_frame, text="Добавить паузу перед этой репликой", variable=enabled_var,
-                            command=toggle_enabled, **r_style)
-        cb.pack(anchor='w')
+        cur_mode = self.node.custom_data.get('pause_mode', 'click')
+        cur_dur = self.node.custom_data.get('pause_duration', 0.0)
 
-        rb_click = tk.Radiobutton(opts_frame, text="Ждать клика игрока", variable=mode_var, 
-                                  value="click", command=update_entry_state, **r_style)
-        rb_click.pack(anchor='w', pady=2)
+        options = [
+            "Ожидание клика игрока",
+            "0.5 сек",
+            "1.0 сек",
+            "1.5 сек",
+            "2.0 сек",
+            "3.0 сек",
+            "5.0 сек"
+        ]
 
-        row_time = tk.Frame(opts_frame, bg='#2b2b2b')
-        row_time.pack(fill=tk.X, pady=2)
+        if cur_mode == 'click' or float(cur_dur) == 0.0:
+            selected_opt = "Ожидание клика игрока"
+        else:
+            selected_opt = f"{cur_dur} сек"
+            if selected_opt not in options:
+                options.append(selected_opt)
 
-        rb_time = tk.Radiobutton(row_time, text="Таймер задержки (сек):", variable=mode_var, 
-                                 value="time", command=update_entry_state, **r_style)
-        rb_time.pack(side=tk.LEFT)
-        dur_entry.pack(side=tk.LEFT, padx=5)
+        self.combo_var = tk.StringVar(value=selected_opt)
+        self.combo = ttk.Combobox(self.win, textvariable=self.combo_var, values=options, state="readonly", font=("Segoe UI", 10))
+        self.combo.pack(fill=tk.X, padx=30, pady=5)
 
-        update_entry_state()
-        toggle_enabled()
+        lbl_hint = tk.Label(
+            self.win,
+            text="• «Ожидание клика» — ждёт нажатия игрока\n• «X.X сек» — автоматический переход по таймеру",
+            bg='#222222', fg='#888888', font=("Segoe UI", 8), justify="left"
+        )
+        lbl_hint.pack(pady=12)
+
+        tk.Button(
+            self.win, text="💾 Сохранить", command=self.save,
+            bg='#6c3483', activebackground='#8e44ad', fg='white',
+            font=("Segoe UI", 9, "bold"), relief='flat', padx=20, pady=6, cursor='hand2'
+        ).pack(side=tk.BOTTOM, pady=20)
+
+    def save(self):
+        val = self.combo_var.get()
+        if "клика" in val.lower():
+            self.node.custom_data['pause_mode'] = 'click'
+            self.node.custom_data['pause_duration'] = 0.0
+            self.node.content = "Ожидание клика"
+        else:
+            sec_str = val.replace("сек", "").strip()
+            try:
+                sec = float(sec_str)
+            except ValueError:
+                sec = 1.0
+            self.node.custom_data['pause_mode'] = 'time'
+            self.node.custom_data['pause_duration'] = sec
+            self.node.content = f"Задержка: {sec} сек"
+
+        self.node.calculate_size()
+        self.callback()
+        self.win.destroy()

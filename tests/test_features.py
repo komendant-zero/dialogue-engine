@@ -264,7 +264,44 @@ class TestFeatures(unittest.TestCase):
             if os.path.exists(tmp_path):
                 os.remove(tmp_path)
 
+    def test_pause_editor_dialog_choice_only(self):
+        from plugins.pause_plugin import PauseEditorDialog
+
+        class MockDialogNode:
+            def __init__(self):
+                self.custom_data = {}
+                self.content = ""
+            def calculate_size(self):
+                pass
+
+        class MockVar:
+            def __init__(self, val):
+                self.val = val
+            def get(self):
+                return self.val
+
+        node = MockDialogNode()
+        # Mock dialog save logic
+        dialog = PauseEditorDialog.__new__(PauseEditorDialog)
+        dialog.node = node
+        dialog.callback = lambda: None
+        dialog.win = type("MockWin", (), {"destroy": lambda s: None})()
+
+        # Test click choice
+        dialog.combo_var = MockVar("Ожидание клика игрока")
+        dialog.save()
+        self.assertEqual(node.custom_data['pause_mode'], 'click')
+        self.assertEqual(node.content, "Ожидание клика")
+
+        # Test timed choice
+        dialog.combo_var = MockVar("1.5 сек")
+        dialog.save()
+        self.assertEqual(node.custom_data['pause_mode'], 'time')
+        self.assertEqual(node.custom_data['pause_duration'], 1.5)
+        self.assertEqual(node.content, "Задержка: 1.5 сек")
+
 if __name__ == "__main__":
     unittest.main()
+
 
 
