@@ -3,45 +3,54 @@
         {
             "id": "node_start",
             "x": 60,
-            "y": 180,
+            "y": 240,
             "title": "start",
-            "content": "Вы стоите перед старинным особняком. Дверь слегка приоткрыта, а внутри мерцает слабый свет.",
+            "content": "Штормовой ветер бьёт в лицо. Перед вами возвышается силуэт старого маяка Мыса Бурь.",
             "type": "story",
             "mode": "standard",
             "custom_data": {
-                "header_color": "#27ae60",
-                "bg_color": "#1e4620"
+                "bg_color": "#2c3e50",
+                "header_color": "#1a252f",
+                "header_text_color": "#5dade2"
             },
             "is_character": true
         },
         {
-            "id": "node_choice",
+            "id": "node_media_bg",
             "x": 320,
             "y": 140,
-            "title": "Выбор пути",
-            "content": "Войти внутрь особняка\nПостучать в дубовую дверь\nОбойти особняк к саду",
-            "type": "choice",
+            "title": "Фон: Побережье",
+            "content": "{\"mode\": \"background\", \"image_path\": \"images/bg_lighthouse.jpg\", \"animation\": \"dissolve\", \"animation_duration\": 1.0}",
+            "type": "media",
             "mode": "standard",
-            "custom_data": {},
-            "is_character": true
+            "custom_data": {
+                "bg_color": "#16a085",
+                "header_color": "#117a65"
+            },
+            "is_character": false
         },
         {
-            "id": "node_hall",
-            "x": 620,
-            "y": 40,
-            "title": "Холл",
-            "content": "Вы осторожно переступаете порог. В тишине холла на столике поблёскивает старинный медный ключ.",
-            "type": "story",
+            "id": "node_music_theme",
+            "x": 320,
+            "y": 320,
+            "title": "Атмосфера бури",
+            "content": "audio/storm_waves.ogg",
+            "type": "music",
             "mode": "standard",
-            "custom_data": {},
-            "is_character": true
+            "custom_data": {
+                "music_mode": "bg",
+                "music_file": "audio/storm_waves.ogg",
+                "bg_color": "#8e44ad",
+                "header_color": "#71368a"
+            },
+            "is_character": false
         },
         {
-            "id": "node_get_key",
-            "x": 880,
-            "y": 40,
-            "title": "# Получение ключа",
-            "content": "has_key = True\nplayer_bravery += 1",
+            "id": "node_init_vars",
+            "x": 580,
+            "y": 240,
+            "title": "# Инициализация",
+            "content": "reputation = 0\nhas_lantern = False\nclues = 0\nscore = 0",
             "type": "variable",
             "mode": "standard",
             "custom_data": {
@@ -52,103 +61,307 @@
             "is_character": false
         },
         {
-            "id": "node_knock",
-            "x": 620,
-            "y": 200,
-            "title": "Стук",
-            "content": "Вы трижды стучите тяжёлым дверным кольцом. В ответ — лишь глухое эхо в коридорах.",
+            "id": "node_alisa_briefing",
+            "x": 850,
+            "y": 240,
+            "title": "Алиса",
+            "content": "По радио передали штормовое предупреждение! Нам нужно действовать быстро, пока связь с материком окончательно не оборвалась.",
             "type": "story",
-            "mode": "standard",
-            "custom_data": {},
-            "is_character": true
-        },
-        {
-            "id": "node_garden",
-            "x": 620,
-            "y": 380,
-            "title": "Заброшенный сад",
-            "content": "Тропинка приводит вас к кованой калитке в глубине сада. На ней висит массивный замок.",
-            "type": "story",
-            "mode": "standard",
-            "custom_data": {},
-            "is_character": true
-        },
-        {
-            "id": "node_cond_key",
-            "x": 880,
-            "y": 380,
-            "title": "Проверка ключа",
-            "content": "has_key == True",
-            "type": "condition",
-            "mode": "standard",
-            "custom_data": {},
-            "is_character": true
-        },
-        {
-            "id": "node_unlocked",
-            "x": 1160,
-            "y": 310,
-            "title": "Калитка открыта",
-            "content": "Медный ключ мягко поворачивается в замке! Калитка со скрипом распахивается.",
-            "type": "story",
-            "mode": "standard",
-            "custom_data": {},
-            "is_character": true
-        },
-        {
-            "id": "node_locked",
-            "x": 1160,
-            "y": 460,
-            "title": "Заперто",
-            "content": "Замок не поддаётся. Похоже, сначала нужно найти ключ.",
-            "type": "story",
-            "mode": "standard",
-            "custom_data": {},
-            "is_character": true
-        },
-        {
-            "id": "node_music",
-            "x": 1160,
-            "y": 90,
-            "title": "Атмосфера",
-            "content": "bgm/mystery_theme.ogg",
-            "type": "music",
             "mode": "standard",
             "custom_data": {
-                "music_mode": "bgm",
-                "bg_color": "#8e44ad",
-                "header_color": "#9b59b6"
+                "bg_color": "#1b4f72",
+                "header_color": "#154360",
+                "header_text_color": "#85c1e9",
+                "highlights": {
+                    "штормовое предупреждение": "#e74c3c",
+                    "быстро": "#f39c12"
+                }
+            },
+            "is_character": true
+        },
+        {
+            "id": "node_main_choice",
+            "x": 1140,
+            "y": 200,
+            "title": "План действий",
+            "content": "Спуститься в затопленный подвал\nПоговорить со старым смотрителем\nСразу подняться к фонарной башне",
+            "type": "choice",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#2d4a57",
+                "header_color": "#e67e22"
+            },
+            "is_character": true
+        },
+        {
+            "id": "node_basement_intro",
+            "x": 1420,
+            "y": 40,
+            "title": "#",
+            "content": "Сырые каменные ступени уходят во тьму. Под ногами хлюпает ледяная морская вода.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#34495e",
+                "header_color": "#2c3e50"
             },
             "is_character": false
         },
         {
-            "id": "node_finale",
-            "x": 1460,
-            "y": 240,
-            "title": "Финал демо",
-            "content": "Это завершение демонстрационного сценария. Попробуйте отредактировать этот граф или добавить новые ветки!",
+            "id": "node_get_lantern",
+            "x": 1690,
+            "y": 40,
+            "title": "# Находка фонаря",
+            "content": "has_lantern = True\nclues += 1",
+            "type": "variable",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#2980b9",
+                "header_color": "#1f618d",
+                "text_color": "#f4d03f"
+            },
+            "is_character": false
+        },
+        {
+            "id": "node_cond_lantern",
+            "x": 1960,
+            "y": 40,
+            "title": "Проверка фонаря",
+            "content": "has_lantern == True",
+            "type": "condition",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#1b4f72",
+                "header_color": "#154360"
+            },
+            "is_character": true
+        },
+        {
+            "id": "node_basement_secret",
+            "x": 2260,
+            "y": -30,
+            "title": "Алиса",
+            "content": "Смотри! Луч фонаря осветил потайной ящик в стене. Внутри лежит запечатанный судовой журнал 1892 года!",
             "type": "story",
             "mode": "standard",
             "custom_data": {
-                "header_color": "#d35400",
-                "bg_color": "#3c2a1e"
+                "bg_color": "#1e8449",
+                "header_color": "#145a32",
+                "header_text_color": "#a9dfbf"
             },
             "is_character": true
+        },
+        {
+            "id": "node_basement_dark",
+            "x": 2260,
+            "y": 100,
+            "title": "#",
+            "content": "Без источника света продвигаться дальше слишком рискованно. Пришлось вернуться наверх.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#34495e",
+                "header_color": "#2c3e50"
+            },
+            "is_character": false
+        },
+        {
+            "id": "node_caretaker_dialogue",
+            "x": 1420,
+            "y": 240,
+            "title": "Смотритель",
+            "content": "Кто вы такие? В такую погоду сюда заглядывают либо безумцы, либо те, кому нечего терять... Но раз уж пришли — погрейтесь у печи.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#5d4037",
+                "header_color": "#4e342e",
+                "header_text_color": "#edbb99"
+            },
+            "is_character": true
+        },
+        {
+            "id": "node_caretaker_trust",
+            "x": 1690,
+            "y": 240,
+            "title": "# Доверие смотрителя",
+            "content": "reputation += 6\nclues += 1",
+            "type": "variable",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#2980b9",
+                "header_color": "#1f618d",
+                "text_color": "#f4d03f"
+            },
+            "is_character": false
+        },
+        {
+            "id": "node_thunder_fx",
+            "x": 1960,
+            "y": 240,
+            "title": "Удар грома",
+            "content": "with vpunch\nplay sound \"audio/thunder.ogg\"",
+            "type": "raw_rpy",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#16a085",
+                "header_color": "#117a65"
+            },
+            "is_character": false
+        },
+        {
+            "id": "node_caretaker_lore",
+            "x": 2260,
+            "y": 240,
+            "title": "Смотритель",
+            "content": "Сорок лет назад... маяк погас не из-за бури. Кто-то перерезал кабели изнутри, чтобы судно «Северная Звезда» разбилось о рифы.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#5d4037",
+                "header_color": "#4e342e",
+                "header_text_color": "#edbb99",
+                "highlights": {
+                    "«Северная Звезда»": "#f4d03f",
+                    "не из-за бури": "#e74c3c"
+                }
+            },
+            "is_character": true
+        },
+        {
+            "id": "node_tower_danger",
+            "x": 1420,
+            "y": 440,
+            "title": "#",
+            "content": "Вы поднимаетесь по старой железной лестнице. Внезапно проржавевшая ступень с грохотом проламывается под ногой!",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#7b241c",
+                "header_color": "#641e16"
+            },
+            "is_character": false
+        },
+        {
+            "id": "node_bad_ending",
+            "x": 1720,
+            "y": 440,
+            "title": "Плохой финал",
+            "content": "Вы получили тяжёлую травму и не можете продолжать расследование. Утром вас находит патрульный катер береговой охраны.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#922b21",
+                "header_color": "#641e16",
+                "header_text_color": "#f5b7b1"
+            },
+            "is_character": true
+        },
+        {
+            "id": "node_py_calc",
+            "x": 2560,
+            "y": 120,
+            "title": "Python: Оценка улик",
+            "content": "score = (reputation * 2) + (clues * 5)\nis_master = (score >= 15)",
+            "type": "python_code",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#2c3e50",
+                "header_color": "#34495e",
+                "text_color": "#2ecc71"
+            },
+            "is_character": false
+        },
+        {
+            "id": "node_cond_final",
+            "x": 2840,
+            "y": 120,
+            "title": "Успех расследования",
+            "content": "is_master == True",
+            "type": "condition",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#1b4f72",
+                "header_color": "#154360"
+            },
+            "is_character": true
+        },
+        {
+            "id": "node_true_ending",
+            "x": 3140,
+            "y": 30,
+            "title": "🌟 Истинный финал",
+            "content": "Объединив показания смотрителя и страницы судового журнала, вы раскрыли тайну гибели корабля! Заговор века раскрыт.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#1e8449",
+                "header_color": "#145a32",
+                "header_text_color": "#a9dfbf"
+            },
+            "is_character": true
+        },
+        {
+            "id": "node_normal_ending",
+            "x": 3140,
+            "y": 210,
+            "title": "Обычный финал",
+            "content": "Утром шторм стих. Вам удалось собрать лишь обрывки сведений, а главная загадка маяка так и осталась неразгаданной.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#34495e",
+                "header_color": "#2c3e50",
+                "header_text_color": "#d5dbdb"
+            },
+            "is_character": true
+        },
+        {
+            "id": "node_credits_music",
+            "x": 3440,
+            "y": 120,
+            "title": "Музыка титров",
+            "content": "audio/credits_theme.ogg",
+            "type": "music",
+            "mode": "standard",
+            "custom_data": {
+                "music_mode": "bg",
+                "music_file": "audio/credits_theme.ogg",
+                "bg_color": "#8e44ad",
+                "header_color": "#71368a"
+            },
+            "is_character": false
         }
     ],
     "connections": [
-        { "from": "node_start", "out_idx": 0, "to": "node_choice" },
-        { "from": "node_choice", "out_idx": 0, "to": "node_hall" },
-        { "from": "node_choice", "out_idx": 1, "to": "node_knock" },
-        { "from": "node_choice", "out_idx": 2, "to": "node_garden" },
-        { "from": "node_hall", "out_idx": 0, "to": "node_get_key" },
-        { "from": "node_get_key", "out_idx": 0, "to": "node_music" },
-        { "from": "node_knock", "out_idx": 0, "to": "node_music" },
-        { "from": "node_garden", "out_idx": 0, "to": "node_cond_key" },
-        { "from": "node_cond_key", "out_idx": 0, "to": "node_unlocked" },
-        { "from": "node_cond_key", "out_idx": 1, "to": "node_locked" },
-        { "from": "node_music", "out_idx": 0, "to": "node_finale" },
-        { "from": "node_unlocked", "out_idx": 0, "to": "node_finale" },
-        { "from": "node_locked", "out_idx": 0, "to": "node_finale" }
+        { "from": "node_start", "out_idx": 0, "to": "node_media_bg" },
+        { "from": "node_media_bg", "out_idx": 0, "to": "node_music_theme" },
+        { "from": "node_music_theme", "out_idx": 0, "to": "node_init_vars" },
+        { "from": "node_init_vars", "out_idx": 0, "to": "node_alisa_briefing" },
+        { "from": "node_alisa_briefing", "out_idx": 0, "to": "node_main_choice" },
+        
+        { "from": "node_main_choice", "out_idx": 0, "to": "node_basement_intro" },
+        { "from": "node_main_choice", "out_idx": 1, "to": "node_caretaker_dialogue" },
+        { "from": "node_main_choice", "out_idx": 2, "to": "node_tower_danger" },
+
+        { "from": "node_basement_intro", "out_idx": 0, "to": "node_get_lantern" },
+        { "from": "node_get_lantern", "out_idx": 0, "to": "node_cond_lantern" },
+        { "from": "node_cond_lantern", "out_idx": 0, "to": "node_basement_secret" },
+        { "from": "node_cond_lantern", "out_idx": 1, "to": "node_basement_dark" },
+        { "from": "node_basement_secret", "out_idx": 0, "to": "node_py_calc" },
+        { "from": "node_basement_dark", "out_idx": 0, "to": "node_py_calc" },
+
+        { "from": "node_caretaker_dialogue", "out_idx": 0, "to": "node_caretaker_trust" },
+        { "from": "node_caretaker_trust", "out_idx": 0, "to": "node_thunder_fx" },
+        { "from": "node_thunder_fx", "out_idx": 0, "to": "node_caretaker_lore" },
+        { "from": "node_caretaker_lore", "out_idx": 0, "to": "node_py_calc" },
+
+        { "from": "node_tower_danger", "out_idx": 0, "to": "node_bad_ending" },
+
+        { "from": "node_py_calc", "out_idx": 0, "to": "node_cond_final" },
+        { "from": "node_cond_final", "out_idx": 0, "to": "node_true_ending" },
+        { "from": "node_cond_final", "out_idx": 1, "to": "node_normal_ending" },
+        { "from": "node_true_ending", "out_idx": 0, "to": "node_credits_music" },
+        { "from": "node_normal_ending", "out_idx": 0, "to": "node_credits_music" }
     ]
 }
