@@ -187,12 +187,24 @@ class Node:
         # 2. Заголовок
         canvas.create_rectangle(x, y, x+w, y+25, fill=head_col, outline="", tags=("node", self.id))
         
-        # ЛОГИКА ОТОБРАЖЕНИЯ ИМЕНИ:
+        # ЛОГИКА ОТОБРАЖЕНИЯ ИМЕНИ ПЕРСОНАЖА:
         final_title = display_title
-        if display_title.startswith('#'):
-            final_title = ""
+        title_font = ("Segoe UI", 9, "bold")
+        title_fill = header_text_col
+
+        if display_title.startswith('#') or not display_title.strip():
+            if self.node_type == 'story':
+                comment = display_title.lstrip('#').strip()
+                final_title = f"💭 {comment}" if comment else "💭 Слова автора"
+                title_font = ("Segoe UI", 8, "italic")
+                title_fill = "#aaaaaa"
+            else:
+                final_title = ""
+        else:
+            if self.node_type == 'story':
+                final_title = f"👤 {display_title}"
             
-        canvas.create_text(x+10, y+12, text=final_title, fill=header_text_col, anchor="w", font=("Segoe UI", 9, "bold"), tags=("node", self.id))
+        canvas.create_text(x+10, y+12, text=final_title, fill=title_fill, anchor="w", font=title_font, tags=("node", self.id))
 
         # Индикатор режима (Standard / Continue)
         if self.node_type == 'story' and self.mode == 'continue':
@@ -692,7 +704,18 @@ class ScenarioEditor(tk.Tk):
         if x < 0: x = 10 
         
         if title is None: 
-            title = "Сцена" if ntype == 'story' else ("Выбор" if ntype == 'choice' else "Музыка")
+            if ntype == 'story':
+                # Если в проекте уже есть персонаж, предлагаем имя последнего активного говорящего
+                last_story = next((n for n in reversed(self.nodes) if n.node_type == 'story' and n.title and not n.title.startswith('#') and n.title != "Сцена"), None)
+                title = last_story.title if last_story else "Персонаж"
+            elif ntype == 'choice':
+                title = "Выбор"
+            elif ntype == 'music':
+                title = "Музыка"
+            elif ntype == 'condition':
+                title = "Условие"
+            else:
+                title = ntype.capitalize()
         if content is None: 
             content = "Текст..." if ntype == 'story' else ("Вар 1\nВар 2" if ntype == 'choice' else "Нет файла")
         
@@ -976,11 +999,43 @@ class ScenarioEditor(tk.Tk):
         dialog.configure(bg=COLORS['bg'])
         dialog.attributes('-topmost', True) 
 
-        # --- Заголовок ---
-        tk.Label(dialog, text="Заголовок (Сцена, # - скрыть):", bg=COLORS['bg'], fg='white').pack(pady=5)
-        e_title = tk.Entry(dialog, bg='#333', fg='white')
-        e_title.insert(0, node.title)
-        e_title.pack(fill=tk.X, padx=10)
+        # --- Заголовок / Имя персонажа ---
+        is_story = (node.node_type == 'story')
+        title_lbl_text = "👤 Имя персонажа (# или пусто — слова автора/мысли):" if is_story else "🏷️ Заголовок блока (# — скрыть):"
+        tk.Label(dialog, text=title_lbl_text, bg=COLORS['bg'], fg='white').pack(pady=5)
+
+        title_frame = tk.Frame(dialog, bg=COLORS['bg'])
+        title_frame.pack(fill=tk.X, padx=10)
+
+        # Собираем список уже используемых персонажей в проекте
+        existing_chars = sorted(list({
+            n.title.strip() for n in self.nodes 
+            if n.node_type == 'story' and n.title.strip() and not n.title.strip().startswith('#') and n.title.strip() not in ('Сцена', 'Персонаж')
+        }))
+
+        if is_story and existing_chars:
+            from tkinter import ttk
+            e_title = ttk.Combobox(title_frame, values=existing_chars, font=("Segoe UI", 9))
+            e_title.set(node.title)
+            e_title.pack(side=tk.LEFT, fill=tk.X, expand=True)
+            e_title.bind("<<ComboboxSelected>>", lambda e: auto_save())
+        else:
+            e_title = tk.Entry(title_frame, bg='#333', fg='white', insertbackground='white', font=("Segoe UI", 9))
+            e_title.insert(0, node.title)
+            e_title.pack(side=tk.LEFT, fill=tk.X, expand=True)
+
+        if is_story:
+            def set_narrator():
+                from tkinter import ttk
+                if isinstance(e_title, ttk.Combobox):
+                    e_title.set("#")
+                else:
+                    e_title.delete(0, tk.END)
+                    e_title.insert(0, "#")
+                auto_save()
+
+            tk.Button(title_frame, text="💭 Слова автора (#)", command=set_narrator,
+                      bg='#333333', fg='#aaaaaa', relief='flat', font=("Segoe UI", 8), padx=6).pack(side=tk.RIGHT, padx=(5, 0))
 
         # --- Блок оформления / цветов ---
         color_frame = tk.LabelFrame(dialog, text="🎨 Оформление блока", bg=COLORS['bg'], fg='white', padx=8, pady=8)
