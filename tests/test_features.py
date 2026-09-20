@@ -209,6 +209,61 @@ class TestFeatures(unittest.TestCase):
         # m2 should NOT pause because story directly follows
         self.assertFalse(exporter.should_pause_after_media(node_media2, conns, nodes_map))
 
+    def test_pause_plugin_and_story_pause_export(self):
+        from plugins.pause_plugin import PausePlugin
+        from plugins.renpy_exporter import RenpyExporterPlugin
+
+        plugin = PausePlugin(editor=None)
+        exporter = RenpyExporterPlugin(editor=None)
+
+        # 1. Test Pause Node export
+        pause_node = MockNode("p1", "Пауза", "Задержка: 2.5 сек", "pause", {
+            "pause_mode": "time",
+            "pause_duration": 2.5
+        })
+        conns = [{"from": "p1", "to": "s1", "out_idx": 0}]
+
+        with tempfile.NamedTemporaryFile(mode="w+", delete=False, encoding="utf-8") as tmp:
+            tmp_path = tmp.name
+
+        try:
+            with open(tmp_path, "w", encoding="utf-8") as f:
+                data = {"node": pause_node, "file": f, "connections": conns, "handled": False}
+                plugin.on_event("renpy_export_node", data)
+                self.assertTrue(data["handled"])
+
+            with open(tmp_path, "r", encoding="utf-8") as f:
+                content = f.read()
+
+            self.assertIn("pause 2.5", content)
+            self.assertIn("jump node_s1", content)
+        finally:
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+
+        # 2. Test Story Node with pause_before
+        story_with_pause = MockNode("s1", "Герой", "Привет!", "story", {
+            "pause_before": True,
+            "pause_before_mode": "time",
+            "pause_before_duration": 1.5
+        })
+
+        with tempfile.NamedTemporaryFile(mode="w+", delete=False, encoding="utf-8") as tmp:
+            tmp_path = tmp.name
+
+        try:
+            with open(tmp_path, "w", encoding="utf-8") as f:
+                exporter.write_node_content_default(f, story_with_pause, [])
+
+            with open(tmp_path, "r", encoding="utf-8") as f:
+                content = f.read()
+
+            self.assertIn("pause 1.5", content)
+            self.assertIn('"Герой" "Привет!"', content)
+        finally:
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+
 if __name__ == "__main__":
     unittest.main()
 

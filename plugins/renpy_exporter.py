@@ -145,6 +145,18 @@ class RenpyExporterPlugin(Plugin):
     def write_node_content_default(self, f, node, connections, export_dir="", nodes_map=None):
         # 1. Текстовый узел (Story)
         if node.node_type == 'story':
+            # Пауза перед показом текста реплики (если включена в плагине паузы)
+            if node.custom_data.get('pause_before'):
+                p_mode = node.custom_data.get('pause_before_mode', 'click')
+                p_dur = node.custom_data.get('pause_before_duration', 1.0)
+                try:
+                    if p_mode == 'time' and float(p_dur) > 0:
+                        f.write(f'    pause {p_dur}\n')
+                    else:
+                        f.write('    pause\n')
+                except (ValueError, TypeError):
+                    f.write('    pause\n')
+
             char_name = node.title.replace('"', '\\"')
             text = node.content.replace('"', '\\"').replace('\n', '\\n')
             

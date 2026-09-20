@@ -172,6 +172,22 @@ class PlaytestWindow(tk.Toplevel):
                 self.lbl_dialogue.config(text=f"Анимация: {node.content}")
             self.show_next_button(0)
 
+        elif node.node_type == 'pause':
+            mode = node.custom_data.get('pause_mode', 'click')
+            dur = node.custom_data.get('pause_duration', 1.0)
+            self.lbl_speaker.config(text="⏸️ Пауза / Задержка")
+            if mode == 'time':
+                self.lbl_dialogue.config(text=f"Пауза: {dur} сек...\n(Нажмите Далее или подождите)")
+                self.show_next_button(0)
+                try:
+                    delay_ms = int(float(dur) * 1000)
+                    self.after(delay_ms, lambda n=node: self.advance_if_current(n))
+                except (ValueError, TypeError):
+                    pass
+            else:
+                self.lbl_dialogue.config(text="Пауза сценария.\nОжидание клика игрока перед продолжением.")
+                self.show_next_button(0)
+
         elif node.node_type == 'choice':
             speaker = node.title if not node.title.startswith('#') else ""
             self.lbl_speaker.config(text=speaker)
@@ -241,6 +257,10 @@ class PlaytestWindow(tk.Toplevel):
                 self.show_ended(reason="⚠️ Выбранный вариант не имеет следующего узла (ветка не достроена на холсте).")
             else:
                 self.show_ended()
+
+    def advance_if_current(self, node):
+        if self.current_node == node:
+            self.jump_to_next(0)
 
     def show_ended(self, reason=None):
         self.lbl_speaker.config(text="🏁 Конец сценария")
