@@ -5,16 +5,17 @@
 <h1 align="center">🎭 Dialogue Engine</h1>
 
 <p align="center">
-  <b>A visual, node-based dialogue editor for Ren'Py and visual novel creators.</b><br>
-  Design branching storylines visually, no coding required.
+  <b>A visual, node-based narrative & dialogue editor for Ren'Py and visual novel creators.</b><br>
+  Design branching storylines, multimedia scenes, audio, and logic visually without manual scripting.
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge&logo=python&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python&logoColor=white"/>
   <img src="https://img.shields.io/badge/Tkinter-GUI-orange?style=for-the-badge"/>
-  <img src="https://img.shields.io/badge/Ren'Py-Compatible-red?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Ren'Py-8.x%20%2F%207.x%20Ready-red?style=for-the-badge"/>
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge"/>
-  <img src="https://img.shields.io/badge/Platform-Windows-lightgrey?style=for-the-badge&logo=windows"/>
+  <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Tests-23%20Passed-brightgreen?style=for-the-badge"/>
 </p>
 
 <p align="center">
@@ -23,213 +24,114 @@
 
 ---
 
-## What is Dialogue Engine?
+## 📖 What is Dialogue Engine?
 
-**Dialogue Engine** is a free, open-source visual editor for writing branching dialogues and stories. Think of it as a **node graph editor** specifically crafted for Ren'Py visual novel developers. Connect story nodes, choice nodes, and music nodes on an infinite canvas, then **export directly to `.rpy` script** with one click.
+**Dialogue Engine** is a free, open-source visual node graph editor designed specifically for Ren'Py visual novel writers, narrative designers, and indie developers.
 
-No more writing complex `menu:` blocks by hand. Just drag, connect, and export.
+Connect narrative blocks, choice branches, multimedia sprites, background music/SFX, and conditional logic on an infinite canvas — and generate production-ready `.rpy` scripts with a single click.
 
 ---
 
-## Features
+## ✨ Key Features
 
-### Visual Node Editor
-- **Infinite canvas** with smooth physics-based panning (arrow keys + middle mouse)
-- **3 node types**: Story (dialogue), Choice (branching), Music/Audio
-- **Rich text rendering** with per-word color highlighting
-- Snap-to-grid layout
+### 🎨 Visual Graph Editor
+- **Infinite Canvas**: Smooth inertial physics panning (middle-click drag or arrow keys) and precise multi-level zooming (`Ctrl+Wheel`, `Ctrl+Plus`, `Ctrl+Minus`, `Ctrl+0`).
+- **Rich Node Presentation**: Story dialogues, multi-branch choices, audio/SFX, conditions (`If / Else`), ATL animations, and python scripts.
+- **Per-Word Highlighting**: Format and tint specific words or character names with custom palettes.
+- **Search with Camera Focus (`Ctrl+F`)**: Search dialogue lines and speakers with live camera focusing on matched nodes.
 
-### Editing and Workflow
-- **Undo / Redo** (Ctrl+Z / Ctrl+Y) up to 50 steps
-- **Copy, Paste, Duplicate** selected nodes (Ctrl+C / Ctrl+V / Ctrl+D)
-- **Marquee selection** drag to select multiple nodes at once
-- **Search and Replace** across all node content
-- **Unsaved changes indicator** so you never lose your work
+### 🛡️ Reliability & Safety
+- **Background Autosave & Crash Recovery**: Periodic snapshot saves every 30s (`Save/.autosave/`) and automatic recovery detection upon startup.
+- **Atomic File Writing**: Projects are saved atomically with automatic `.bak` backup protection against power outages and data corruption.
+- **Full Undo / Redo**: 50-step deep state stack (`Ctrl+Z` / `Ctrl+Y`) with multi-node copy, paste, and duplicate (`Ctrl+C` / `Ctrl+V` / `Ctrl+D`).
 
-### Export
-- **One-click export to Ren'Py** `.rpy` script format
-- Automatic `label`, `menu`, `jump`, `play music` generation
-- **Test-Drive** launches your script directly in Ren'Py from the editor
+### ⚙️ Modular Engine Architecture (v2.0)
+- `core/`: Standalone graph models, cycle detection, pathfinding, and JSON serialization.
+- `ui/`: Responsive Tkinter canvas, theme presets, and modal dialogs.
+- `export/`: Headless & GUI-ready Ren'Py exporter with relative path resolution.
+- `plugin_system/`: Plugin system with error boundaries, duplicate protection, and health checks.
 
-### Plugin System
-The editor has a built-in plugin architecture. Drop a `.py` file into the `plugins/` folder and it is auto-loaded on startup.
+---
 
-**Included plugins:**
+## 🧩 Built-in Plugins & Capabilities
 
 | Plugin | Description |
 |---|---|
-| `renpy_exporter.py` | Exports the node graph to a valid `.rpy` script |
-| `condition_node.py` | Conditional branching (`If / Else`) with True and False ports |
-| `graph_validator.py` | Scenario health check & diagnostics (finds dead ends, orphans, missing connections) |
-| `quick_playtest.py` | Instant in-editor dialogue playtester (no Ren'Py installation needed) |
-| `interactive_player.py` | Launches Ren'Py for instant test-driving |
-| `media_node.py` | Image and animated GIF display in nodes |
-| `music_plugin.py` | Music/Audio nodes with BGM and Voice modes |
-| `fs_plugin.py` | File system sidebar with drag and drop for assets |
-| `battle_plugin.py` | Battle / minigame node system |
-| `animations_plugin.py` | ATL visual animations and transitions |
-| `word_counter.py` | Live word count statistics |
-| `advanced_scripting.py` | Advanced scripting node types (Python block, raw RPY) |
-| `core_nodes.py` | Core node behaviors and extensions |
-| `flow_nodes.py` | Flow control nodes (labels, variables) |
-| `auto_layout.py` | Automatic node layout and grid alignment (Ctrl+L) |
-| `reload_plugin.py` | Hot-reload plugins without restarting |
-| `updater_plugin.py` | Checks for updates |
+| `renpy_exporter.py` | Exports the full node graph to structured, clean `.rpy` Ren'Py code |
+| `condition_node.py` | Logic branching (`If / Else`) with dedicated True and False output ports |
+| `graph_validator.py` | Scenario health check: finds dead ends, orphans, and unconnected choice branches |
+| `quick_playtest.py` | Instant in-editor dialogue simulator without launching external Ren'Py |
+| `interactive_player.py` | Launches Ren'Py directly from the editor for fast test-driving |
+| `media_node.py` | Sprite, background, and animated GIF integration with transition previews |
+| `music_plugin.py` | Music and sound effect nodes with BGM, SFX, and Voice playback modes |
+| `pause_plugin.py` | Timed delays and player click pauses |
+| `auto_layout.py` | Automatic graph arrangement and grid alignment (`Ctrl+L`) |
+| `word_counter.py` | Live project word and line count statistics |
+| `advanced_scripting.py` | Raw Ren'Py code and Python block nodes |
 
-### Save and Load
-- Projects saved as human-readable **JSON** files
-- Full node graph serialization (positions, content, connections, custom data)
+> 📚 Want to build custom nodes and tools? Read our complete [Plugin Development Guide (Public API)](docs/PLUGIN_API.md).
 
 ---
 
-## Installation
+## 🚀 Quick Start
 
 ### Requirements
-- Python **3.8+**
-- `tkinter` (included with standard Python on Windows)
+- Python **3.10+** (also tested on 3.11 and 3.12)
+- `tkinter` (bundled with Python on Windows and macOS; install `python3-tk` on Linux)
+- Optional: `Pillow>=9.0.0` for animated GIF previews
 
-### Run
+### Installation & Run
 
 ```bash
 git clone https://github.com/komendant-zero/dialogue-engine.git
 cd dialogue-engine
+pip install -r requirements.txt
 python main.py
 ```
 
-No external dependencies required. The editor runs on Python's standard library only.
+### Run Tests
+
+```bash
+python -m unittest discover tests -v
+```
 
 ---
 
-## Usage
-
-### Creating a Story
-
-1. Click **"New Story"** to add a story node
-2. **Double-click** a node to edit its content
-3. Click **"New Choice"** to add a branching choice node
-4. **Drag from the output port** (right side of a node) to the input port of another node to connect them
-
-### Navigation
+## ⌨️ Shortcuts Reference
 
 | Action | Shortcut |
 |---|---|
-| Pan canvas | Middle Mouse Button drag / Arrow Keys |
-| Select multiple | Left-click drag (marquee) |
-| Undo | Ctrl+Z |
-| Redo | Ctrl+Y |
-| Copy | Ctrl+C |
-| Paste | Ctrl+V |
-| Duplicate | Ctrl+D |
-| Delete selected | Delete |
-| Edit node | Double-click |
-| Context menu | Right-click |
-
-### Exporting to Ren'Py
-
-1. Open your Ren'Py project
-2. Click **"Export to Ren'Py"** in the toolbar
-3. Select the `game/` folder of your Ren'Py project
-4. A `script.rpy` file will be generated automatically
-
-### Test-Drive
-
-Click **"Test-Drive"** to launch Ren'Py directly from the editor. On first use, you will be prompted to locate your Ren'Py executable.
+| **Save Project** | `Ctrl + S` |
+| **Open Project** | `Ctrl + O` |
+| **Search & Focus** | `Ctrl + F` |
+| **Undo / Redo** | `Ctrl + Z` / `Ctrl + Y` |
+| **Copy / Paste / Duplicate** | `Ctrl + C` / `Ctrl + V` / `Ctrl + D` |
+| **Delete Selected** | `Delete` |
+| **Zoom In / Out / Reset** | `Ctrl + +` / `Ctrl + -` / `Ctrl + 0` (or `Ctrl + MouseWheel`) |
+| **Pan Canvas** | `Middle Mouse Button` or `Arrow Keys` |
+| **Box Select (Marquee)** | `Left-click + Drag on background` |
+| **Edit Node** | `Double-click` |
+| **Context Menu** | `Right-click` |
 
 ---
 
-## Writing Your Own Plugin
+## 🏗️ Project Structure
 
-The plugin system is simple and event-driven. Create a `.py` file in the `plugins/` folder:
-
-```python
-from plugin_system import Plugin
-
-class MyPlugin(Plugin):
-    name = "My Plugin"
-    version = "1.0"
-
-    def on_enable(self):
-        print("Plugin loaded!")
-
-    def on_event(self, event_type, data=None):
-        if event_type == 'setup_ui':
-            # Add your toolbar button here
-            pass
-
-        elif event_type == 'node_added':
-            node = data
-            print(f"New node: {node.title}")
+```text
+dialogue-engine/
+├── core/                # Core domain models, GraphModel, serialization, autosave
+├── ui/                  # Canvas, themes, node view, modal dialogs, main editor window
+├── export/              # Ren'Py code generators
+├── plugin_system/       # Plugin manager with error isolation and health checks
+├── plugins/             # Built-in and user-installed plugins
+├── tests/               # 23+ unit and integration test suite
+├── docs/                # Public API documentation
+├── .github/workflows/   # Multi-OS CI/CD (Windows, Linux, macOS)
+└── main.py              # Application launcher
 ```
 
-### Available Events
-
-| Event | Triggered When |
-|---|---|
-| `setup_ui` | Editor UI is being built (add toolbar buttons) |
-| `node_added` | A new node is added to the canvas |
-| `node_deleted` | A node is removed |
-| `draw_node` | A node is being drawn (add custom visuals) |
-| `draw_node_content` | Custom content rendering for a node |
-| `draw_node_ports` | Custom port rendering |
-| `calculate_node_size` | Override node size calculation |
-| `node_edit_dialog` | Edit dialog is opening (add custom fields) |
-| `node_edit_save` | Edit dialog is saving (read custom fields) |
-| `save` | Project is being saved |
-| `load` | Project is being loaded |
-
 ---
 
-## 🗺️ Roadmap & Development Status
+## 📄 License
 
-<p align="center">
-  <b>Project Progress:</b>
-</p>
-<p align="center">
-  <code>[ ████████████████████████░░░░░░░░ ] 75% Complete</code>
-</p>
-
-<br>
-
-| Status | Feature | Description | Target |
-| :---: | :--- | :--- | :---: |
-| ![Done](https://img.shields.io/badge/Done-2ecc71?style=flat-square) | **Canvas Zoom (In / Out)** | Smooth mouse-wheel scaling (`Ctrl+Wheel`), toolbar buttons & shortcuts | `v1.0` |
-| ![Done](https://img.shields.io/badge/Done-2ecc71?style=flat-square) | **Condition Branching (`If/Else`)** | Visual decision nodes with `True`/`False` ports and `.rpy` code generation | `v1.0` |
-| ![Done](https://img.shields.io/badge/Done-2ecc71?style=flat-square) | **Scenario Health Check** | Graph diagnostics to detect dead ends, unreachable nodes & empty choices | `v1.0` |
-| ![Done](https://img.shields.io/badge/Done-2ecc71?style=flat-square) | **In-Editor Playtest** | Lightweight dialogue runner to test story branches without launching Ren'Py | `v1.0` |
-| ![Done](https://img.shields.io/badge/Done-2ecc71?style=flat-square) | **Auto-Layout Graph** | Grid arrangement and automatic graph alignment (`Ctrl+L`) | `v1.0` |
-| ![Planned](https://img.shields.io/badge/Planned-f39c12?style=flat-square) | **Character Manager** | Global cast roster: character colors, avatars, and dropdown speaker selection | `v1.2` |
-| ![Planned](https://img.shields.io/badge/Planned-3498db?style=flat-square) | **Cross-Platform Support** | Verified native support and run scripts for macOS and Linux | `v1.2` |
-| ![Planned](https://img.shields.io/badge/Planned-3498db?style=flat-square) | **Minimap Navigation** | Canvas radar / minimap in the corner for massive story graphs | `v1.3` |
-| ![Idea](https://img.shields.io/badge/Idea-9b59b6?style=flat-square) | **Multi-Format Export** | Exporting dialogue graphs to Twine, Ink, and generic JSON formats | `v2.0` |
-
----
-
-## Contributing
-
-Contributions are very welcome! Here is how to get started:
-
-1. **Fork** the repository
-2. **Create a branch** for your feature (`git checkout -b feature/amazing-feature`)
-3. **Commit** your changes
-4. **Push** and open a **Pull Request**
-
-Plugin contributions are especially appreciated. The plugin system makes it easy to add new node types, exporters, or tools without touching the core editor.
-
----
-
-## License
-
-This project is licensed under the **MIT License**, see the [LICENSE](LICENSE) file for details.
-
----
-
-## Acknowledgements
-
-- Built with Python and Tkinter
-- Grammar checking powered by [LanguageTool](https://languagetool.org/) (via public API)
-- Inspired by visual scripting tools like Twine and Yarn Spinner
-- Made for the [Ren'Py](https://www.renpy.org/) visual novel community
-
----
-
-<p align="center">Made with love for visual novel creators</p>
+This project is open-source under the **[MIT License](LICENSE)**.

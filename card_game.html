@@ -1,0 +1,2376 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Битва Магов: Карточная Дуэль (Pixel Art)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen:wght@400;700&family=Outfit:wght@500;700;800&family=Fira+Code:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #07090e;
+      --bg-surface: rgba(16, 20, 34, 0.82);
+      --border-glow: rgba(147, 112, 219, 0.35);
+      
+      --color-attack: #ff4757;
+      --color-attack-glow: rgba(255, 71, 87, 0.6);
+      
+      --color-defense: #1e90ff;
+      --color-defense-glow: rgba(30, 144, 255, 0.6);
+      
+      --color-magic: #a55eea;
+      --color-magic-glow: rgba(165, 94, 234, 0.6);
+      
+      --color-energy: #fbc531;
+      --color-hp: #2ed573;
+      --color-shield: #00d2d3;
+      --font-pixel: 'Press Start 2P', monospace;
+      --font-retro: 'Silkscreen', monospace;
+      --font-main: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      font-family: var(--font-main);
+      color: #f1f2f6;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      background: radial-gradient(circle at 50% 25%, #141a2e 0%, #090c15 65%, #040508 100%);
+      position: relative;
+    }
+
+    /* Ambient background canvas */
+    #bg-canvas, #fx-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    #fx-canvas {
+      z-index: 30;
+    }
+
+    /* Game Container */
+    .game-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      z-index: 5;
+    }
+
+    /* Top Header */
+    .game-header {
+      padding: 12px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(180deg, rgba(8, 10, 18, 0.9) 0%, transparent 100%);
+      z-index: 10;
+    }
+
+    .game-title {
+      font-family: var(--font-pixel);
+      font-size: 1.05rem;
+      letter-spacing: 1px;
+      background: linear-gradient(90deg, #e056fd, #fbc531, #00d2d3);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 20px rgba(224, 86, 253, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .round-badge {
+      background: rgba(255, 255, 255, 0.08);
+      border: 2px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      padding: 6px 16px;
+      font-family: var(--font-pixel);
+      font-size: 0.75rem;
+      color: #ffd32a;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      letter-spacing: 1px;
+    }
+
+    .header-controls {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-icon {
+      background: rgba(255, 255, 255, 0.08);
+      border: 2px solid rgba(255, 255, 255, 0.18);
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-family: var(--font-retro);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(6px);
+    }
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: rgba(255, 255, 255, 0.35);
+      transform: translateY(-2px);
+    }
+
+    /* Battle Arena */
+    .battle-arena {
+      flex: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 90px;
+      position: relative;
+    }
+
+    .arena-center-fx {
+      position: absolute;
+      top: 48%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      opacity: 0.9;
+    }
+
+    .vs-emblem {
+      font-family: var(--font-pixel);
+      font-size: 2.2rem;
+      color: rgba(255, 255, 255, 0.15);
+      letter-spacing: 4px;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.08);
+    }
+
+    .turn-indicator {
+      font-family: var(--font-pixel);
+      font-size: 0.8rem;
+      padding: 8px 20px;
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      letter-spacing: 1px;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .turn-indicator.player-turn {
+      color: #00d2d3;
+      border-color: #00d2d3;
+      box-shadow: 0 0 20px rgba(0, 210, 211, 0.35);
+    }
+    .turn-indicator.enemy-turn {
+      color: #ff4757;
+      border-color: #ff4757;
+      box-shadow: 0 0 20px rgba(255, 71, 87, 0.35);
+    }
+
+    /* Combatant Zone */
+    .combatant-zone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 320px;
+      position: relative;
+    }
+
+    /* HUD Box */
+    .hud-box {
+      width: 100%;
+      background: var(--bg-surface);
+      border: 2px solid var(--border-glow);
+      border-radius: 12px;
+      padding: 14px 16px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(12px);
+      margin-bottom: 20px;
+    }
+
+    .hud-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .combatant-name {
+      font-family: var(--font-pixel);
+      font-size: 0.85rem;
+      letter-spacing: 0.5px;
+    }
+    .player-zone .combatant-name {
+      color: #70a1ff;
+      text-shadow: 0 0 8px rgba(112, 161, 255, 0.6);
+    }
+    .enemy-zone .combatant-name {
+      color: #ff6b81;
+      text-shadow: 0 0 8px rgba(255, 107, 129, 0.6);
+    }
+
+    .combatant-role {
+      font-family: var(--font-retro);
+      font-size: 0.75rem;
+      color: #a4b0be;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 3px;
+    }
+
+    /* Health & Shield Bars */
+    .bar-container {
+      margin-bottom: 4px;
+    }
+    .bar-label-row {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-retro);
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      letter-spacing: 0.5px;
+    }
+    .bar-track {
+      width: 100%;
+      height: 14px;
+      background: #000;
+      border-radius: 3px;
+      overflow: hidden;
+      position: relative;
+      border: 2px solid rgba(255, 255, 255, 0.12);
+    }
+    .bar-fill {
+      height: 100%;
+      transition: width 0.35s ease;
+      position: relative;
+    }
+    .hp-fill {
+      background: linear-gradient(90deg, #ff4757, #2ed573);
+      box-shadow: 0 0 10px rgba(46, 213, 115, 0.5);
+    }
+    .enemy-zone .hp-fill {
+      background: linear-gradient(90deg, #ffa502, #ff4757);
+      box-shadow: 0 0 10px rgba(255, 71, 87, 0.5);
+    }
+
+    .shield-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(0, 210, 211, 0.2);
+      border: 2px solid #00d2d3;
+      color: #00d2d3;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-family: var(--font-pixel);
+      font-size: 0.65rem;
+      box-shadow: 0 0 10px rgba(0, 210, 211, 0.3);
+    }
+
+    /* ============================================================
+       PIXEL ART SPRITE STAGES
+       ============================================================ */
+    .sprite-stage {
+      position: relative;
+      width: 250px;
+      height: 270px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Retro Pixel Pedestal Grid */
+    .sprite-pedestal {
+      position: absolute;
+      bottom: 6px;
+      width: 180px;
+      height: 24px;
+      background: 
+        radial-gradient(circle, rgba(147, 112, 219, 0.5) 0%, transparent 70%);
+      border-bottom: 3px solid rgba(147, 112, 219, 0.6);
+      box-shadow: 0 4px 15px rgba(147, 112, 219, 0.3);
+      border-radius: 50%;
+    }
+    .player-zone .sprite-pedestal {
+      background: radial-gradient(circle, rgba(0, 210, 211, 0.5) 0%, transparent 70%);
+      border-bottom-color: #00d2d3;
+      box-shadow: 0 4px 20px rgba(0, 210, 211, 0.4);
+    }
+    .enemy-zone .sprite-pedestal {
+      background: radial-gradient(circle, rgba(255, 71, 87, 0.5) 0%, transparent 70%);
+      border-bottom-color: #ff4757;
+      box-shadow: 0 4px 20px rgba(255, 71, 87, 0.4);
+    }
+
+    .sprite-container {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 2;
+    }
+
+    /* Pixel Art Render Engine (Crisp edges & pixel scaling) */
+    .pixel-sprite-svg {
+      width: 100%;
+      height: 100%;
+      image-rendering: pixelated;
+      image-rendering: -moz-crisp-edges;
+      image-rendering: crisp-edges;
+      shape-rendering: crispEdges;
+      filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.7));
+    }
+
+    /* Idle Pixel Bobbing Animations (Integer pixel steps) */
+    .player-idle {
+      animation: pixelBobHero 1.8s steps(4) infinite alternate;
+    }
+    .enemy-idle {
+      animation: pixelBobEnemy 2.2s steps(4) infinite alternate;
+    }
+
+    @keyframes pixelBobHero {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-8px); }
+    }
+    @keyframes pixelBobEnemy {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(-4px); }
+    }
+
+    /* Hero & Enemy Attack lunges */
+    .hero-attack-lunge {
+      animation: heroLunge 0.35s steps(4) forwards;
+    }
+    @keyframes heroLunge {
+      0% { transform: translateX(0); }
+      50% { transform: translateX(45px); filter: brightness(1.6) drop-shadow(0 0 25px #00d2d3); }
+      100% { transform: translateX(0); }
+    }
+
+    .enemy-attack-lunge {
+      animation: enemyLunge 0.4s steps(4) forwards;
+    }
+    @keyframes enemyLunge {
+      0% { transform: translateX(0); }
+      50% { transform: translateX(-55px); filter: brightness(1.7) drop-shadow(0 0 30px #ff4757); }
+      100% { transform: translateX(0); }
+    }
+
+    /* Recoil / Hit effect */
+    .sprite-hit {
+      animation: hitShake 0.45s steps(4) both !important;
+      filter: brightness(3) drop-shadow(0 0 25px #ff4757) !important;
+    }
+    @keyframes hitShake {
+      0%, 100% { transform: translate(0, 0); }
+      20% { transform: translate(-10px, -4px); }
+      40% { transform: translate(12px, 4px); }
+      60% { transform: translate(-8px, 2px); }
+      80% { transform: translate(8px, -2px); }
+    }
+
+    .sprite-shield-block {
+      animation: shieldFlash 0.5s ease-out both;
+    }
+    @keyframes shieldFlash {
+      0% { filter: drop-shadow(0 0 45px #00d2d3) brightness(2.2); transform: scale(1.06); }
+      100% { filter: drop-shadow(0 12px 20px rgba(0,0,0,0.7)) brightness(1); transform: scale(1); }
+    }
+
+    .sprite-heal-glow {
+      animation: healGlow 0.8s ease-out both;
+    }
+    @keyframes healGlow {
+      0% { filter: drop-shadow(0 0 50px #2ed573) brightness(2.2); transform: scale(1.08); }
+      100% { filter: drop-shadow(0 12px 20px rgba(0,0,0,0.7)) brightness(1); transform: scale(1); }
+    }
+
+    /* Pixel Shield Barrier */
+    .shield-dome-vfx {
+      position: absolute;
+      width: 220px;
+      height: 240px;
+      border: 4px dashed #00d2d3;
+      border-radius: 12px;
+      box-shadow: 0 0 30px rgba(0, 210, 211, 0.6), inset 0 0 25px rgba(0, 210, 211, 0.4);
+      pointer-events: none;
+      z-index: 10;
+      animation: shieldDomeDeploy 0.6s steps(4) forwards;
+    }
+    @keyframes shieldDomeDeploy {
+      0% { transform: scale(0.3); opacity: 0; }
+      50% { transform: scale(1.1); opacity: 1; filter: brightness(2); }
+      100% { transform: scale(1); opacity: 0.9; }
+    }
+
+    /* Pixel Heal Pillar */
+    .heal-pillar-vfx {
+      position: absolute;
+      width: 140px;
+      height: 290px;
+      background: repeating-linear-gradient(0deg, rgba(46, 213, 115, 0.8) 0px, rgba(46, 213, 115, 0.8) 8px, rgba(46, 213, 115, 0.2) 8px, rgba(46, 213, 115, 0.2) 16px);
+      border: 3px solid #2ed573;
+      filter: drop-shadow(0 0 25px #2ed573);
+      pointer-events: none;
+      z-index: 12;
+      animation: healPillarRise 0.75s steps(5) forwards;
+    }
+    @keyframes healPillarRise {
+      0% { transform: translateY(30px) scaleY(0.2); opacity: 0; }
+      40% { transform: translateY(-15px) scaleY(1.1); opacity: 1; }
+      100% { transform: translateY(-40px) scaleY(1.2); opacity: 0; }
+    }
+
+    /* ============================================================
+       PIXEL ART ATTACK PROJECTILES
+       ============================================================ */
+    .attack-projectile {
+      position: fixed;
+      pointer-events: none;
+      z-index: 500;
+      transform-origin: center center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      image-rendering: pixelated;
+      shape-rendering: crispEdges;
+    }
+
+    .projectile-pixel-slash {
+      width: 80px;
+      height: 80px;
+      filter: drop-shadow(0 0 15px #ff4757) drop-shadow(0 0 25px #ff6b81);
+    }
+    .projectile-pixel-heavy {
+      width: 110px;
+      height: 110px;
+      filter: drop-shadow(0 0 20px #ffa502) drop-shadow(0 0 35px #ff4757);
+    }
+    .projectile-pixel-fireball {
+      width: 75px;
+      height: 75px;
+      filter: drop-shadow(0 0 18px #ff4757) drop-shadow(0 0 30px #ffa502);
+    }
+    .projectile-pixel-lightning {
+      width: 85px;
+      height: 85px;
+      filter: drop-shadow(0 0 20px #e056fd) drop-shadow(0 0 35px #be2edd);
+    }
+    .projectile-pixel-chaos {
+      width: 85px;
+      height: 85px;
+      filter: drop-shadow(0 0 20px #ff4757) drop-shadow(0 0 35px #38006b);
+    }
+
+    /* Intent Bubble */
+    .intent-bubble {
+      position: absolute;
+      top: -30px;
+      right: 20px;
+      background: rgba(16, 20, 34, 0.95);
+      border: 2px solid #ff4757;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-family: var(--font-retro);
+      font-weight: 700;
+      color: #ff6b81;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+      animation: bounceIntent 1.6s steps(4) infinite;
+      z-index: 10;
+    }
+    @keyframes bounceIntent {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    /* Bottom Deck & Actions */
+    .bottom-zone {
+      background: linear-gradient(0deg, rgba(5, 7, 12, 0.98) 0%, rgba(10, 14, 24, 0.85) 75%, transparent 100%);
+      padding: 10px 40px 22px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 20;
+    }
+
+    .player-action-bar {
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 0 10px;
+    }
+
+    .energy-display {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(16, 20, 34, 0.85);
+      border: 2px solid #fbc531;
+      padding: 6px 14px;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(251, 197, 49, 0.2);
+    }
+
+    .energy-orb-icon {
+      font-size: 1.1rem;
+      color: #fbc531;
+      text-shadow: 0 0 10px #fbc531;
+    }
+
+    .energy-text {
+      font-family: var(--font-pixel);
+      font-size: 0.85rem;
+      color: #fbc531;
+    }
+
+    .category-filter-chips {
+      display: flex;
+      gap: 10px;
+    }
+
+    .filter-chip {
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-family: var(--font-retro);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid transparent;
+      backdrop-filter: blur(4px);
+    }
+    .chip-attack {
+      background: rgba(255, 71, 87, 0.18);
+      border-color: #ff4757;
+      color: #ff6b81;
+    }
+    .chip-defense {
+      background: rgba(30, 144, 255, 0.18);
+      border-color: #1e90ff;
+      color: #70a1ff;
+    }
+    .chip-magic {
+      background: rgba(165, 94, 234, 0.18);
+      border-color: #a55eea;
+      color: #e056fd;
+    }
+
+    .btn-end-turn {
+      background: linear-gradient(135deg, #e056fd, #8854d0);
+      border: 2px solid #fff;
+      color: #fff;
+      font-family: var(--font-retro);
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 10px 22px;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(165, 94, 234, 0.5);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-end-turn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(165, 94, 234, 0.7);
+      filter: brightness(1.15);
+    }
+    .btn-end-turn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none;
+    }
+
+    /* Cards Hand Container */
+    .cards-hand-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 1100px;
+      height: 240px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+    }
+
+    .cards-hand {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 16px;
+      perspective: 1200px;
+      height: 100%;
+      padding-bottom: 6px;
+    }
+
+    /* Card Item */
+    .card-item {
+      position: relative;
+      width: 165px;
+      height: 230px;
+      border-radius: 10px;
+      background: #0f1322;
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 10px;
+      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.25s ease, opacity 0.25s ease;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+      transform-origin: center bottom;
+      overflow: hidden;
+    }
+
+    .card-attack {
+      border-color: #ff4757;
+      box-shadow: 0 6px 20px rgba(255, 71, 87, 0.3);
+    }
+    .card-attack:hover {
+      border-color: #ff6b81;
+      box-shadow: 0 12px 30px rgba(255, 71, 87, 0.6), 0 0 15px rgba(255, 71, 87, 0.4);
+    }
+
+    .card-defense {
+      border-color: #1e90ff;
+      box-shadow: 0 6px 20px rgba(30, 144, 255, 0.3);
+    }
+    .card-defense:hover {
+      border-color: #70a1ff;
+      box-shadow: 0 12px 30px rgba(30, 144, 255, 0.6), 0 0 15px rgba(30, 144, 255, 0.4);
+    }
+
+    .card-magic {
+      border-color: #a55eea;
+      box-shadow: 0 6px 20px rgba(165, 94, 234, 0.3);
+    }
+    .card-magic:hover {
+      border-color: #e056fd;
+      box-shadow: 0 12px 30px rgba(165, 94, 234, 0.6), 0 0 15px rgba(165, 94, 234, 0.4);
+    }
+
+    .card-item:hover {
+      transform: translateY(-35px) scale(1.12) rotate(0deg) !important;
+      z-index: 40 !important;
+    }
+
+    .card-item.card-activating {
+      animation: cardCastDissolve 0.4s ease-out forwards !important;
+      pointer-events: none;
+    }
+    @keyframes cardCastDissolve {
+      0% { transform: translateY(-35px) scale(1.15); filter: brightness(1.3); opacity: 1; }
+      50% { transform: translateY(-70px) scale(1.25); filter: brightness(2.4); opacity: 0.9; }
+      100% { transform: translateY(-110px) scale(0.5); filter: brightness(3.5); opacity: 0; }
+    }
+
+    .card-item.not-enough-energy {
+      opacity: 0.4;
+      filter: grayscale(0.8);
+      cursor: not-allowed;
+    }
+    .card-item.not-enough-energy:hover {
+      transform: none !important;
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .card-cost {
+      width: 26px;
+      height: 26px;
+      background: #fbc531;
+      border: 2px solid #fff;
+      color: #000;
+      font-weight: 900;
+      font-size: 0.75rem;
+      font-family: var(--font-pixel);
+      border-radius: 4px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 8px rgba(251, 197, 49, 0.8);
+    }
+
+    .card-type-tag {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      font-family: var(--font-retro);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.6);
+    }
+    .card-attack .card-type-tag { color: #ff6b81; border: 1px solid #ff4757; }
+    .card-defense .card-type-tag { color: #70a1ff; border: 1px solid #1e90ff; }
+    .card-magic .card-type-tag { color: #e056fd; border: 1px solid #a55eea; }
+
+    .card-art {
+      height: 85px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      margin: 4px 0;
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      image-rendering: pixelated;
+    }
+
+    .card-art-svg {
+      width: 50px;
+      height: 50px;
+      image-rendering: pixelated;
+      shape-rendering: crispEdges;
+      transition: transform 0.2s ease;
+    }
+    .card-item:hover .card-art-svg {
+      transform: scale(1.15);
+    }
+
+    .card-info {
+      text-align: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .card-name {
+      font-family: var(--font-retro);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: #fff;
+      margin-bottom: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-desc {
+      font-size: 0.72rem;
+      color: #cbd5e1;
+      line-height: 1.25;
+      font-weight: 500;
+      min-height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Combat Log */
+    .combat-log-ticker {
+      position: absolute;
+      top: 62px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(14, 18, 30, 0.9);
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      padding: 6px 18px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-family: var(--font-retro);
+      color: #e4e7eb;
+      pointer-events: none;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      z-index: 15;
+      opacity: 0;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    .combat-log-ticker.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Floating numbers */
+    .floating-text {
+      position: absolute;
+      font-family: var(--font-pixel);
+      font-size: 1.4rem;
+      pointer-events: none;
+      z-index: 1000;
+      animation: floatUpFade 1.2s steps(6) forwards;
+      text-shadow: 0 0 10px currentColor, 0 3px 0 #000;
+    }
+    @keyframes floatUpFade {
+      0% { opacity: 0; transform: translateY(15px) scale(0.7); }
+      20% { opacity: 1; transform: translateY(-10px) scale(1.2); }
+      60% { transform: translateY(-35px) scale(1); opacity: 1; }
+      100% { opacity: 0; transform: translateY(-70px) scale(0.9); }
+    }
+
+    /* Modal Victory / Defeat */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 5, 10, 0.9);
+      backdrop-filter: blur(12px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: #111526;
+      border: 4px solid #fff;
+      border-radius: 14px;
+      padding: 35px;
+      text-align: center;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+      transform: scale(0.85);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .modal-overlay.active .modal-card {
+      transform: scale(1);
+    }
+
+    .modal-title {
+      font-family: var(--font-pixel);
+      font-size: 1.8rem;
+      margin-bottom: 14px;
+      letter-spacing: 2px;
+    }
+    .victory-text {
+      color: #fbc531;
+      text-shadow: 0 0 20px rgba(251, 197, 49, 0.6);
+    }
+    .defeat-text {
+      color: #ff4757;
+      text-shadow: 0 0 20px rgba(255, 71, 87, 0.6);
+    }
+
+    .modal-desc {
+      color: #a4b0be;
+      font-family: var(--font-retro);
+      font-size: 0.95rem;
+      margin-bottom: 25px;
+      line-height: 1.5;
+    }
+
+    .btn-restart {
+      background: linear-gradient(135deg, #00d2d3, #1e90ff);
+      border: 2px solid #fff;
+      color: #fff;
+      font-family: var(--font-retro);
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 12px 30px;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 6px 25px rgba(0, 210, 211, 0.4);
+      transition: all 0.2s ease;
+    }
+    .btn-restart:hover {
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 10px 30px rgba(0, 210, 211, 0.6);
+    }
+
+    .helper-hint {
+      position: absolute;
+      bottom: 255px;
+      background: rgba(0, 0, 0, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 4px 12px;
+      font-family: var(--font-retro);
+      font-size: 0.75rem;
+      color: #a4b0be;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Canvas & Particles -->
+  <canvas id="bg-canvas"></canvas>
+  <canvas id="fx-canvas"></canvas>
+
+  <div class="game-container">
+    
+    <!-- Top Header -->
+    <header class="game-header">
+      <div class="game-title">
+        <span>⚔️ АРЕНА СТИХИЙ (16-BIT)</span>
+      </div>
+
+      <div class="round-badge" id="roundBadge">РАУНД 1</div>
+
+      <div class="header-controls">
+        <button class="btn-icon" id="btnSound" title="Переключить звук">
+          <span id="soundIcon">🔊</span> ЗВУК
+        </button>
+        <button class="btn-icon" id="btnReset">
+          🔄 ЗАНОВО
+        </button>
+      </div>
+    </header>
+
+    <!-- Combat Log Notification -->
+    <div class="combat-log-ticker" id="combatTicker">Битва начинается! Выберите карту.</div>
+
+    <!-- Battle Arena (Player on Left, Opponent on Right) -->
+    <main class="battle-arena">
+      
+      <!-- Center VS & Indicator -->
+      <div class="arena-center-fx">
+        <div class="vs-emblem">VS</div>
+        <div class="turn-indicator player-turn" id="turnIndicator">ВАШ ХОД</div>
+      </div>
+
+      <!-- LEFT: PLAYER PIXEL SPRITE & HUD -->
+      <div class="combatant-zone player-zone" id="playerZone">
+        <div class="hud-box">
+          <div class="hud-header">
+            <div>
+              <div class="combatant-name">ГЕРОЙ</div>
+              <div class="combatant-role">Рыцарь Маг</div>
+            </div>
+            <div class="shield-badge" id="playerShieldBadge" style="display: none;">
+              🛡️ <span id="playerShieldVal">0</span>
+            </div>
+          </div>
+          
+          <div class="bar-container">
+            <div class="bar-label-row">
+              <span>HP</span>
+              <span id="playerHpText">100 / 100</span>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill hp-fill" id="playerHpBar" style="width: 100%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Player Pixel Art SVG Sprite Stage -->
+        <div class="sprite-stage">
+          <div class="sprite-pedestal"></div>
+          <div class="sprite-container player-idle" id="playerSprite">
+            <!-- 32x32 Handcrafted Pixel Art Hero SVG -->
+            <svg class="pixel-sprite-svg" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+              <!-- Flowing Blue Cape -->
+              <rect x="7" y="12" width="5" height="13" fill="#1e3799" />
+              <rect x="6" y="14" width="4" height="12" fill="#0984e3" />
+              <rect x="5" y="17" width="3" height="10" fill="#00a8ff" />
+
+              <!-- Legs / Greaves -->
+              <rect x="11" y="21" width="3" height="6" fill="#2f3542" />
+              <rect x="16" y="21" width="3" height="6" fill="#2f3542" />
+              <!-- Steel Boots with gold trim -->
+              <rect x="10" y="27" width="4" height="3" fill="#747d8c" />
+              <rect x="16" y="27" width="4" height="3" fill="#747d8c" />
+              <rect x="10" y="29" width="5" height="2" fill="#57606f" />
+              <rect x="16" y="29" width="5" height="2" fill="#57606f" />
+              <rect x="10" y="27" width="1" height="1" fill="#fbc531" />
+              <rect x="16" y="27" width="1" height="1" fill="#fbc531" />
+
+              <!-- Torso / Armor -->
+              <rect x="10" y="11" width="10" height="9" fill="#747d8c" />
+              <rect x="11" y="12" width="8" height="7" fill="#dfe4ea" />
+              <rect x="12" y="13" width="6" height="5" fill="#f1f2f6" />
+              <!-- Chest Arcane Core (Cyan Glow) -->
+              <rect x="14" y="14" width="2" height="3" fill="#00d2d3" />
+              <rect x="13" y="15" width="4" height="1" fill="#00d2d3" />
+              <rect x="14" y="15" width="2" height="1" fill="#fff" />
+              <!-- Gold Belt -->
+              <rect x="10" y="19" width="10" height="2" fill="#fbc531" />
+              <rect x="14" y="19" width="2" height="2" fill="#e1b12c" />
+
+              <!-- Left Arm (Shield Focus) -->
+              <rect x="8" y="12" width="3" height="6" fill="#747d8c" />
+              <rect x="7" y="16" width="3" height="3" fill="#00d2d3" />
+              <rect x="8" y="17" width="1" height="1" fill="#fff" />
+
+              <!-- Shoulders / Pauldrons -->
+              <rect x="8" y="10" width="4" height="3" fill="#dfe4ea" />
+              <rect x="18" y="10" width="4" height="3" fill="#dfe4ea" />
+              <rect x="8" y="10" width="1" height="1" fill="#fbc531" />
+              <rect x="21" y="10" width="1" height="1" fill="#fbc531" />
+
+              <!-- Helmet & Visor -->
+              <rect x="11" y="4" width="8" height="7" fill="#747d8c" />
+              <rect x="12" y="3" width="6" height="8" fill="#dfe4ea" />
+              <!-- Helmet Plume -->
+              <rect x="14" y="1" width="2" height="3" fill="#00d2d3" />
+              <rect x="15" y="0" width="2" height="2" fill="#54a0ff" />
+              <rect x="16" y="1" width="1" height="2" fill="#0984e3" />
+              <!-- Glowing Cyan Visor Eyes -->
+              <rect x="13" y="6" width="6" height="2" fill="#111" />
+              <rect x="14" y="6" width="2" height="1" fill="#00d2d3" />
+              <rect x="17" y="6" width="2" height="1" fill="#00d2d3" />
+              <rect x="15" y="6" width="1" height="1" fill="#fff" />
+              <rect x="18" y="6" width="1" height="1" fill="#fff" />
+
+              <!-- Right Arm & Glowing Runed Pixel Sword -->
+              <rect x="19" y="12" width="3" height="5" fill="#747d8c" />
+              <rect x="21" y="15" width="2" height="2" fill="#dfe4ea" />
+              <!-- Sword Crossguard (Gold) -->
+              <rect x="20" y="14" width="7" height="2" fill="#fbc531" />
+              <rect x="23" y="16" width="1" height="2" fill="#8854d0" />
+              <!-- Sword Blade (Glowing Cyan / White) -->
+              <rect x="23" y="2" width="2" height="12" fill="#00d2d3" />
+              <rect x="24" y="1" width="1" height="13" fill="#fff" />
+              <rect x="22" y="4" width="1" height="9" fill="#54a0ff" />
+              <rect x="23" y="0" width="2" height="2" fill="#fff" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: ENEMY PIXEL SPRITE & HUD -->
+      <div class="combatant-zone enemy-zone" id="enemyZone">
+        <!-- Enemy Intent Bubble -->
+        <div class="intent-bubble" id="enemyIntent">
+          <span id="intentIcon">⚔️</span>
+          <span id="intentText">Атака 12</span>
+        </div>
+
+        <div class="hud-box">
+          <div class="hud-header">
+            <div>
+              <div class="combatant-name">ТЁМНЫЙ ЛОРД</div>
+              <div class="combatant-role">Владыка Хаоса</div>
+            </div>
+            <div class="shield-badge" id="enemyShieldBadge" style="display: none;">
+              🛡️ <span id="enemyShieldVal">0</span>
+            </div>
+          </div>
+          
+          <div class="bar-container">
+            <div class="bar-label-row">
+              <span>HP</span>
+              <span id="enemyHpText">120 / 120</span>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill hp-fill" id="enemyHpBar" style="width: 100%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Enemy Pixel Art SVG Sprite Stage -->
+        <div class="sprite-stage">
+          <div class="sprite-pedestal"></div>
+          <div class="sprite-container enemy-idle" id="enemySprite">
+            <!-- 32x32 Handcrafted Pixel Art Dark Demon Overlord SVG -->
+            <svg class="pixel-sprite-svg" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+              <!-- Shadow Wings & Dark Mist Aura -->
+              <rect x="3" y="6" width="3" height="10" fill="#3d0c24" />
+              <rect x="2" y="8" width="4" height="8" fill="#ff4757" opacity="0.6" />
+              <rect x="1" y="9" width="3" height="5" fill="#ff6b81" opacity="0.4" />
+              <rect x="26" y="6" width="3" height="10" fill="#3d0c24" />
+              <rect x="26" y="8" width="4" height="8" fill="#ff4757" opacity="0.6" />
+              <rect x="28" y="9" width="3" height="5" fill="#ff6b81" opacity="0.4" />
+
+              <!-- Robes / Lower Body (Ragged shadow flames) -->
+              <rect x="9" y="14" width="14" height="13" fill="#1e0b1d" />
+              <rect x="10" y="16" width="12" height="12" fill="#0a030c" />
+              <rect x="11" y="27" width="2" height="4" fill="#ff4757" />
+              <rect x="15" y="28" width="2" height="3" fill="#ff4757" />
+              <rect x="19" y="27" width="2" height="4" fill="#ff4757" />
+
+              <!-- Robe Folds / Red Rune Emblems -->
+              <rect x="15" y="16" width="2" height="9" fill="#ff4757" opacity="0.8" />
+              <rect x="13" y="19" width="6" height="2" fill="#ff4757" opacity="0.8" />
+
+              <!-- Demonic Horns -->
+              <!-- Left Horn -->
+              <rect x="9" y="2" width="2" height="3" fill="#ff4757" />
+              <rect x="8" y="4" width="3" height="3" fill="#2d3436" />
+              <rect x="9" y="6" width="3" height="2" fill="#2d3436" />
+              <!-- Right Horn -->
+              <rect x="21" y="2" width="2" height="3" fill="#ff4757" />
+              <rect x="21" y="4" width="3" height="3" fill="#2d3436" />
+              <rect x="20" y="6" width="3" height="2" fill="#2d3436" />
+
+              <!-- Dark Hood & Mask -->
+              <rect x="11" y="5" width="10" height="9" fill="#1e1e24" />
+              <rect x="12" y="6" width="8" height="7" fill="#000" />
+
+              <!-- Glowing Crimson Pixel Eyes -->
+              <rect x="13" y="8" width="2" height="1" fill="#ff4757" />
+              <rect x="17" y="8" width="2" height="1" fill="#ff4757" />
+              <rect x="14" y="8" width="1" height="1" fill="#fff" />
+              <rect x="18" y="8" width="1" height="1" fill="#fff" />
+
+              <!-- Chest Void Core (Pulsing Fire Eye) -->
+              <rect x="14" y="14" width="4" height="4" fill="#000" />
+              <rect x="15" y="15" width="2" height="2" fill="#ff4757" />
+              <rect x="15" y="15" width="1" height="1" fill="#fff" />
+
+              <!-- Left Claw / Floating Shadow Fire Orb -->
+              <rect x="7" y="14" width="3" height="5" fill="#1e1e24" />
+              <!-- Fire Orb in hand -->
+              <rect x="4" y="13" width="4" height="4" fill="#ff4757" />
+              <rect x="5" y="14" width="2" height="2" fill="#ffd32a" />
+              <rect x="4" y="12" width="2" height="1" fill="#ff6b81" />
+
+              <!-- Right Dark Claw Hand -->
+              <rect x="22" y="14" width="3" height="5" fill="#1e1e24" />
+              <rect x="24" y="18" width="2" height="2" fill="#2d3436" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Helper hint -->
+    <div class="helper-hint">Кликните на карту, чтобы направить атаку на противника</div>
+
+    <!-- BOTTOM ZONE: CARDS & CONTROLS -->
+    <footer class="bottom-zone">
+      
+      <!-- Energy and Turn Actions Bar -->
+      <div class="player-action-bar">
+        <div class="energy-display">
+          <span class="energy-orb-icon">⚡</span>
+          <span class="energy-text"><span id="currentEnergy">3</span> / <span id="maxEnergy">3</span></span>
+        </div>
+
+        <div class="category-filter-chips">
+          <div class="filter-chip chip-attack">⚔️ Атака</div>
+          <div class="filter-chip chip-defense">🛡️ Защита</div>
+          <div class="filter-chip chip-magic">🔮 Магия</div>
+        </div>
+
+        <button class="btn-end-turn" id="btnEndTurn">
+          <span>ХОД ВРАГА</span> ➔
+        </button>
+      </div>
+
+      <!-- Player Hand of Cards -->
+      <div class="cards-hand-wrapper">
+        <div class="cards-hand" id="cardsHand">
+          <!-- Cards dynamically generated here -->
+        </div>
+      </div>
+
+    </footer>
+
+  </div>
+
+  <!-- Victory / Defeat Modal -->
+  <div class="modal-overlay" id="endModal">
+    <div class="modal-card">
+      <h2 class="modal-title" id="modalTitle">ПОБЕДА!</h2>
+      <p class="modal-desc" id="modalDesc">Вы сокрушили Тёмного Лорда древней магией и мастерством клинка!</p>
+      <button class="btn-restart" id="btnModalRestart">ИГРАТЬ СНОВА</button>
+    </div>
+  </div>
+
+  <!-- Game Logic Script -->
+  <script>
+    /* ============================================================
+       AUDIO SYNTHESIZER (Web Audio API)
+       ============================================================ */
+    class SoundFX {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+      }
+
+      playSlash() {
+        if (this.muted) return;
+        this.init();
+        const ctx = this.ctx;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const filter = ctx.createBiquadFilter();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(750, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(90, ctx.currentTime + 0.18);
+
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(1400, ctx.currentTime);
+        filter.frequency.exponentialRampToValueAtTime(250, ctx.currentTime + 0.18);
+
+        gain.gain.setValueAtTime(0.4, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start();
+        osc.stop(ctx.currentTime + 0.18);
+      }
+
+      playHeavySlash() {
+        if (this.muted) return;
+        this.init();
+        const ctx = this.ctx;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(320, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(45, ctx.currentTime + 0.28);
+
+        gain.gain.setValueAtTime(0.5, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start();
+        osc.stop(ctx.currentTime + 0.3);
+      }
+
+      playShield() {
+        if (this.muted) return;
+        this.init();
+        const ctx = this.ctx;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(220, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(550, ctx.currentTime + 0.12);
+        osc.frequency.exponentialRampToValueAtTime(180, ctx.currentTime + 0.28);
+
+        gain.gain.setValueAtTime(0.4, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start();
+        osc.stop(ctx.currentTime + 0.3);
+      }
+
+      playFireball() {
+        if (this.muted) return;
+        this.init();
+        const ctx = this.ctx;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const filter = ctx.createBiquadFilter();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(65, ctx.currentTime + 0.32);
+
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(800, ctx.currentTime);
+        filter.frequency.exponentialRampToValueAtTime(120, ctx.currentTime + 0.32);
+
+        gain.gain.setValueAtTime(0.45, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.32);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start();
+        osc.stop(ctx.currentTime + 0.32);
+      }
+
+      playLightning() {
+        if (this.muted) return;
+        this.init();
+        const ctx = this.ctx;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(900, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1400, ctx.currentTime + 0.1);
+        osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.28);
+
+        gain.gain.setValueAtTime(0.4, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start();
+        osc.stop(ctx.currentTime + 0.3);
+      }
+
+      playHeal() {
+        if (this.muted) return;
+        this.init();
+        const notes = [440, 554.37, 659.25, 880];
+        notes.forEach((freq, i) => {
+          setTimeout(() => {
+            if (!this.ctx) return;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+            gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.32);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start();
+            osc.stop(this.ctx.currentTime + 0.32);
+          }, i * 65);
+        });
+      }
+
+      playDarkBlast() {
+        if (this.muted) return;
+        this.init();
+        const ctx = this.ctx;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(180, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(45, ctx.currentTime + 0.35);
+
+        gain.gain.setValueAtTime(0.4, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start();
+        osc.stop(ctx.currentTime + 0.35);
+      }
+
+      playWhoosh() {
+        if (this.muted) return;
+        this.init();
+        const ctx = this.ctx;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(160, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(750, ctx.currentTime + 0.12);
+        osc.frequency.exponentialRampToValueAtTime(90, ctx.currentTime + 0.22);
+
+        gain.gain.setValueAtTime(0.2, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start();
+        osc.stop(ctx.currentTime + 0.22);
+      }
+
+      playVictory() {
+        if (this.muted) return;
+        this.init();
+        const notes = [261.63, 329.63, 392.00, 523.25];
+        notes.forEach((freq, idx) => {
+          setTimeout(() => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+            gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.5);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start();
+            osc.stop(this.ctx.currentTime + 0.5);
+          }, idx * 140);
+        });
+      }
+
+      playDefeat() {
+        if (this.muted) return;
+        this.init();
+        const notes = [300, 260, 210, 160];
+        notes.forEach((freq, idx) => {
+          setTimeout(() => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+            gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.4);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start();
+            osc.stop(this.ctx.currentTime + 0.4);
+          }, idx * 180);
+        });
+      }
+    }
+
+    const sound = new SoundFX();
+
+    /* ============================================================
+       CANVAS PARTICLE SYSTEM (Square Pixel Particles)
+       ============================================================ */
+    const fxCanvas = document.getElementById('fx-canvas');
+    const fxCtx = fxCanvas.getContext('2d');
+    const bgCanvas = document.getElementById('bg-canvas');
+    const bgCtx = bgCanvas.getContext('2d');
+
+    let particles = [];
+    let bgStars = [];
+
+    function resizeCanvas() {
+      fxCanvas.width = window.innerWidth;
+      fxCanvas.height = window.innerHeight;
+      bgCanvas.width = window.innerWidth;
+      bgCanvas.height = window.innerHeight;
+      initBgStars();
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    function initBgStars() {
+      bgStars = [];
+      for (let i = 0; i < 60; i++) {
+        bgStars.push({
+          x: Math.random() * bgCanvas.width,
+          y: Math.random() * bgCanvas.height,
+          size: Math.floor(Math.random() * 3 + 2),
+          alpha: Math.random() * 0.7 + 0.2,
+          speed: Math.random() * 0.4 + 0.1
+        });
+      }
+    }
+
+    function renderBg() {
+      bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+      for (let s of bgStars) {
+        s.y -= s.speed;
+        if (s.y < 0) s.y = bgCanvas.height;
+        bgCtx.fillStyle = `rgba(180, 200, 255, ${s.alpha})`;
+        // Draw pixel squares
+        bgCtx.fillRect(Math.floor(s.x), Math.floor(s.y), s.size, s.size);
+      }
+      requestAnimationFrame(renderBg);
+    }
+
+    function spawnHitParticles(x, y, color = '#ff4757', count = 28) {
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 8 + 3;
+        particles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          size: Math.floor(Math.random() * 6 + 4),
+          color: color,
+          alpha: 1,
+          decay: Math.random() * 0.035 + 0.02,
+          gravity: 0.15
+        });
+      }
+    }
+
+    function spawnTrailParticles(x, y, color = '#ff4757', count = 2) {
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: x + (Math.random() * 12 - 6),
+          y: y + (Math.random() * 12 - 6),
+          vx: (Math.random() - 0.5) * 2,
+          vy: (Math.random() - 0.5) * 2,
+          size: Math.floor(Math.random() * 5 + 3),
+          color: color,
+          alpha: 0.85,
+          decay: 0.05,
+          gravity: 0
+        });
+      }
+    }
+
+    function renderFx() {
+      fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += p.gravity;
+        p.alpha -= p.decay;
+
+        if (p.alpha <= 0) {
+          particles.splice(i, 1);
+          continue;
+        }
+
+        fxCtx.save();
+        fxCtx.globalAlpha = Math.max(0, p.alpha);
+        fxCtx.fillStyle = p.color;
+        // Draw crisp pixel squares
+        fxCtx.fillRect(Math.floor(p.x), Math.floor(p.y), p.size, p.size);
+        fxCtx.restore();
+      }
+      requestAnimationFrame(renderFx);
+    }
+
+    /* ============================================================
+       CARD DATABASE (Pixel Art Card Icons & 3 Types)
+       ============================================================ */
+    const CARD_TEMPLATES = [
+      // 1. АТАКА (Attack)
+      {
+        id: 'atk_slash',
+        type: 'attack',
+        attackKind: 'slash',
+        name: 'Удар клинком',
+        cost: 1,
+        value: 12,
+        desc: 'Пиксельный меч рассекает врага на 12 ед.',
+        icon: `
+          <svg class="card-art-svg" viewBox="0 0 16 16">
+            <rect x="13" y="1" width="2" height="2" fill="#fff"/>
+            <rect x="11" y="3" width="3" height="3" fill="#00d2d3"/>
+            <rect x="8" y="6" width="4" height="4" fill="#00d2d3"/>
+            <rect x="5" y="9" width="4" height="4" fill="#54a0ff"/>
+            <rect x="3" y="10" width="4" height="2" fill="#fbc531"/>
+            <rect x="4" y="11" width="2" height="4" fill="#fbc531"/>
+            <rect x="1" y="13" width="3" height="3" fill="#e1b12c"/>
+          </svg>
+        `
+      },
+      {
+        id: 'atk_heavy',
+        type: 'attack',
+        attackKind: 'heavy_slash',
+        name: 'Сокрушение',
+        cost: 2,
+        value: 24,
+        desc: 'Мощное огненное лезвие наносит 24 ед. урона.',
+        icon: `
+          <svg class="card-art-svg" viewBox="0 0 16 16">
+            <rect x="7" y="1" width="3" height="4" fill="#fff"/>
+            <rect x="6" y="4" width="5" height="5" fill="#ffd32a"/>
+            <rect x="5" y="7" width="7" height="4" fill="#ff4757"/>
+            <rect x="4" y="11" width="9" height="3" fill="#b31217"/>
+            <rect x="7" y="14" width="3" height="2" fill="#ff6b81"/>
+          </svg>
+        `
+      },
+      {
+        id: 'atk_flurry',
+        type: 'attack',
+        attackKind: 'flurry',
+        name: 'Вихрь стали',
+        cost: 3,
+        value: 36,
+        desc: 'Тройной залп разящих клинков наносит 36 ед.',
+        icon: `
+          <svg class="card-art-svg" viewBox="0 0 16 16">
+            <rect x="2" y="3" width="4" height="2" fill="#ff4757"/>
+            <rect x="10" y="2" width="4" height="2" fill="#ff4757"/>
+            <rect x="6" y="7" width="5" height="2" fill="#fff"/>
+            <rect x="3" y="11" width="4" height="2" fill="#ff4757"/>
+            <rect x="11" y="10" width="4" height="2" fill="#ff4757"/>
+          </svg>
+        `
+      },
+
+      // 2. ЗАЩИТА (Defense)
+      {
+        id: 'def_shield',
+        type: 'defense',
+        name: 'Щит титана',
+        cost: 1,
+        value: 12,
+        desc: 'Укрепляет пиксельную броню на +12 ед.',
+        icon: `
+          <svg class="card-art-svg" viewBox="0 0 16 16">
+            <rect x="3" y="2" width="10" height="2" fill="#00d2d3"/>
+            <rect x="2" y="4" width="12" height="6" fill="#1e90ff"/>
+            <rect x="4" y="6" width="8" height="4" fill="#fff"/>
+            <rect x="4" y="10" width="8" height="3" fill="#0652dd"/>
+            <rect x="6" y="13" width="4" height="2" fill="#00d2d3"/>
+          </svg>
+        `
+      },
+      {
+        id: 'def_fortress',
+        type: 'defense',
+        name: 'Бастион духа',
+        cost: 2,
+        value: 22,
+        desc: 'Энергетический барьер дарует +22 щита.',
+        icon: `
+          <svg class="card-art-svg" viewBox="0 0 16 16">
+            <rect x="2" y="2" width="12" height="12" fill="#1e90ff"/>
+            <rect x="4" y="4" width="8" height="8" fill="#00d2d3"/>
+            <rect x="6" y="6" width="4" height="4" fill="#fff"/>
+          </svg>
+        `
+      },
+
+      // 3. МАГИЯ (Magic)
+      {
+        id: 'mag_fireball',
+        type: 'magic',
+        magicType: 'fireball',
+        name: 'Огненный шар',
+        cost: 1,
+        value: 16,
+        desc: 'Пиксельный огненный шар наносит 16 ед.',
+        icon: `
+          <svg class="card-art-svg" viewBox="0 0 16 16">
+            <rect x="6" y="2" width="4" height="2" fill="#ff4757"/>
+            <rect x="4" y="4" width="8" height="8" fill="#ff4757"/>
+            <rect x="6" y="6" width="4" height="4" fill="#ffd32a"/>
+            <rect x="7" y="7" width="2" height="2" fill="#fff"/>
+            <rect x="2" y="10" width="3" height="3" fill="#ff6b81"/>
+          </svg>
+        `
+      },
+      {
+        id: 'mag_heal',
+        type: 'magic',
+        magicType: 'heal',
+        name: 'Свет исцеления',
+        cost: 2,
+        value: 22,
+        desc: 'Святой свет исцеляет 22 ед. здоровья.',
+        icon: `
+          <svg class="card-art-svg" viewBox="0 0 16 16">
+            <rect x="6" y="2" width="4" height="12" fill="#2ed573"/>
+            <rect x="2" y="6" width="12" height="4" fill="#2ed573"/>
+            <rect x="6" y="6" width="4" height="4" fill="#fff"/>
+          </svg>
+        `
+      },
+      {
+        id: 'mag_lightning',
+        type: 'magic',
+        magicType: 'lightning',
+        name: 'Молния Бездны',
+        cost: 3,
+        value: 34,
+        desc: 'Разряд фиолетовой молнии наносит 34 ед.',
+        icon: `
+          <svg class="card-art-svg" viewBox="0 0 16 16">
+            <rect x="8" y="1" width="4" height="3" fill="#fff"/>
+            <rect x="6" y="4" width="4" height="3" fill="#e056fd"/>
+            <rect x="4" y="7" width="8" height="2" fill="#be2edd"/>
+            <rect x="6" y="9" width="4" height="3" fill="#e056fd"/>
+            <rect x="4" y="12" width="3" height="3" fill="#fff"/>
+          </svg>
+        `
+      }
+    ];
+
+    /* ============================================================
+       GAME CONTROLLER & LOGIC
+       ============================================================ */
+    class CardGame {
+      constructor() {
+        this.maxEnergy = 3;
+        this.currentEnergy = 3;
+        this.round = 1;
+        this.isPlayerTurn = true;
+        this.isAnimating = false;
+
+        this.player = {
+          maxHp: 100,
+          hp: 100,
+          shield: 0
+        };
+
+        this.enemy = {
+          maxHp: 120,
+          hp: 120,
+          shield: 0,
+          nextMove: null
+        };
+
+        this.playerHand = [];
+
+        this.cacheElements();
+        this.bindEvents();
+      }
+
+      cacheElements() {
+        this.elRoundBadge = document.getElementById('roundBadge');
+        this.elTurnIndicator = document.getElementById('turnIndicator');
+        this.elCombatTicker = document.getElementById('combatTicker');
+        
+        this.elPlayerHpBar = document.getElementById('playerHpBar');
+        this.elPlayerHpText = document.getElementById('playerHpText');
+        this.elPlayerShieldBadge = document.getElementById('playerShieldBadge');
+        this.elPlayerShieldVal = document.getElementById('playerShieldVal');
+        this.elPlayerSprite = document.getElementById('playerSprite');
+        this.elPlayerZone = document.getElementById('playerZone');
+
+        this.elEnemyHpBar = document.getElementById('enemyHpBar');
+        this.elEnemyHpText = document.getElementById('enemyHpText');
+        this.elEnemyShieldBadge = document.getElementById('enemyShieldBadge');
+        this.elEnemyShieldVal = document.getElementById('enemyShieldVal');
+        this.elEnemySprite = document.getElementById('enemySprite');
+        this.elEnemyZone = document.getElementById('enemyZone');
+        this.elEnemyIntent = document.getElementById('enemyIntent');
+        this.elIntentIcon = document.getElementById('intentIcon');
+        this.elIntentText = document.getElementById('intentText');
+
+        this.elCurrentEnergy = document.getElementById('currentEnergy');
+        this.elMaxEnergy = document.getElementById('maxEnergy');
+        this.elCardsHand = document.getElementById('cardsHand');
+        this.elBtnEndTurn = document.getElementById('btnEndTurn');
+        
+        this.elBtnSound = document.getElementById('btnSound');
+        this.elSoundIcon = document.getElementById('soundIcon');
+        this.elBtnReset = document.getElementById('btnReset');
+
+        this.elEndModal = document.getElementById('endModal');
+        this.elModalTitle = document.getElementById('modalTitle');
+        this.elModalDesc = document.getElementById('modalDesc');
+        this.elBtnModalRestart = document.getElementById('btnModalRestart');
+      }
+
+      bindEvents() {
+        this.elBtnEndTurn.addEventListener('click', () => this.endPlayerTurn());
+        this.elBtnReset.addEventListener('click', () => this.startNewGame());
+        this.elBtnModalRestart.addEventListener('click', () => {
+          this.elEndModal.classList.remove('active');
+          this.startNewGame();
+        });
+
+        this.elBtnSound.addEventListener('click', () => {
+          sound.muted = !sound.muted;
+          this.elSoundIcon.textContent = sound.muted ? '🔇' : '🔊';
+        });
+      }
+
+      startNewGame() {
+        this.player.hp = this.player.maxHp;
+        this.player.shield = 0;
+        this.enemy.hp = this.enemy.maxHp;
+        this.enemy.shield = 0;
+        this.round = 1;
+        this.isPlayerTurn = true;
+        this.isAnimating = false;
+        this.elEndModal.classList.remove('active');
+
+        this.planEnemyMove();
+        this.startPlayerTurn();
+        this.updateHUD();
+        this.logMessage('Битва начинается! Раунд 1');
+      }
+
+      planEnemyMove() {
+        const moves = [
+          { type: 'attack', name: 'Теневой разрез', val: 12 + Math.floor(this.round * 1.5), icon: '⚔️' },
+          { type: 'magic', name: 'Шар Хаоса', val: 18 + Math.floor(this.round * 2), icon: '🔥' },
+          { type: 'defense', name: 'Тёмный щит', val: 14 + Math.floor(this.round * 1.5), icon: '🛡️' },
+          { type: 'magic', name: 'Проклятие Тьмы', val: 20 + Math.floor(this.round * 2.2), icon: '🔮' }
+        ];
+
+        this.enemy.nextMove = moves[Math.floor(Math.random() * moves.length)];
+        this.elIntentIcon.textContent = this.enemy.nextMove.icon;
+        this.elIntentText.textContent = `${this.enemy.nextMove.name} (${this.enemy.nextMove.val})`;
+      }
+
+      startPlayerTurn() {
+        this.isPlayerTurn = true;
+        this.currentEnergy = this.maxEnergy;
+        this.player.shield = 0;
+        this.updateHUD();
+
+        this.elTurnIndicator.textContent = 'ВАШ ХОД';
+        this.elTurnIndicator.className = 'turn-indicator player-turn';
+        this.elBtnEndTurn.disabled = false;
+
+        this.drawCards(4);
+      }
+
+      drawCards(count) {
+        this.playerHand = [];
+        for (let i = 0; i < count; i++) {
+          const randomCard = CARD_TEMPLATES[Math.floor(Math.random() * CARD_TEMPLATES.length)];
+          this.playerHand.push({ ...randomCard, uid: 'card_' + Date.now() + '_' + i + Math.random() });
+        }
+        this.renderHand();
+      }
+
+      renderHand() {
+        this.elCardsHand.innerHTML = '';
+        const total = this.playerHand.length;
+
+        this.playerHand.forEach((card, index) => {
+          const cardEl = document.createElement('div');
+          
+          const mid = (total - 1) / 2;
+          const offset = index - mid;
+          const rot = offset * 4;
+          const translateY = Math.abs(offset) * 6;
+
+          cardEl.className = `card-item card-${card.type}`;
+          if (card.cost > this.currentEnergy) {
+            cardEl.classList.add('not-enough-energy');
+          }
+
+          cardEl.style.transform = `translateY(${translateY}px) rotate(${rot}deg)`;
+          cardEl.dataset.uid = card.uid;
+
+          const typeNames = { attack: 'Атака', defense: 'Защита', magic: 'Магия' };
+
+          cardEl.innerHTML = `
+            <div class="card-top">
+              <div class="card-cost">${card.cost}</div>
+              <div class="card-type-tag">${typeNames[card.type]}</div>
+            </div>
+            <div class="card-art">
+              ${card.icon}
+            </div>
+            <div class="card-info">
+              <div class="card-name">${card.name}</div>
+              <div class="card-desc">${card.desc}</div>
+            </div>
+          `;
+
+          cardEl.addEventListener('click', () => {
+            if (!this.isPlayerTurn || this.isAnimating) return;
+            if (card.cost > this.currentEnergy) {
+              this.logMessage('Недостаточно энергии!');
+              return;
+            }
+            this.playPlayerCard(card, cardEl);
+          });
+
+          this.elCardsHand.appendChild(cardEl);
+        });
+      }
+
+      playPlayerCard(card, cardEl) {
+        this.isAnimating = true;
+        this.currentEnergy -= card.cost;
+        this.updateHUD();
+
+        // 1. Card activates and dissolves at the bottom
+        cardEl.classList.add('card-activating');
+        sound.playWhoosh();
+
+        // Hero attacks
+        this.elPlayerSprite.classList.add('hero-attack-lunge');
+        setTimeout(() => this.elPlayerSprite.classList.remove('hero-attack-lunge'), 350);
+
+        setTimeout(() => {
+          this.playerHand = this.playerHand.filter(c => c.uid !== card.uid);
+          this.renderHand();
+        }, 280);
+
+        // 2. Launch the ACTUAL pixel attack projectile / spell across the arena!
+        if (card.type === 'attack') {
+          this.launchAttackProjectile(card);
+        } else if (card.type === 'magic') {
+          if (card.magicType === 'heal') {
+            this.castHealSpell(card);
+          } else {
+            this.launchMagicProjectile(card);
+          }
+        } else if (card.type === 'defense') {
+          this.castDefenseSpell(card);
+        }
+      }
+
+      /* Pixel Attack Projectile (Crescent Pixel Blade) */
+      launchAttackProjectile(card) {
+        const pRect = this.elPlayerSprite.getBoundingClientRect();
+        const eRect = this.elEnemySprite.getBoundingClientRect();
+
+        const startX = pRect.left + pRect.width * 0.75;
+        const startY = pRect.top + pRect.height * 0.45;
+
+        const targetX = eRect.left + eRect.width * 0.4;
+        const targetY = eRect.top + eRect.height * 0.45;
+
+        const count = (card.attackKind === 'flurry') ? 3 : 1;
+
+        for (let i = 0; i < count; i++) {
+          setTimeout(() => {
+            const proj = document.createElement('div');
+            proj.className = `attack-projectile ${card.attackKind === 'heavy_slash' ? 'projectile-pixel-heavy' : 'projectile-pixel-slash'}`;
+            
+            // Handcrafted Pixel Crescent Blade SVG
+            proj.innerHTML = `
+              <svg viewBox="0 0 16 16" width="100%" height="100%">
+                <rect x="12" y="1" width="3" height="3" fill="#fff"/>
+                <rect x="9" y="3" width="4" height="3" fill="#ff6b81"/>
+                <rect x="6" y="5" width="4" height="4" fill="#ff4757"/>
+                <rect x="3" y="8" width="4" height="4" fill="#ff4757"/>
+                <rect x="1" y="11" width="3" height="3" fill="#b31217"/>
+                <rect x="4" y="6" width="2" height="2" fill="#ffd32a"/>
+              </svg>
+            `;
+
+            proj.style.left = `${startX}px`;
+            proj.style.top = `${startY + (i * 16 - 16)}px`;
+            document.body.appendChild(proj);
+
+            if (card.attackKind === 'heavy_slash') {
+              sound.playHeavySlash();
+            } else {
+              sound.playSlash();
+            }
+
+            const duration = 360;
+            const startTime = performance.now();
+
+            const animateFlight = (now) => {
+              const elapsed = now - startTime;
+              const progress = Math.min(1, elapsed / duration);
+              
+              const currentX = startX + (targetX - startX) * progress;
+              const currentY = startY + (targetY - startY) * progress;
+
+              proj.style.left = `${currentX}px`;
+              proj.style.top = `${currentY}px`;
+              proj.style.transform = `scale(${1 + progress * 0.25}) rotate(${progress * 20}deg)`;
+
+              spawnTrailParticles(currentX + 25, currentY + 25, '#ff4757', 2);
+
+              if (progress < 1) {
+                requestAnimationFrame(animateFlight);
+              } else {
+                proj.remove();
+                if (i === count - 1) {
+                  this.onAttackHit(card, targetX, targetY);
+                } else {
+                  this.dealDamage(this.enemy, Math.floor(card.value / count), this.elEnemyZone, this.elEnemySprite);
+                  spawnHitParticles(targetX, targetY, '#ff4757', 15);
+                }
+              }
+            };
+
+            requestAnimationFrame(animateFlight);
+          }, i * 110);
+        }
+      }
+
+      /* Pixel Magic Projectile (Fireball / Lightning) */
+      launchMagicProjectile(card) {
+        const pRect = this.elPlayerSprite.getBoundingClientRect();
+        const eRect = this.elEnemySprite.getBoundingClientRect();
+
+        const startX = pRect.left + pRect.width * 0.75;
+        const startY = pRect.top + pRect.height * 0.45;
+
+        const targetX = eRect.left + eRect.width * 0.4;
+        const targetY = eRect.top + eRect.height * 0.45;
+
+        const proj = document.createElement('div');
+        const isLightning = (card.magicType === 'lightning');
+
+        proj.className = `attack-projectile ${isLightning ? 'projectile-pixel-lightning' : 'projectile-pixel-fireball'}`;
+        
+        if (isLightning) {
+          proj.innerHTML = `
+            <svg viewBox="0 0 16 16" width="100%" height="100%">
+              <rect x="10" y="1" width="4" height="4" fill="#fff"/>
+              <rect x="7" y="4" width="4" height="4" fill="#e056fd"/>
+              <rect x="4" y="7" width="8" height="3" fill="#be2edd"/>
+              <rect x="6" y="10" width="4" height="3" fill="#e056fd"/>
+              <rect x="3" y="13" width="4" height="3" fill="#fff"/>
+            </svg>
+          `;
+          sound.playLightning();
+        } else {
+          proj.innerHTML = `
+            <svg viewBox="0 0 16 16" width="100%" height="100%">
+              <rect x="6" y="2" width="6" height="3" fill="#ff4757"/>
+              <rect x="4" y="4" width="10" height="8" fill="#ff4757"/>
+              <rect x="6" y="6" width="6" height="5" fill="#ffd32a"/>
+              <rect x="8" y="7" width="3" height="3" fill="#fff"/>
+              <rect x="1" y="9" width="4" height="4" fill="#ff6b81"/>
+            </svg>
+          `;
+          sound.playFireball();
+        }
+
+        proj.style.left = `${startX}px`;
+        proj.style.top = `${startY}px`;
+        document.body.appendChild(proj);
+
+        const duration = isLightning ? 260 : 380;
+        const startTime = performance.now();
+
+        const animateFlight = (now) => {
+          const elapsed = now - startTime;
+          const progress = Math.min(1, elapsed / duration);
+          
+          const currentX = startX + (targetX - startX) * progress;
+          const arcOffset = Math.sin(progress * Math.PI) * (isLightning ? -25 : -40);
+          const currentY = startY + (targetY - startY) * progress + arcOffset;
+
+          proj.style.left = `${currentX}px`;
+          proj.style.top = `${currentY}px`;
+
+          const pColor = isLightning ? '#e056fd' : '#ff4757';
+          spawnTrailParticles(currentX + 25, currentY + 25, pColor, 3);
+
+          if (progress < 1) {
+            requestAnimationFrame(animateFlight);
+          } else {
+            proj.remove();
+            this.onMagicHit(card, targetX, targetY);
+          }
+        };
+
+        requestAnimationFrame(animateFlight);
+      }
+
+      /* Heal Spell */
+      castHealSpell(card) {
+        sound.playHeal();
+        const pRect = this.elPlayerSprite.getBoundingClientRect();
+
+        const healVfx = document.createElement('div');
+        healVfx.className = 'heal-pillar-vfx';
+        this.elPlayerZone.appendChild(healVfx);
+
+        this.player.hp = Math.min(this.player.maxHp, this.player.hp + card.value);
+        this.showFloatingText(`+${card.value} HP`, '#2ed573', this.elPlayerZone);
+        this.elPlayerSprite.classList.add('sprite-heal-glow');
+
+        spawnHitParticles(pRect.left + pRect.width / 2, pRect.top + pRect.height / 2, '#2ed573', 30);
+        this.logMessage(`Свет исцеления восстановил ${card.value} HP!`);
+
+        setTimeout(() => {
+          healVfx.remove();
+          this.elPlayerSprite.classList.remove('sprite-heal-glow');
+          this.isAnimating = false;
+        }, 750);
+
+        this.updateHUD();
+      }
+
+      /* Defense Spell */
+      castDefenseSpell(card) {
+        sound.playShield();
+        const pRect = this.elPlayerSprite.getBoundingClientRect();
+
+        const shieldVfx = document.createElement('div');
+        shieldVfx.className = 'shield-dome-vfx';
+        this.elPlayerZone.appendChild(shieldVfx);
+
+        this.player.shield += card.value;
+        this.showFloatingText(`+${card.value} БРОНЯ`, '#00d2d3', this.elPlayerZone);
+        this.elPlayerSprite.classList.add('sprite-shield-block');
+
+        spawnHitParticles(pRect.left + pRect.width / 2, pRect.top + pRect.height / 2, '#00d2d3', 25);
+        this.logMessage(`Вы укрепили защиту на +${card.value} щита!`);
+
+        setTimeout(() => {
+          shieldVfx.remove();
+          this.elPlayerSprite.classList.remove('sprite-shield-block');
+          this.isAnimating = false;
+        }, 600);
+
+        this.updateHUD();
+      }
+
+      onAttackHit(card, x, y) {
+        const dmg = card.value;
+        this.dealDamage(this.enemy, dmg, this.elEnemyZone, this.elEnemySprite);
+        spawnHitParticles(x, y, '#ff4757', 35);
+        this.logMessage(`Атака поразила врага на ${dmg} урона!`);
+
+        this.updateHUD();
+        this.isAnimating = false;
+
+        if (this.enemy.hp <= 0) {
+          this.handleVictory();
+        }
+      }
+
+      onMagicHit(card, x, y) {
+        const dmg = card.value;
+        const pColor = (card.magicType === 'lightning') ? '#e056fd' : '#ff4757';
+        
+        this.dealDamage(this.enemy, dmg, this.elEnemyZone, this.elEnemySprite);
+        spawnHitParticles(x, y, pColor, 40);
+        this.logMessage(`Магия нанесла ${dmg} урона!`);
+
+        this.updateHUD();
+        this.isAnimating = false;
+
+        if (this.enemy.hp <= 0) {
+          this.handleVictory();
+        }
+      }
+
+      dealDamage(target, rawDmg, targetZone, targetSprite) {
+        let dmg = rawDmg;
+        if (target.shield > 0) {
+          if (target.shield >= dmg) {
+            target.shield -= dmg;
+            this.showFloatingText(`БЛОК -${dmg}`, '#00d2d3', targetZone);
+            targetSprite.classList.add('sprite-shield-block');
+            setTimeout(() => targetSprite.classList.remove('sprite-shield-block'), 500);
+            return;
+          } else {
+            dmg -= target.shield;
+            target.shield = 0;
+          }
+        }
+
+        target.hp = Math.max(0, target.hp - dmg);
+        this.showFloatingText(`-${dmg}`, '#ff4757', targetZone);
+        
+        targetSprite.classList.add('sprite-hit');
+        setTimeout(() => targetSprite.classList.remove('sprite-hit'), 450);
+      }
+
+      endPlayerTurn() {
+        if (!this.isPlayerTurn || this.isAnimating) return;
+        this.isPlayerTurn = false;
+        this.elBtnEndTurn.disabled = true;
+        this.elTurnIndicator.textContent = 'ХОД ВРАГА';
+        this.elTurnIndicator.className = 'turn-indicator enemy-turn';
+
+        this.logMessage('Тёмный Лорд начинает атаку...');
+        setTimeout(() => this.executeEnemyTurn(), 700);
+      }
+
+      executeEnemyTurn() {
+        if (this.enemy.hp <= 0) return;
+
+        const move = this.enemy.nextMove;
+        this.enemy.shield = 0;
+
+        this.elEnemySprite.classList.add('enemy-attack-lunge');
+        setTimeout(() => this.elEnemySprite.classList.remove('enemy-attack-lunge'), 400);
+
+        if (move.type === 'defense') {
+          sound.playShield();
+          this.enemy.shield += move.val;
+          this.showFloatingText(`+${move.val} ЩИТ`, '#00d2d3', this.elEnemyZone);
+          
+          const eRect = this.elEnemySprite.getBoundingClientRect();
+          spawnHitParticles(eRect.left + eRect.width / 2, eRect.top + eRect.height / 2, '#00d2d3', 25);
+          this.logMessage(`Враг воздвиг Тёмный щит на +${move.val}!`);
+          this.updateHUD();
+
+          setTimeout(() => this.finishEnemyTurn(), 1000);
+        } else {
+          // Launch Pixel Dark Chaos Orb from Enemy to Player
+          const eRect = this.elEnemySprite.getBoundingClientRect();
+          const pRect = this.elPlayerSprite.getBoundingClientRect();
+
+          const startX = eRect.left + eRect.width * 0.25;
+          const startY = eRect.top + eRect.height * 0.45;
+
+          const targetX = pRect.left + pRect.width * 0.6;
+          const targetY = pRect.top + pRect.height * 0.45;
+
+          const proj = document.createElement('div');
+          proj.className = 'attack-projectile projectile-pixel-chaos';
+          proj.innerHTML = `
+            <svg viewBox="0 0 16 16" width="100%" height="100%">
+              <rect x="5" y="2" width="6" height="3" fill="#ff4757"/>
+              <rect x="3" y="4" width="10" height="8" fill="#1e0b1d"/>
+              <rect x="5" y="6" width="6" height="4" fill="#ff4757"/>
+              <rect x="7" y="7" width="2" height="2" fill="#fff"/>
+              <rect x="12" y="5" width="3" height="3" fill="#38006b"/>
+            </svg>
+          `;
+          proj.style.left = `${startX}px`;
+          proj.style.top = `${startY}px`;
+          document.body.appendChild(proj);
+
+          sound.playDarkBlast();
+
+          const duration = 380;
+          const startTime = performance.now();
+
+          const animateFlight = (now) => {
+            const elapsed = now - startTime;
+            const progress = Math.min(1, elapsed / duration);
+            
+            const currentX = startX + (targetX - startX) * progress;
+            const currentY = startY + (targetY - startY) * progress;
+
+            proj.style.left = `${currentX}px`;
+            proj.style.top = `${currentY}px`;
+
+            spawnTrailParticles(currentX + 25, currentY + 25, '#ff4757', 2);
+
+            if (progress < 1) {
+              requestAnimationFrame(animateFlight);
+            } else {
+              proj.remove();
+
+              if (move.type === 'magic') {
+                sound.playLightning();
+              } else {
+                sound.playSlash();
+              }
+
+              this.dealDamage(this.player, move.val, this.elPlayerZone, this.elPlayerSprite);
+              spawnHitParticles(targetX, targetY, '#ff4757', 35);
+              this.logMessage(`Враг нанес ${move.val} урона герою!`);
+              this.updateHUD();
+
+              if (this.player.hp <= 0) {
+                setTimeout(() => this.handleDefeat(), 600);
+              } else {
+                setTimeout(() => this.finishEnemyTurn(), 900);
+              }
+            }
+          };
+
+          requestAnimationFrame(animateFlight);
+        }
+      }
+
+      finishEnemyTurn() {
+        this.round++;
+        this.elRoundBadge.textContent = `РАУНД ${this.round}`;
+        this.planEnemyMove();
+        this.startPlayerTurn();
+      }
+
+      showFloatingText(text, color, targetZone) {
+        const floatEl = document.createElement('div');
+        floatEl.className = 'floating-text';
+        floatEl.style.color = color;
+        floatEl.textContent = text;
+        floatEl.style.top = '110px';
+        floatEl.style.left = '50%';
+        floatEl.style.transform = 'translateX(-50%)';
+        targetZone.appendChild(floatEl);
+
+        setTimeout(() => floatEl.remove(), 1200);
+      }
+
+      updateHUD() {
+        // Player HP
+        const playerHpPct = Math.max(0, (this.player.hp / this.player.maxHp) * 100);
+        this.elPlayerHpBar.style.width = `${playerHpPct}%`;
+        this.elPlayerHpText.textContent = `${this.player.hp} / ${this.player.maxHp}`;
+
+        // Player Shield
+        if (this.player.shield > 0) {
+          this.elPlayerShieldBadge.style.display = 'inline-flex';
+          this.elPlayerShieldVal.textContent = this.player.shield;
+        } else {
+          this.elPlayerShieldBadge.style.display = 'none';
+        }
+
+        // Enemy HP
+        const enemyHpPct = Math.max(0, (this.enemy.hp / this.enemy.maxHp) * 100);
+        this.elEnemyHpBar.style.width = `${enemyHpPct}%`;
+        this.elEnemyHpText.textContent = `${this.enemy.hp} / ${this.enemy.maxHp}`;
+
+        // Enemy Shield
+        if (this.enemy.shield > 0) {
+          this.elEnemyShieldBadge.style.display = 'inline-flex';
+          this.elEnemyShieldVal.textContent = this.enemy.shield;
+        } else {
+          this.elEnemyShieldBadge.style.display = 'none';
+        }
+
+        // Energy
+        this.elCurrentEnergy.textContent = this.currentEnergy;
+        this.elMaxEnergy.textContent = this.maxEnergy;
+
+        // Card disabled status
+        const cardElements = this.elCardsHand.querySelectorAll('.card-item');
+        cardElements.forEach(cardEl => {
+          const cost = parseInt(cardEl.querySelector('.card-cost').textContent, 10);
+          if (cost > this.currentEnergy) {
+            cardEl.classList.add('not-enough-energy');
+          } else {
+            cardEl.classList.remove('not-enough-energy');
+          }
+        });
+      }
+
+      logMessage(msg) {
+        this.elCombatTicker.textContent = msg;
+        this.elCombatTicker.classList.add('show');
+      }
+
+      handleVictory() {
+        sound.playVictory();
+        this.elModalTitle.textContent = 'ПОБЕДА!';
+        this.elModalTitle.className = 'modal-title victory-text';
+        this.elModalDesc.textContent = `Тёмный Лорд повержен на ${this.round} раунде! Ваша магия и клинок спасли королевство.`;
+        this.elEndModal.classList.add('active');
+      }
+
+      handleDefeat() {
+        sound.playDefeat();
+        this.elModalTitle.textContent = 'ПОРАЖЕНИЕ';
+        this.elModalTitle.className = 'modal-title defeat-text';
+        this.elModalDesc.textContent = `Герой пал в битве... Тьма окутала арену. Попробуйте снова и выберите другую тактику!`;
+        this.elEndModal.classList.add('active');
+      }
+    }
+
+    // Initialize Game
+    window.addEventListener('DOMContentLoaded', () => {
+      resizeCanvas();
+      renderBg();
+      renderFx();
+
+      const game = new CardGame();
+      game.startNewGame();
+    });
+  </script>
+</body>
+</html>

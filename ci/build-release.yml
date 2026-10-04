@@ -11,15 +11,21 @@ on:
 
 jobs:
   test:
-    name: Run Unit Tests
-    runs-on: windows-latest
+    name: Test on ${{ matrix.os }} (Python ${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        python-version: [ '3.10', '3.11', '3.12' ]
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: ${{ matrix.python-version }}
           cache: 'pip'
 
       - name: Install dependencies
@@ -27,9 +33,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
 
-      - name: Run pytest
+      - name: Run Unit & Integration Tests
         run: |
-          pytest tests/ -v
+          python -m unittest discover tests -v
 
   build-exe:
     name: Build Standalone Windows Executable
