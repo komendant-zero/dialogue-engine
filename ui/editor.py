@@ -5,9 +5,42 @@ Dialogue Engine - Main Editor Window Controller.
 from __future__ import annotations
 import math
 import os
+import re
 import sys
+import time
 import tkinter as tk
 from tkinter import colorchooser, filedialog, messagebox
+from typing import Any, Callable
+
+# Таблица сопоставления латинских букв клавиш с кириллическими keysyms Tkinter
+CYRILLIC_KEY_MAP: dict[str, tuple[str, str]] = {
+    "a": ("Cyrillic_ef", "Cyrillic_EF"),              # Ф
+    "b": ("Cyrillic_i", "Cyrillic_I"),                # И
+    "c": ("Cyrillic_es", "Cyrillic_ES"),              # С
+    "d": ("Cyrillic_ve", "Cyrillic_VE"),              # В
+    "e": ("Cyrillic_u", "Cyrillic_U"),                # У
+    "f": ("Cyrillic_a", "Cyrillic_A"),                # А
+    "g": ("Cyrillic_pe", "Cyrillic_PE"),              # П
+    "h": ("Cyrillic_er", "Cyrillic_ER"),              # Р
+    "i": ("Cyrillic_sha", "Cyrillic_SHA"),            # Ш
+    "j": ("Cyrillic_o", "Cyrillic_O"),                # О
+    "k": ("Cyrillic_el", "Cyrillic_EL"),              # Л
+    "l": ("Cyrillic_de", "Cyrillic_DE"),              # Д
+    "m": ("Cyrillic_softsign", "Cyrillic_SOFTSIGN"),  # Ь
+    "n": ("Cyrillic_te", "Cyrillic_TE"),              # Т
+    "o": ("Cyrillic_shcha", "Cyrillic_SHCHA"),        # Щ
+    "p": ("Cyrillic_ze", "Cyrillic_ZE"),              # З
+    "q": ("Cyrillic_shorti", "Cyrillic_SHORTI"),      # Й
+    "r": ("Cyrillic_ka", "Cyrillic_KA"),              # К
+    "s": ("Cyrillic_yeru", "Cyrillic_YERU"),          # Ы
+    "t": ("Cyrillic_ie", "Cyrillic_IE"),              # Е
+    "u": ("Cyrillic_ghe", "Cyrillic_GHE"),            # Г
+    "v": ("Cyrillic_em", "Cyrillic_EM"),              # М
+    "w": ("Cyrillic_tse", "Cyrillic_TSE"),            # Ц
+    "x": ("Cyrillic_che", "Cyrillic_CHE"),            # Ч
+    "y": ("Cyrillic_en", "Cyrillic_EN"),              # Н
+    "z": ("Cyrillic_ya", "Cyrillic_YA"),              # Я
+}
 
 from core.autosave import AutosaveManager
 from core.history import HistoryManager
@@ -57,6 +90,9 @@ class ScenarioEditor(tk.Tk):
         self.marquee_start: tuple[float, float] | None = None
         self.marquee_id: int | None = None
         self.pressed_keys: dict[str, bool] = {}
+        self._hotkey_actions: dict[tuple[bool, bool, int | str], Any] = {}
+        self._in_bind: bool = False
+        self._last_hotkey_time: float = 0.0
 
         # Physics & Panning
         self.velocity_x = 0.0
@@ -218,14 +254,62 @@ class ScenarioEditor(tk.Tk):
         self.canvas.bind("<B2-Motion>", self.do_pan)
         self.canvas.bind("<ButtonRelease-2>", self.stop_pan)
 
+    def bind(self, sequence: str | None = None, func: Any = None, add: str | None = None) -> Any:
+        res = super().bind(sequence, func, add)
+        if sequence and func and not getattr(self, "_in_bind", False):
+            self._register_layout_hotkey(sequence, func, add)
+        return res
+
+    def _register_layout_hotkey(self, sequence: str, func: Any, add: str | None = None) -> None:
+        if not hasattr(self, "_hotkey_actions"):
+            return
+        m = re.match(r"^<Control-(?:(Shift)-)?(?:Key-)?([a-zA-Z])>$", sequence, re.IGNORECASE)
+        if m:
+            has_shift = bool(m.group(1))
+            letter = m.group(2).lower()
+            vk = ord(letter.upper())
+            self._hotkey_actions[(True, has_shift, vk)] = func
+            self._hotkey_actions[(True, has_shift, letter)] = func
+            self._hotkey_actions[(True, has_shift, letter.upper())] = func
+
+            self._in_bind = True
+            try:
+                if not has_shift:
+                    super().bind(f"<Control-{letter.upper()}>", func, add)
+                if letter in CYRILLIC_KEY_MAP:
+                    for cyr in CYRILLIC_KEY_MAP[letter]:
+                        self._hotkey_actions[(True, has_shift, cyr)] = func
+                        patt = f"<Control-Shift-{cyr}>" if has_shift else f"<Control-{cyr}>"
+                        try:
+                            super().bind(patt, func, add)
+                        except Exception:
+                            pass
+            finally:
+                self._in_bind = False
+        elif sequence in ("<Delete>", "<Control-0>", "<Control-plus>", "<Control-equal>", "<Control-minus>"):
+            if sequence == "<Delete>":
+                self._hotkey_actions[(False, False, 46)] = func
+                self._hotkey_actions[(False, False, "Delete")] = func
+            elif sequence == "<Control-0>":
+                self._hotkey_actions[(True, False, 48)] = func
+                self._hotkey_actions[(True, False, 96)] = func
+            elif sequence in ("<Control-plus>", "<Control-equal>"):
+                self._hotkey_actions[(True, False, 187)] = func
+                self._hotkey_actions[(True, False, 107)] = func
+            elif sequence == "<Control-minus>":
+                self._hotkey_actions[(True, False, 189)] = func
+                self._hotkey_actions[(True, False, 109)] = func
+
     def setup_hotkeys(self) -> None:
         self.bind("<KeyPress>", self.on_key_press)
         self.bind("<KeyRelease>", self.on_key_release)
         self.bind("<Control-z>", self.undo)
         self.bind("<Control-y>", self.redo)
+        self.bind("<Control-Shift-z>", self.redo)
         self.bind("<Control-c>", self.copy)
         self.bind("<Control-v>", self.paste)
         self.bind("<Control-d>", self.duplicate)
+        self.bind("<Control-a>", self.select_all)
         self.bind("<Delete>", self.delete_selected)
         self.bind("<Control-s>", lambda e: self.save_project())
         self.bind("<Control-S>", lambda e: self.save_project())
@@ -238,8 +322,96 @@ class ScenarioEditor(tk.Tk):
         self.bind("<Control-minus>", lambda e: self.zoom_out())
         self.bind("<Control-0>", lambda e: self.zoom_reset())
 
-    def on_key_press(self, event: Any) -> None:
+        self._setup_cyrillic_widget_bindings()
+
+    def _setup_cyrillic_widget_bindings(self) -> None:
+        """Позволяет использовать стандартные хоткеи (Ctrl+C, Ctrl+V, Ctrl+A, Ctrl+X, Ctrl+Z, Ctrl+Y)
+        в полях ввода Entry и Text даже при включенной русской раскладке клавиатуры."""
+        def handle_entry_ctrl(event: Any) -> str | None:
+            if not (event.state & 4):
+                return None
+            kc = event.keycode
+            w = event.widget
+            if kc == 65:  # Ctrl+A
+                w.select_range(0, tk.END)
+                w.icursor(tk.END)
+                return "break"
+            elif kc == 67:  # Ctrl+C
+                w.event_generate("<<Copy>>")
+                return "break"
+            elif kc == 86:  # Ctrl+V
+                w.event_generate("<<Paste>>")
+                return "break"
+            elif kc == 88:  # Ctrl+X
+                w.event_generate("<<Cut>>")
+                return "break"
+            return None
+
+        def handle_text_ctrl(event: Any) -> str | None:
+            if not (event.state & 4):
+                return None
+            kc = event.keycode
+            w = event.widget
+            if kc == 65:  # Ctrl+A
+                w.tag_add("sel", "1.0", "end")
+                return "break"
+            elif kc == 67:  # Ctrl+C
+                w.event_generate("<<Copy>>")
+                return "break"
+            elif kc == 86:  # Ctrl+V
+                w.event_generate("<<Paste>>")
+                return "break"
+            elif kc == 88:  # Ctrl+X
+                w.event_generate("<<Cut>>")
+                return "break"
+            elif kc == 90:  # Ctrl+Z
+                try:
+                    w.edit_undo()
+                except Exception:
+                    pass
+                return "break"
+            elif kc == 89:  # Ctrl+Y
+                try:
+                    w.edit_redo()
+                except Exception:
+                    pass
+                return "break"
+            return None
+
+        self.bind_class("Entry", "<Control-KeyPress>", handle_entry_ctrl)
+        self.bind_class("Text", "<Control-KeyPress>", handle_text_ctrl)
+
+    def on_key_press(self, event: Any) -> str | None:
         self.pressed_keys[event.keysym] = True
+
+        # Универсальная обработка хоткеев независимо от раскладки (QWERTY / ЙЦУКЕН)
+        is_ctrl = bool(event.state & 4)
+        is_shift = bool(event.state & 1)
+
+        action = None
+        if is_ctrl:
+            # 1. Поиск по виртуальному коду клавиши (Windows keycode)
+            action = self._hotkey_actions.get((True, is_shift, event.keycode))
+            if not action and not is_shift:
+                action = self._hotkey_actions.get((True, False, event.keycode))
+            # 2. Поиск по keysym (Tkinter keysym / Linux X11)
+            if not action:
+                action = self._hotkey_actions.get((True, is_shift, event.keysym))
+            if not action and not is_shift:
+                action = self._hotkey_actions.get((True, False, event.keysym))
+        elif event.keysym == "Delete" or event.keycode == 46:
+            action = self._hotkey_actions.get((False, False, 46)) or self._hotkey_actions.get((False, False, "Delete"))
+
+        if action:
+            now = time.monotonic()
+            if now - self._last_hotkey_time > 0.05:
+                self._last_hotkey_time = now
+                try:
+                    action(event)
+                except TypeError:
+                    action()
+            return "break"
+        return None
 
     def on_key_release(self, event: Any) -> None:
         self.pressed_keys[event.keysym] = False
@@ -379,6 +551,10 @@ class ScenarioEditor(tk.Tk):
     def duplicate(self, event: Any = None) -> None:
         self.copy()
         self.paste()
+
+    def select_all(self, event: Any = None) -> None:
+        self.selected_nodes = list(self.nodes)
+        self.redraw()
 
     def delete_selected(self, event: Any = None) -> None:
         if not self.selected_nodes and not self.selected_connection:

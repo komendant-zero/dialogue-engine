@@ -182,6 +182,8 @@ class AutoLayoutPlugin(Plugin):
         if hasattr(self.editor, 'bind'):
             self.editor.bind("<Control-l>", self.run_auto_layout)
             self.editor.bind("<Control-L>", self.run_auto_layout)
+            self.editor.bind("<Control-Cyrillic_de>", self.run_auto_layout)
+            self.editor.bind("<Control-Cyrillic_DE>", self.run_auto_layout)
 
     def on_event(self, event_type, data=None):
         if event_type == 'setup_ui':
