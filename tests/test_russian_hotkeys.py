@@ -95,6 +95,74 @@ class TestRussianHotkeys(unittest.TestCase):
         self.app.on_key_press(MockKeyEvent(state=0, keycode=46, keysym="Delete"))
         self.assertEqual(len(self.app.nodes), 1)
 
+    def test_node_creation_hotkeys(self):
+        """Проверяет создание нод по горячим клавишам (1 - Сюжет, 2 - Выбор, 3 - Условие, 4 - Музыка)."""
+        # Клавиша '1' -> Сюжет
+        self.app._last_hotkey_time = 0.0
+        res = self.app.on_key_press(MockKeyEvent(state=0, keycode=49, keysym="1"))
+        self.assertEqual(res, "break")
+        self.assertEqual(len(self.app.nodes), 1)
+        self.assertEqual(self.app.nodes[0].node_type, "story")
+
+        # Клавиша '2' -> Выбор
+        self.app._last_hotkey_time = 0.0
+        res = self.app.on_key_press(MockKeyEvent(state=0, keycode=50, keysym="2"))
+        self.assertEqual(res, "break")
+        self.assertEqual(len(self.app.nodes), 2)
+        self.assertEqual(self.app.nodes[1].node_type, "choice")
+
+        # Клавиша '3' -> Условие
+        self.app._last_hotkey_time = 0.0
+        res = self.app.on_key_press(MockKeyEvent(state=0, keycode=51, keysym="3"))
+        self.assertEqual(res, "break")
+        self.assertEqual(len(self.app.nodes), 3)
+        self.assertEqual(self.app.nodes[2].node_type, "condition")
+
+        # Клавиша '4' -> Музыка
+        self.app._last_hotkey_time = 0.0
+        res = self.app.on_key_press(MockKeyEvent(state=0, keycode=52, keysym="4"))
+        self.assertEqual(res, "break")
+        self.assertEqual(len(self.app.nodes), 4)
+        self.assertEqual(self.app.nodes[3].node_type, "music")
+
+    def test_custom_hotkeys_rebind_and_settings(self):
+        """Проверяет динамическое переназначение горячих клавиш через HotkeyManager."""
+        self.app.hotkey_manager.hotkeys["add_story"] = "Ctrl+Shift+S"
+        self.app.reload_hotkeys()
+        self.app.nodes.clear()
+
+        # Старая клавиша '1' не должна создавать ноду
+        self.app._last_hotkey_time = 0.0
+        self.app.on_key_press(MockKeyEvent(state=0, keycode=49, keysym="1"))
+        self.assertEqual(len(self.app.nodes), 0)
+
+        # Новая клавиша 'Ctrl+Shift+S' (state 5, keycode 83) должна создать сюжетную ноду
+        self.app._last_hotkey_time = 0.0
+        res = self.app.on_key_press(MockKeyEvent(state=5, keycode=83, keysym="??"))
+        self.assertEqual(res, "break")
+        self.assertEqual(len(self.app.nodes), 1)
+        self.assertEqual(self.app.nodes[0].node_type, "story")
+
+        # Сброс к значениям по умолчанию
+        self.app.hotkey_manager.reset_to_defaults()
+        self.app.reload_hotkeys()
+
+    def test_hotkey_settings_dialog_ui(self):
+        """Проверяет открытие и поиск в окне настроек горячих клавиш."""
+        from ui.dialogs.hotkey_settings import HotkeySettingsDialog
+        dlg = HotkeySettingsDialog(self.app, self.app)
+        self.assertIsNotNone(dlg.dialog)
+        self.assertGreater(len(dlg.tree.get_children()), 10)
+
+        # Фильтр поиска
+        dlg.e_search.insert(0, "сюжет")
+        dlg._populate_tree()
+        children = dlg.tree.get_children()
+        self.assertEqual(len(children), 1)
+        self.assertEqual(children[0], "add_story")
+
+        dlg.dialog.destroy()
+
 
 if __name__ == "__main__":
     unittest.main()

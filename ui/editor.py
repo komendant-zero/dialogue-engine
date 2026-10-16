@@ -44,10 +44,12 @@ CYRILLIC_KEY_MAP: dict[str, tuple[str, str]] = {
 
 from core.autosave import AutosaveManager
 from core.history import HistoryManager
+from core.hotkeys import HotkeyManager
 from core.models import ConnectionData, NodeData, ProjectData
 from core.serialization import ProjectSerializer, SerializationError
 from plugin_system.manager import PluginManager
 from ui.canvas import EditorCanvas
+from ui.dialogs.hotkey_settings import HotkeySettingsDialog
 from ui.dialogs.node_editor import NodeEditorDialog
 from ui.dialogs.search_replace import SearchReplaceDialog
 from ui.node_view import Node
@@ -77,6 +79,7 @@ class ScenarioEditor(tk.Tk):
         self.history_manager = HistoryManager(max_depth=50)
         self.autosave_manager = AutosaveManager()
         self.plugin_manager = PluginManager(self)
+        self.hotkey_manager = HotkeyManager()
 
         # State Variables
         self.selected_nodes: list[Node] = []
@@ -220,6 +223,8 @@ class ScenarioEditor(tk.Tk):
         self.project_menu.add_command(label="💾 Сохранить (Ctrl+S)", command=self.save_project)
         self.project_menu.add_command(label="📂 Загрузить (Ctrl+O)", command=self.load_project)
         self.project_menu.add_separator()
+        self.project_menu.add_command(label="⌨️ Горячие клавиши...", command=self.open_hotkey_settings)
+        self.project_menu.add_separator()
         self.project_menu.add_command(label="⚠️ Очистить холст", command=self.clear_all)
 
         # Поиск
@@ -230,6 +235,10 @@ class ScenarioEditor(tk.Tk):
         self.dev_menu_btn.pack(side=tk.RIGHT, padx=3)
         self.dev_menu = tk.Menu(self.dev_menu_btn, **MENU_CFG_STYLE)
         self.dev_menu_btn["menu"] = self.dev_menu
+        self.dev_menu.add_command(label="⌨️ Настройки горячих клавиш...", command=self.open_hotkey_settings)
+
+        # Кнопка настроек хоткеев на тулбаре
+        tk.Button(self.toolbar_right, text="⌨️ Хоткеи", command=self.open_hotkey_settings, **BTN_NORMAL_STYLE).pack(side=tk.RIGHT, padx=3)
 
         # Масштабирование (Zoom)
         self.zoom_frame = tk.Frame(self.toolbar_right, bg=COLORS["bg"])
@@ -303,6 +312,31 @@ class ScenarioEditor(tk.Tk):
     def setup_hotkeys(self) -> None:
         self.bind("<KeyPress>", self.on_key_press)
         self.bind("<KeyRelease>", self.on_key_release)
+
+        # Регистрация действий в HotkeyManager
+        self.hotkey_manager.register_action("add_story", lambda e=None: self.add_node_at_cursor("story"))
+        self.hotkey_manager.register_action("add_choice", lambda e=None: self.add_node_at_cursor("choice"))
+        self.hotkey_manager.register_action("add_condition", lambda e=None: self.add_node_at_cursor("condition"))
+        self.hotkey_manager.register_action("add_music", lambda e=None: self.add_node_at_cursor("music"))
+        self.hotkey_manager.register_action("add_pause", lambda e=None: self.add_node_at_cursor("pause"))
+        self.hotkey_manager.register_action("save_project", lambda e=None: self.save_project())
+        self.hotkey_manager.register_action("load_project", lambda e=None: self.load_project())
+        self.hotkey_manager.register_action("search", lambda e=None: self.open_search_replace())
+        self.hotkey_manager.register_action("undo", self.undo)
+        self.hotkey_manager.register_action("redo", self.redo)
+        self.hotkey_manager.register_action("copy", self.copy)
+        self.hotkey_manager.register_action("paste", self.paste)
+        self.hotkey_manager.register_action("duplicate", self.duplicate)
+        self.hotkey_manager.register_action("select_all", self.select_all)
+        self.hotkey_manager.register_action("delete", self.delete_selected)
+        self.hotkey_manager.register_action("auto_layout", self.trigger_auto_layout)
+        self.hotkey_manager.register_action("zoom_in", lambda e=None: self.zoom_in())
+        self.hotkey_manager.register_action("zoom_out", lambda e=None: self.zoom_out())
+        self.hotkey_manager.register_action("zoom_reset", lambda e=None: self.zoom_reset())
+
+        self.hotkey_manager.compile()
+
+        # Базовые биндинги
         self.bind("<Control-z>", self.undo)
         self.bind("<Control-y>", self.redo)
         self.bind("<Control-Shift-z>", self.redo)
@@ -323,6 +357,59 @@ class ScenarioEditor(tk.Tk):
         self.bind("<Control-0>", lambda e: self.zoom_reset())
 
         self._setup_cyrillic_widget_bindings()
+        self.update_menu_accelerators()
+
+    def add_node_at_cursor(self, ntype: str) -> Node:
+        """Создаёт новую ноду в позиции курсора мыши на холсте (или по центру экрана)."""
+        try:
+            root_x = self.canvas.winfo_pointerx()
+            root_y = self.canvas.winfo_pointery()
+            c_root_x = self.canvas.winfo_rootx()
+            c_root_y = self.canvas.winfo_rooty()
+            c_w = self.canvas.winfo_width()
+            c_h = self.canvas.winfo_height()
+
+            mx = root_x - c_root_x
+            my = root_y - c_root_y
+            if 0 <= mx <= c_w and 0 <= my <= c_h:
+                x = self.canvas.canvasx(mx) - 90
+                y = self.canvas.canvasy(my) - 40
+            else:
+                x = self.canvas.canvasx(self.winfo_width() / 2) - 90
+                y = self.canvas.canvasy(self.winfo_height() / 2) - 50
+        except Exception:
+            x = self.canvas.canvasx(self.winfo_width() / 2) - 90
+            y = self.canvas.canvasy(self.winfo_height() / 2) - 50
+
+        node = self.add_node(ntype, x=max(10, x), y=max(10, y))
+        self.selected_nodes = [node]
+        self.redraw()
+        return node
+
+    def trigger_auto_layout(self, event: Any = None) -> None:
+        """Вызывает автоматическую расстановку нод через плагин Auto Layout."""
+        plugin = self.plugin_manager.get_plugin("Auto Layout")
+        if plugin and hasattr(plugin, "run_auto_layout"):
+            plugin.run_auto_layout()
+
+    def open_hotkey_settings(self) -> None:
+        """Открывает диалог настройки горячих клавиш."""
+        HotkeySettingsDialog(self, self)
+
+    def reload_hotkeys(self) -> None:
+        """Перекомпилирует хоткеи и обновляет подсказки в интерфейсе."""
+        self.hotkey_manager.compile()
+        self.update_menu_accelerators()
+
+    def update_menu_accelerators(self) -> None:
+        """Обновляет надписи горячих клавиш в меню."""
+        save_key = self.hotkey_manager.hotkeys.get("save_project", "Ctrl+S")
+        load_key = self.hotkey_manager.hotkeys.get("load_project", "Ctrl+O")
+        try:
+            self.project_menu.entryconfigure(0, label=f"💾 Сохранить ({save_key})")
+            self.project_menu.entryconfigure(1, label=f"📂 Загрузить ({load_key})")
+        except Exception:
+            pass
 
     def _setup_cyrillic_widget_bindings(self) -> None:
         """Позволяет использовать стандартные хоткеи (Ctrl+C, Ctrl+V, Ctrl+A, Ctrl+X, Ctrl+Z, Ctrl+Y)
@@ -384,9 +471,18 @@ class ScenarioEditor(tk.Tk):
     def on_key_press(self, event: Any) -> str | None:
         self.pressed_keys[event.keysym] = True
 
-        # Универсальная обработка хоткеев независимо от раскладки (QWERTY / ЙЦУКЕН)
+        # 1. Проверяем динамический HotkeyManager (пользовательские хоткеи и хоткеи создания нод)
+        if hasattr(self, "hotkey_manager"):
+            now = time.monotonic()
+            if now - self._last_hotkey_time > 0.05:
+                if self.hotkey_manager.dispatch(event):
+                    self._last_hotkey_time = now
+                    return "break"
+
+        # 2. Фолбэк на зарегистрированные действия _hotkey_actions (плагины и пр.)
         is_ctrl = bool(event.state & 4)
         is_shift = bool(event.state & 1)
+        is_alt = bool(event.state & 8) or bool(event.state & 0x20000)
 
         action = None
         if is_ctrl:
