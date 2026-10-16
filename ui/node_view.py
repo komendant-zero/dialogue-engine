@@ -180,6 +180,8 @@ class Node:
         if self.node_type in ("choice", "battle", "condition"):
             if self.node_type == "condition":
                 return (self.x + self.width, self.y + 35 + (15 if index == 0 else 40))
+            if self.node_type == "choice" and hasattr(self, "_choice_port_offsets") and index < len(self._choice_port_offsets):
+                return (self.x + self.width, self.y + self._choice_port_offsets[index])
             return (self.x + self.width, self.y + 35 + (index * 25))
         return (self.x + self.width, self.y + self.height / 2)
 

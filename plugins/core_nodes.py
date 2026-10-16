@@ -28,7 +28,46 @@ class CoreNodesPlugin(Plugin):
             if node.node_type == 'choice':
                 display_content = data['display_content']
                 options = display_content.split('\n')
-                data['height'] = data['base_h'] + (len(options) * 25) + 10
+                font = getattr(node, 'font_content', None)
+
+                # Вычисляем максимальную длину строки для адаптивной ширины блока
+                max_text_w = 140
+                if font:
+                    for opt in options:
+                        clean_opt = opt.strip() if opt else ""
+                        if clean_opt:
+                            w_meas = font.measure(clean_opt)
+                            if w_meas > max_text_w:
+                                max_text_w = w_meas
+
+                # Адаптивная ширина: базовая 200px, максимум 340px (если текст длиннее, он переносится)
+                node.width = max(200, min(340, max_text_w + 40))
+                avail_w = max(100, node.width - 32)
+
+                port_offsets = []
+                curr_y = 35.0
+                canvas = self.editor.canvas if (self.editor and hasattr(self.editor, 'canvas')) else None
+
+                for opt in options:
+                    clean_opt = opt.strip() if opt else ""
+                    if not clean_opt:
+                        opt_h = 24.0
+                    elif canvas and font:
+                        temp_t = canvas.create_text(0, 0, text=clean_opt, width=avail_w, font=font, anchor="nw")
+                        bbox = canvas.bbox(temp_t)
+                        canvas.delete(temp_t)
+                        opt_h = max(24.0, (bbox[3] - bbox[1]) + 8.0) if bbox else 24.0
+                    elif font:
+                        lines_cnt = max(1, math.ceil(font.measure(clean_opt) / avail_w))
+                        opt_h = max(24.0, lines_cnt * 18.0 + 6.0)
+                    else:
+                        opt_h = 24.0
+
+                    port_offsets.append(curr_y + (opt_h / 2.0))
+                    curr_y += opt_h + 6.0
+
+                node._choice_port_offsets = port_offsets
+                data['height'] = curr_y + 8.0
                 data['handled']['done'] = True
 
         elif event_type == 'draw_node_content':
@@ -41,9 +80,26 @@ class CoreNodesPlugin(Plugin):
             if node.node_type == 'choice':
                 highlights = node.custom_data.get('highlights', {})
                 options = display_content.split('\n')
+                port_offsets = getattr(node, '_choice_port_offsets', None)
+                if not port_offsets or len(port_offsets) != len(options):
+                    port_offsets = [35.0 + 12.0 + (i * 28.0) for i in range(len(options))]
+
+                avail_w = max(100, w - 32)
+
                 for i, opt in enumerate(options):
-                    opt_y = y + 35 + (i * 25)
-                    if highlights:
+                    clean_opt = opt.strip() if opt else ""
+                    port_y = y + port_offsets[i]
+
+                    # Проверяем наличие подсветки конкретных фраз
+                    matched_highlight = None
+                    if highlights and clean_opt:
+                        for phrase, color in highlights.items():
+                            if phrase and phrase in clean_opt:
+                                matched_highlight = color
+                                break
+
+                    # Если текст вмещается в одну строку и есть фрагментарная подсветка
+                    if matched_highlight and node.font_content and node.font_content.measure(clean_opt) <= avail_w and len(highlights) > 0:
                         text_colors = [text_col] * len(opt)
                         for phrase, color in highlights.items():
                             if not phrase: continue
@@ -68,14 +124,26 @@ class CoreNodesPlugin(Plugin):
                                     chunk_text = opt[k]
                                     chunk_color = c_col
                             chunks.append((chunk_text, chunk_color))
-                        cur_x = x + w - 15
+                        cur_x = x + w - 18
                         for text_chunk, color in reversed(chunks):
-                            canvas.create_text(cur_x, opt_y, text=text_chunk, fill=color, anchor="e", font=node.font_content, tags=("node", node.id))
+                            canvas.create_text(cur_x, port_y, text=text_chunk, fill=color, anchor="e", font=node.font_content, tags=("node", node.id))
                             cur_x -= node.font_content.measure(text_chunk)
                     else:
-                        canvas.create_text(x+w-15, opt_y, text=opt, fill=text_col, anchor="e", font=node.font_content, tags=("node", node.id))
+                        # Текст опции с жесткой привязкой к границам блока (не может вылезти влево или вправо)
+                        fill_color = matched_highlight if matched_highlight else text_col
+                        canvas.create_text(
+                            x + w - 18,
+                            port_y,
+                            text=opt,
+                            fill=fill_color,
+                            anchor="e",
+                            justify="right",
+                            width=avail_w,
+                            font=node.font_content,
+                            tags=("node", node.id)
+                        )
                     
-                    node.draw_port(canvas, x+w, opt_y, i)
+                    node.draw_port(canvas, x + w, port_y, i)
                     
                 data['handled'] = True
                 
