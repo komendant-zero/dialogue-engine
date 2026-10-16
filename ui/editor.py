@@ -301,23 +301,21 @@ class ScenarioEditor(tk.Tk):
 
     def restore_state(self, state: dict[str, Any]) -> None:
         self._reset_canvas()
-        id_map = {}
         for nd in state.get("nodes", []):
             node = Node(
                 self, nd["x"], nd["y"], nd["title"], nd["content"],
-                nd["type"], dict(nd.get("custom_data", {})), nd.get("mode", "standard")
+                nd["type"], dict(nd.get("custom_data", {})), nd.get("mode", "standard"),
+                node_id=nd.get("id")
             )
-            node.id = nd["id"]
+            node.calculate_size()
             self.nodes.append(node)
-            id_map[nd["id"]] = node.id
 
         for c in state.get("connections", []):
-            if c["from"] in id_map and c["to"] in id_map:
-                self.connections.append({
-                    "from": id_map[c["from"]],
-                    "out_idx": c["out_idx"],
-                    "to": id_map[c["to"]]
-                })
+            self.connections.append({
+                "from": c["from"],
+                "out_idx": c["out_idx"],
+                "to": c["to"]
+            })
         self.redraw()
 
     def undo(self, event: Any = None) -> None:
@@ -407,7 +405,8 @@ class ScenarioEditor(tk.Tk):
         content: str | None = None,
         custom_data: dict[str, Any] | None = None,
         mode: str = "standard",
-        save_history: bool = True
+        save_history: bool = True,
+        node_id: str | None = None
     ) -> Node:
         if save_history:
             self.save_state()
@@ -438,7 +437,7 @@ class ScenarioEditor(tk.Tk):
         if content is None:
             content = "Текст..." if ntype == "story" else ("Вар 1\nВар 2" if ntype == "choice" else "Нет файла")
 
-        node = Node(self, x, y, title, content, ntype, custom_data, mode)
+        node = Node(self, x, y, title, content, ntype, custom_data, mode, node_id=node_id)
         node.width = max(80, int(180 * self.zoom_level))
         font_size = max(6, int(9 * self.zoom_level))
         if node.font_content:
@@ -792,28 +791,23 @@ class ScenarioEditor(tk.Tk):
     def _load_project_data(self, project: ProjectData) -> None:
         self._reset_canvas()
         self.history_manager.clear()
-        id_map = {}
 
         for n_data in project.nodes:
-            node = self.add_node(
-                ntype=n_data.node_type,
-                x=n_data.x,
-                y=n_data.y,
-                title=n_data.title,
-                content=n_data.content,
-                custom_data=n_data.custom_data,
-                mode=n_data.mode,
-                save_history=False
-            )
-            id_map[n_data.id] = node.id
+            node = Node.from_node_data(self, n_data)
+            node.is_new = False
+            node.width = max(80, int((n_data.width or 180) * self.zoom_level))
+            font_size = max(6, int(9 * self.zoom_level))
+            if node.font_content:
+                node.font_content.configure(size=font_size)
+            node.calculate_size()
+            self.nodes.append(node)
 
         for c in project.connections:
-            if c.from_node in id_map and c.to_node in id_map:
-                self.connections.append({
-                    "from": id_map[c.from_node],
-                    "out_idx": c.out_idx,
-                    "to": id_map[c.to_node]
-                })
+            self.connections.append({
+                "from": c.from_node,
+                "out_idx": c.out_idx,
+                "to": c.to_node
+            })
 
         self.redraw()
         self.plugin_manager.notify("project_loaded", {"project": project})

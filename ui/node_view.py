@@ -7,6 +7,7 @@ import math
 import tkinter as tk
 import tkinter.font as tkfont
 from typing import Any, Dict, List, Optional, Tuple
+import uuid
 
 from core.models import NodeData
 from ui.theme import COLORS, PC_USER
@@ -24,10 +25,11 @@ class Node:
         content: str,
         node_type: str,
         custom_data: Optional[Dict[str, Any]] = None,
-        mode: str = "standard"
+        mode: str = "standard",
+        node_id: Optional[str] = None
     ):
         self.editor = editor
-        self.id = str(id(self))
+        self.id = str(node_id) if node_id is not None else str(uuid.uuid4().hex[:12])
         self.x = float(x)
         self.y = float(y)
         self.width = 180

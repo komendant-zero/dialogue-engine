@@ -481,9 +481,13 @@ class MediaBlockPlugin(Plugin):
         print(f"[{self.name}] Logic injected (v{self.version}).")
 
     def on_event(self, event_type, data=None):
-        # Только UI-кнопка — всё остальное НЕ должно быть здесь
         if event_type == 'setup_ui':
             self.add_toolbar_button(data)
+        elif event_type in ('clear_cache', 'project_loaded'):
+            IMAGE_CACHE.clear()
+            ANIM_CACHE.clear()
+            SIZE_CACHE.clear()
+            self.animated_nodes.clear()
 
     def add_toolbar_button(self, toolbar):
         if not hasattr(self.editor, 'plugin_menu'):

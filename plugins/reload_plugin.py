@@ -2,10 +2,17 @@ import tkinter as tk
 from tkinter import messagebox
 from plugin_system import Plugin
 import os
+import time
 
 class ReloadPlugin(Plugin):
-    name = "Project Reloader"
-    version = "1.0"
+    name = "Project Reloader & Live Watcher"
+    version = "1.1"
+
+    def __init__(self, editor):
+        super().__init__(editor)
+        self._last_mtime = 0
+        self._auto_watch_enabled = True
+        self._watch_job = None
 
     def on_event(self, event_type, data=None):
         if event_type == 'setup_ui':
@@ -16,7 +23,7 @@ class ReloadPlugin(Plugin):
                 toolbar = data
                 tk.Button(
                     toolbar,
-                    text="🔄 Обновить",
+                    text="🔄 Обновить (F5)",
                     command=self.reload_file,
                     bg='#3498db',
                     fg='white',
@@ -25,6 +32,47 @@ class ReloadPlugin(Plugin):
                     padx=8,
                     pady=3
                 ).pack(side=tk.RIGHT, padx=3)
+            
+            self._start_watcher()
+
+    def _start_watcher(self):
+        if self._watch_job:
+            try:
+                self.editor.after_cancel(self._watch_job)
+            except Exception:
+                pass
+        self._check_file_change()
+
+    def _check_file_change(self):
+        try:
+            filepath = getattr(self.editor, 'current_file', None)
+            if filepath and os.path.exists(filepath):
+                current_mtime = os.path.getmtime(filepath)
+                if self._last_mtime == 0:
+                    self._last_mtime = current_mtime
+                elif current_mtime > self._last_mtime + 0.1:
+                    self._last_mtime = current_mtime
+                    # Если холст чистый (нет несохранённых ручных правок пользователя), обновляем тихо
+                    if not getattr(self.editor, 'is_dirty', False):
+                        self._silent_reload(filepath)
+                    else:
+                        if hasattr(self.editor, 'status_bar'):
+                            self.editor.status_bar.config(text="⚠️ Файл на диске обновлен. Нажмите F5 для перезагрузки.")
+        except Exception:
+            pass
+
+        # Проверяем каждую секунду
+        self._watch_job = self.editor.after(1000, self._check_file_change)
+
+    def _silent_reload(self, filepath):
+        try:
+            if hasattr(self.editor, 'plugin_manager') and self.editor.plugin_manager:
+                self.editor.plugin_manager.notify('clear_cache')
+            self.editor.load_project(file_path=filepath)
+            if hasattr(self.editor, 'status_bar'):
+                self.editor.status_bar.config(text="✅ Проект автоматически синхронизирован с файлом")
+        except Exception:
+            pass
 
     def reload_file(self):
         if not hasattr(self.editor, 'current_file') or not self.editor.current_file:
@@ -42,18 +90,11 @@ class ReloadPlugin(Plugin):
                 return
                 
         try:
-            # Очищаем кэши изображений, если загружены плагины
-            import sys
-            if 'media_node' in sys.modules:
-                if hasattr(sys.modules['media_node'], 'IMAGE_CACHE'):
-                    sys.modules['media_node'].IMAGE_CACHE.clear()
-                if hasattr(sys.modules['media_node'], 'ANIM_CACHE'):
-                    sys.modules['media_node'].ANIM_CACHE.clear()
-                if hasattr(sys.modules['media_node'], 'SIZE_CACHE'):
-                    sys.modules['media_node'].SIZE_CACHE.clear()
+            if hasattr(self.editor, 'plugin_manager') and self.editor.plugin_manager:
+                self.editor.plugin_manager.notify('clear_cache')
                     
             self.editor.load_project(file_path=filepath)
-            # Уведомление об успешном обновлении (можно закомментировать, если мешает)
-            # messagebox.showinfo("Успех", "Проект успешно обновлен из файла!", parent=self.editor)
+            self._last_mtime = os.path.getmtime(filepath)
         except Exception as e:
             messagebox.showerror("Ошибка", f"Не удалось обновить файл:\n{e}", parent=self.editor)
+

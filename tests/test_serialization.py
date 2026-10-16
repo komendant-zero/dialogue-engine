@@ -72,6 +72,24 @@ class TestSerialization(unittest.TestCase):
             self.assertTrue(len(project.nodes) > 0)
             self.assertTrue(len(project.connections) > 0)
 
+    def test_node_id_preservation_and_determinism(self):
+        from ui.node_view import Node
+
+        class DummyEditor:
+            def __init__(self):
+                self.zoom_level = 1.0
+
+        dummy = DummyEditor()
+        # Explicit ID should be preserved
+        n = Node(dummy, 100, 200, "Node A", "Content", "story", node_id="custom_fixed_id_123")
+        self.assertEqual(n.id, "custom_fixed_id_123")
+
+        data = n.to_node_data()
+        self.assertEqual(data.id, "custom_fixed_id_123")
+
+        reconstructed = Node.from_node_data(dummy, data)
+        self.assertEqual(reconstructed.id, "custom_fixed_id_123")
+
 
 if __name__ == "__main__":
     unittest.main()

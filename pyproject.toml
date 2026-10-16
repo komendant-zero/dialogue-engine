@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dialogue-engine"
+version = "2.0.0"
+description = "Node-based visual dialogue and scenario editor for Ren'Py visual novels"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Dialogue Engine Contributors" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Games/Entertainment",
+    "Topic :: Multimedia :: Graphics :: Editors"
+]
+dependencies = [
+    "Pillow>=9.0.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pyinstaller>=6.0.0",
+    "ruff>=0.1.0"
+]
+
+[project.scripts]
+dialogue-engine = "main:main"
+
+[project.urls]
+Homepage = "https://github.com/komendant-zero/dialogue-engine"
+Repository = "https://github.com/komendant-zero/dialogue-engine"

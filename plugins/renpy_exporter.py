@@ -1,37 +1,52 @@
+"""
+Dialogue Engine - Ren'Py Exporter Plugin.
+Delegates to core.export.RenPyExporter while integrating with UI and Editor events.
+"""
+
+from __future__ import annotations
+import os
 import tkinter as tk
 from tkinter import filedialog, messagebox
-from plugin_system import Plugin
-import os
-import json
+from typing import Any, Dict, List, Optional
+
+from core.models import ConnectionData, NodeData, ProjectData
+from export.renpy_exporter import RenPyExporter
+from plugin_system.base import Plugin
+
 
 class RenpyExporterPlugin(Plugin):
     name = "Renpy Exporter"
     version = "2.1"
 
-    def on_event(self, event_type, data=None):
-        if event_type == 'setup_ui':
+    def __init__(self, editor: Any = None):
+        super().__init__(editor)
+        pm = getattr(editor, "plugin_manager", None) if editor else None
+        self.exporter = RenPyExporter(plugin_manager=pm)
+
+    def on_event(self, event_type: str, data: Any = None) -> None:
+        if event_type == "setup_ui":
             self.add_toolbar_button(data)
 
-    def add_toolbar_button(self, toolbar):
-        parent = getattr(self.editor, 'toolbar_right', toolbar)
+    def add_toolbar_button(self, toolbar: Any) -> None:
+        parent = getattr(self.editor, "toolbar_right", toolbar)
         tk.Button(
             parent,
             text="⚙ Экспорт Ren'Py",
             command=self.export_project,
-            bg='#8a2318',
-            activebackground='#a93226',
-            fg='white',
-            activeforeground='white',
-            relief='flat',
-            font=('Segoe UI', 9, 'bold'),
+            bg="#8a2318",
+            activebackground="#a93226",
+            fg="white",
+            activeforeground="white",
+            relief="flat",
+            font=("Segoe UI", 9, "bold"),
             padx=8,
             pady=3,
-            cursor='hand2'
+            cursor="hand2"
         ).pack(side=tk.RIGHT, padx=3)
 
-    def export_project(self):
-        nodes = self.editor.nodes
-        connections = self.editor.connections
+    def export_project(self) -> None:
+        nodes = getattr(self.editor, "nodes", [])
+        connections = getattr(self.editor, "connections", [])
 
         if not nodes:
             messagebox.showwarning("Пусто", "Проект пуст! Добавьте блоки для экспорта.")
@@ -47,228 +62,66 @@ class RenpyExporterPlugin(Plugin):
         else:
             messagebox.showerror("Ошибка", msg)
 
-    def do_export(self, export_dir, nodes, connections):
-        try:
-            rpy_path = os.path.join(export_dir, "script.rpy")
-            nodes_map = {n.id: n for n in nodes}
-            with open(rpy_path, 'w', encoding='utf-8') as f:
-                f.write("# --- Сгенерировано визуальным редактором (v2.0) ---\n\n")
-                
-                # ПЫТАЕМСЯ ДЕЛЕГИРОВАТЬ ЭКСПОРТ INIT БЛОКОВ (Анимации, ATL, настройки)
-                init_data = {'file': f, 'nodes': nodes, 'connections': connections, 'export_dir': export_dir}
-                self.editor.plugin_manager.notify('renpy_export_init', init_data)
-                
-                # Поиск стартового узла
-                to_ids = set(c['to'] for c in connections)
-                start_nodes = [n for n in nodes if n.id not in to_ids]
-                
-                if not start_nodes:
-                    start_nodes = [nodes[0]]
-                
-                start_node = next((n for n in start_nodes if (n.node_type == 'label' or n.node_type == 'story') and n.title.lower() == 'start'), start_nodes[0])
-                
-                f.write("label start:\n")
-                f.write(f"    jump node_{start_node.id}\n\n")
-                
-                for node in nodes:
-                    check_data = {'node': node, 'skip': False}
-                    self.editor.plugin_manager.notify('renpy_export_check', check_data)
-                    if check_data['skip']:
-                        continue
-                        
-                    f.write(f"# --- {node.title} ({node.node_type}) ---\n")
-                    f.write(f"label node_{node.id}:\n")
-                    
-                    # ПЫТАЕМСЯ ДЕЛЕГИРОВАТЬ ЭКСПОРТ ПЛАГИНАМ
-                    export_data = {'node': node, 'file': f, 'connections': connections, 'export_dir': export_dir, 'handled': False}
-                    self.editor.plugin_manager.notify('renpy_export_node', export_data)
-                    
-                    if not export_data['handled']:
-                        # Стандартная логика (фоллбэк)
-                        self.write_node_content_default(f, node, connections, export_dir=export_dir, nodes_map=nodes_map)
-                    
-                    f.write("\n")
-                
-            return True, f"Скрипт успешно экспортирован:\n{rpy_path}"
-        except Exception as e:
-            return False, f"Ошибка экспорта:\n{e}"
+    def do_export(self, export_dir: str, nodes: List[Any], connections: List[Any]) -> tuple[bool, str]:
+        if hasattr(self.editor, "plugin_manager"):
+            self.exporter.plugin_manager = self.editor.plugin_manager
 
-    def clean_rel_path(self, path, export_dir=""):
-        if not path:
-            return ""
-        path = path.replace('\\', '/')
-        
-        # 1. Если путь содержит /game/ (типично для проектов Ren'Py), извлекаем относительный путь
-        path_lower = path.lower()
-        if "/game/" in path_lower:
-            idx = path_lower.find("/game/")
-            path = path[idx + 6:]
-        elif path_lower.startswith("game/"):
-            path = path[5:]
-        elif export_dir and os.path.isabs(path):
-            try:
-                rel = os.path.relpath(path, export_dir).replace('\\', '/')
-                if not rel.startswith('..'):
-                    path = rel
-            except ValueError:
-                pass
-        return path.lstrip('/')
-
-    def should_pause_after_media(self, node, connections, nodes_map=None):
-        if not nodes_map:
-            return False
-        out_conns = [c for c in connections if c['from'] == node.id]
-        if not out_conns:
-            return True  # Тупиковый узел в конце сценария — нужна пауза перед return
-
-        curr_id = out_conns[0]['to']
-        visited = set()
-        while curr_id and curr_id not in visited:
-            visited.add(curr_id)
-            target = nodes_map.get(curr_id)
-            if not target:
-                break
-            # Если следующий узел — диалог (story) или выбор (choice), пауза не нужна (диалог сам ждёт игрока)
-            if target.node_type in ('story', 'choice'):
-                return False
-            # Если на пути встречается другое медиа или анимация — обязательно нужна пауза,
-            # иначе текущее медиа моментально перекроется следующим!
-            if target.node_type in ('media', 'animation'):
-                return True
-            next_outs = [c for c in connections if c['from'] == curr_id]
-            if not next_outs:
-                break
-            curr_id = next_outs[0]['to']
-
-        return False
-
-    def write_node_content_default(self, f, node, connections, export_dir="", nodes_map=None):
-        # 1. Текстовый узел (Story)
-        if node.node_type == 'story':
-            # Пауза перед показом текста реплики (если включена в плагине паузы)
-            if node.custom_data.get('pause_before'):
-                p_mode = node.custom_data.get('pause_before_mode', 'click')
-                p_dur = node.custom_data.get('pause_before_duration', 1.0)
-                try:
-                    if p_mode == 'time' and float(p_dur) > 0:
-                        f.write(f'    pause {p_dur}\n')
-                    else:
-                        f.write('    pause\n')
-                except (ValueError, TypeError):
-                    f.write('    pause\n')
-
-            char_name = node.title.replace('"', '\\"')
-            text = node.content.replace('"', '\\"').replace('\n', '\\n')
-            
-            # Окраска текста
-            if 'highlights' in node.custom_data:
-                for word, color in node.custom_data['highlights'].items():
-                    if word: 
-                        text = text.replace(word, f"{{color={color}}}{word}{{/color}}")
-
-            # Окраска имени персонажа
-            header_color = node.custom_data.get('header_text_color', '')
-            if header_color and header_color.lower() not in ('#ffffff', 'white'):
-                char_name = f"{{color={header_color}}}{char_name}{{/color}}"
-
-            if getattr(node, 'mode', 'standard') == 'continue':
-                if not text.startswith(' ') and not text.startswith('\\n'):
-                    text = ' ' + text
-                f.write(f'    extend "{text}"\n')
-            elif char_name.startswith('#') or not char_name or char_name == f"{{color={header_color}}}#{{/color}}":
-                f.write(f'    "{text}"\n')
+        node_datas: List[NodeData] = []
+        for n in nodes:
+            if hasattr(n, "to_node_data"):
+                node_datas.append(n.to_node_data())
+            elif isinstance(n, NodeData):
+                node_datas.append(n)
+            elif isinstance(n, dict):
+                node_datas.append(NodeData.from_dict(n))
             else:
-                f.write(f'    "{char_name}" "{text}"\n')
-            self.write_jump(f, node.id, connections)
+                node_datas.append(NodeData(
+                    id=getattr(n, "id", ""),
+                    x=getattr(n, "x", 0.0),
+                    y=getattr(n, "y", 0.0),
+                    title=getattr(n, "title", ""),
+                    content=getattr(n, "content", ""),
+                    node_type=getattr(n, "node_type", "story"),
+                    mode=getattr(n, "mode", "standard"),
+                    custom_data=getattr(n, "custom_data", {})
+                ))
 
-        # 2. Узел Музыки/Звука
-        elif node.node_type == 'music':
-            mode = node.custom_data.get('music_mode', 'bg')
-            path = self.clean_rel_path(node.custom_data.get('music_file', ''), export_dir)
-            if path:
-                if mode == 'bg':
-                    f.write(f'    play music "{path}"\n')
-                elif mode == 'sfx':
-                    f.write(f'    play sound "{path}"\n')
-                else:
-                    f.write(f'    voice "{path}"\n')
-            self.write_jump(f, node.id, connections)
+        conn_datas: List[ConnectionData] = []
+        for c in connections:
+            if isinstance(c, ConnectionData):
+                conn_datas.append(c)
+            elif isinstance(c, dict):
+                conn_datas.append(ConnectionData.from_dict(c))
+            else:
+                conn_datas.append(ConnectionData(
+                    from_node=getattr(c, "from_node", getattr(c, "from", "")),
+                    out_idx=getattr(c, "out_idx", 0),
+                    to_node=getattr(c, "to_node", getattr(c, "to", ""))
+                ))
 
-        # 3. Узел Медиа (Фон / Спрайт)
-        elif node.node_type == 'media':
-            try:
-                data = json.loads(node.content)
-                mode = data.get("mode", "sprite")
-                path = self.clean_rel_path(data.get("image_path", ""), export_dir)
-                
-                anim = data.get("animation", "none")
-                dur = data.get("animation_duration", 0.5)
-                with_clause = ""
-                
-                if anim.lower() != "none":
-                    if anim[0].isupper():
-                        with_clause = f" with {anim}({dur})"
-                    else:
-                        if dur != 0.5:
-                            with_clause = f" with {anim.capitalize()}({dur})"
-                        else:
-                            with_clause = f" with {anim}"
+        project = ProjectData(nodes=node_datas, connections=conn_datas)
+        return self.exporter.export(project, export_dir)
 
-                if path:
-                    if mode == "background": 
-                        f.write(f'    scene expression "{path}"{with_clause}\n')
-                    else:
-                        align = data.get("position", "center")
-                        f.write(f'    show expression "{path}" at {align}{with_clause}\n')
+    def clean_rel_path(self, path: str, export_dir: str = "") -> str:
+        return self.exporter.clean_rel_path(path, export_dir)
 
-                # Проверяем, нужна ли пауза (явная или автоматическая перед следующим медиа)
-                if data.get("pause", False) or self.should_pause_after_media(node, connections, nodes_map):
-                    f.write('    pause\n')
-            except: pass
-            self.write_jump(f, node.id, connections)
+    def should_pause_after_media(self, node: Any, connections: List[Any], nodes_map: Optional[Dict[str, Any]] = None) -> bool:
+        conn_datas = [c if isinstance(c, ConnectionData) else ConnectionData.from_dict(c) for c in connections]
+        node_data = node if isinstance(node, NodeData) else (node.to_node_data() if hasattr(node, "to_node_data") else NodeData(id=node.id, title=node.title, content=node.content, node_type=node.node_type, custom_data=getattr(node, "custom_data", {})))
+        nm: Dict[str, NodeData] = {}
+        if nodes_map:
+            for k, v in nodes_map.items():
+                nm[k] = v if isinstance(v, NodeData) else (v.to_node_data() if hasattr(v, "to_node_data") else NodeData(id=v.id, title=v.title, content=v.content, node_type=v.node_type, custom_data=getattr(v, "custom_data", {})))
+        return self.exporter.should_pause_after_media(node_data, conn_datas, nm)
 
-        # 4. Узел Выбора (Choice)
-        elif node.node_type == 'choice':
-            options = node.content.split('\n')
-            f.write("    menu:\n")
-            out_conns = [c for c in connections if c['from'] == node.id]
-            for i, opt in enumerate(options):
-                if not opt.strip(): continue
-                clean_opt = opt.replace('"', '\\"')
-                
-                # У выборов красим не текст, а добавляем аргумент обводки при наведении
-                hover_color = None
-                if 'highlights' in node.custom_data:
-                    for word, color in node.custom_data['highlights'].items():
-                        if word and word in opt: 
-                            hover_color = color
-                            break # берем первый найденный цвет для всей опции
-                
-                if hover_color:
-                    f.write(f'        "{clean_opt}" (hover_outlines=[(2, "{hover_color}", 0, 0)]):\n')
-                else:
-                    f.write(f'        "{clean_opt}":\n')
-                    
-                target_conn = next((c for c in out_conns if c['out_idx'] == i), None)
-                if target_conn: f.write(f'            jump node_{target_conn["to"]}\n')
-                else: f.write('            pass\n')
-                    
-        # 5. Узел Label (Логическая метка)
-        elif node.node_type == 'label':
-            f.write(f'    # Метка: {node.title}\n')
-            self.write_jump(f, node.id, connections)
+    def write_node_content_default(self, f: Any, node: Any, connections: List[Any], export_dir: str = "", nodes_map: Optional[Dict[str, Any]] = None) -> None:
+        conn_datas = [c if isinstance(c, ConnectionData) else ConnectionData.from_dict(c) for c in connections]
+        node_data = node if isinstance(node, NodeData) else (node.to_node_data() if hasattr(node, "to_node_data") else NodeData(id=node.id, title=node.title, content=node.content, node_type=node.node_type, custom_data=getattr(node, "custom_data", {})))
+        nm = None
+        if nodes_map:
+            nm = {k: v if isinstance(v, NodeData) else (v.to_node_data() if hasattr(v, "to_node_data") else NodeData(id=v.id, title=v.title, content=v.content, node_type=v.node_type, custom_data=getattr(v, "custom_data", {}))) for k, v in nodes_map.items()}
+        return self.exporter.write_node_content_default(f, node_data, conn_datas, output_dir=export_dir, nodes_map=nm)
 
-        # 6. Узел Переменных (Variable)
-        elif node.node_type == 'variable':
-            lines = node.content.split('\n')
-            for line in lines:
-                if line.strip(): f.write(f'    $ {line.strip()}\n')
-            self.write_jump(f, node.id, connections)
-
-    def write_jump(self, f, node_id, connections):
-        out_conns = [c for c in connections if c['from'] == node_id]
-        if out_conns:
-            target_id = out_conns[0]['to']
-            f.write(f'    jump node_{target_id}\n')
-        else:
-            f.write('    return\n')
+    def write_jump(self, f: Any, node_id: str, connections: List[Any]) -> None:
+        conn_datas = [c if isinstance(c, ConnectionData) else ConnectionData.from_dict(c) for c in connections]
+        return self.exporter.write_jump(f, node_id, conn_datas)
