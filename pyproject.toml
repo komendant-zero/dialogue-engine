@@ -4,13 +4,27 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dialogue-engine"
-version = "2.0.0"
-description = "Node-based visual dialogue and scenario editor for Ren'Py visual novels"
+version = "2.1.0"
+description = "Node-based visual dialogue and scenario editor for Ren'Py visual novels with MCP AI Copilot"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [
     { name = "Dialogue Engine Contributors" }
+]
+keywords = [
+    "renpy",
+    "visual-novel",
+    "dialogue-editor",
+    "node-editor",
+    "narrative-design",
+    "mcp",
+    "model-context-protocol",
+    "ai-copilot",
+    "gamedev",
+    "storytelling",
+    "game-development",
+    "tkinter"
 ]
 classifiers = [
     "Programming Language :: Python :: 3",

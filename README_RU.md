@@ -13,9 +13,10 @@
   <img src="https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python&logoColor=white"/>
   <img src="https://img.shields.io/badge/Tkinter-GUI-orange?style=for-the-badge"/>
   <img src="https://img.shields.io/badge/Ren'Py-8.x%20%2F%207.x%20Ready-red?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/MCP-Enabled-9cf?style=for-the-badge&logoColor=white"/>
+  <img src="https://img.shields.io/badge/AI%20Copilot-Real--Time-blueviolet?style=for-the-badge"/>
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge"/>
-  <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey?style=for-the-badge"/>
-  <img src="https://img.shields.io/badge/Tests-23%20Passed-brightgreen?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Tests-24%20Passed-brightgreen?style=for-the-badge"/>
 </p>
 
 <p align="center">
