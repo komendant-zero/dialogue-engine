@@ -123,7 +123,7 @@ class ScenarioEditor(tk.Tk):
         self.plugin_manager.notify("setup_ui", self.toolbar)
 
         # Canvas positioning
-        self.canvas.xview_moveto(0.0)
+        self.canvas.xview_moveto(0.5)
         self.canvas.yview_moveto(0.5)
 
         self.protocol("WM_DELETE_WINDOW", self.on_close)
@@ -381,7 +381,7 @@ class ScenarioEditor(tk.Tk):
             x = self.canvas.canvasx(self.winfo_width() / 2) - 90
             y = self.canvas.canvasy(self.winfo_height() / 2) - 50
 
-        node = self.add_node(ntype, x=max(10, x), y=max(10, y))
+        node = self.add_node(ntype, x=x, y=y)
         self.selected_nodes = [node]
         self.redraw()
         return node
@@ -547,6 +547,8 @@ class ScenarioEditor(tk.Tk):
                 self.canvas.xview_scroll(int_move_x, "units")
             if int_move_y != 0:
                 self.canvas.yview_scroll(int_move_y, "units")
+            if int_move_x != 0 or int_move_y != 0:
+                self.canvas.update_grid()
 
         self.after(16, self.physics_loop)
 
@@ -687,8 +689,6 @@ class ScenarioEditor(tk.Tk):
             x = self.canvas.canvasx(self.winfo_width() / 2) - 90
             y = self.canvas.canvasy(self.winfo_height() / 2) - 50
 
-        if x < 0:
-            x = 10
 
         if title is None:
             if ntype == "story":
@@ -798,8 +798,6 @@ class ScenarioEditor(tk.Tk):
             for node in self.selected_nodes:
                 node.x += dx
                 node.y += dy
-                if node.x < 0:
-                    node.x = 0
             self.drag_data.update({"x": x, "y": y})
             self.redraw()
 
@@ -1051,6 +1049,7 @@ class ScenarioEditor(tk.Tk):
         self.velocity_y = dy
         self.mouse_last_x = event.x
         self.mouse_last_y = event.y
+        self.canvas.update_grid()
 
     def stop_pan(self, event: Any) -> None:
         self.is_panning = False

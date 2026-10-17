@@ -11,7 +11,10 @@ from ui.theme import COLORS
 
 
 class EditorCanvas(tk.Canvas):
-    """Специализированный холст редактора с поддержкой бесконечной сетки, кривых Безье, зума и физики скролла."""
+    """Специализированный холст редактора с бесконечной процедурной сеткой во все 4 стороны,
+    кривыми Безье, зумом и физикой скролла.
+    """
+    LIMIT = 5000000
 
     def __init__(self, parent: tk.Widget, editor: Any, **kwargs):
         kwargs.setdefault("bg", COLORS["canvas_bg"])
@@ -22,25 +25,64 @@ class EditorCanvas(tk.Canvas):
 
         self.editor = editor
         self._media_image_refs: List[Any] = []
-        self.create_grid()
+        self.config(scrollregion=(-self.LIMIT, -self.LIMIT, self.LIMIT, self.LIMIT))
+        self.bind("<Configure>", lambda e: self.update_grid())
+        self.update_grid()
 
     def create_grid(self) -> None:
-        """Создает координатную сетку на холсте."""
-        limit = 50000
+        """Алиас для обратной совместимости."""
+        self.update_grid()
+
+    def update_grid(self) -> None:
+        """Процедурно отрисовывает координатную сетку только в видимой области экрана.
+        Это делает холст бесконечным в любую сторону (включая отрицательные координаты)
+        и обеспечивает максимальную производительность без лагов.
+        """
+        self.delete("grid")
+        w = self.winfo_width()
+        h = self.winfo_height()
+        if w <= 1 or h <= 1:
+            return
+
+        x1 = self.canvasx(0)
+        y1 = self.canvasy(0)
+        x2 = self.canvasx(w)
+        y2 = self.canvasy(h)
+
         step = 20
-        self.config(scrollregion=(0, -limit, limit, limit))
+        bold_step = 100
 
-        for i in range(0, limit, step):
-            if i == 0:
-                continue
-            color = COLORS["grid_bold"] if i % 100 == 0 else COLORS["grid_light"]
-            self.create_line(i, -limit, i, limit, tag="grid", fill=color)
+        start_x = int(math.floor(x1 / step)) * step
+        end_x = int(math.ceil(x2 / step)) * step
+        start_y = int(math.floor(y1 / step)) * step
+        end_y = int(math.ceil(y2 / step)) * step
 
-        for i in range(-limit, limit, step):
-            color = COLORS["grid_bold"] if i % 100 == 0 else COLORS["grid_light"]
-            self.create_line(0, i, limit, i, tag="grid", fill=color)
+        # Вертикальные линии
+        for x in range(start_x, end_x + step, step):
+            if x == 0:
+                color = "#3d5a80"  # Центральная ось координат Y
+                width = 2
+            elif x % bold_step == 0:
+                color = COLORS["grid_bold"]
+                width = 1
+            else:
+                color = COLORS["grid_light"]
+                width = 1
+            self.create_line(x, y1, x, y2, tag="grid", fill=color, width=width)
 
-        self.create_line(0, -limit, 0, limit, tag="grid", fill=COLORS["boundary_line"], width=2)
+        # Горизонтальные линии
+        for y in range(start_y, end_y + step, step):
+            if y == 0:
+                color = "#3d5a80"  # Центральная ось координат X
+                width = 2
+            elif y % bold_step == 0:
+                color = COLORS["grid_bold"]
+                width = 1
+            else:
+                color = COLORS["grid_light"]
+                width = 1
+            self.create_line(x1, y, x2, y, tag="grid", fill=color, width=width)
+
         self.tag_lower("grid")
 
     def draw_bezier(
@@ -73,11 +115,13 @@ class EditorCanvas(tk.Canvas):
             self.draw_bezier(start, end, tags=("conn", conn_tag), fill=color)
 
     def redraw_all(self) -> None:
-        """Перерисовывает все узлы и соединения."""
+        """Перерисовывает все узлы, соединения и процедурную сетку."""
         self.delete("node")
         self.delete("port")
         self.delete("conn")
         self._media_image_refs.clear()
+
+        self.update_grid()
 
         for conn in self.editor.connections:
             self.draw_connection(conn)
@@ -87,24 +131,21 @@ class EditorCanvas(tk.Canvas):
             node.draw(self)
 
     def center_on_node(self, node: Any) -> None:
-        """Плавно центрирует холст на выбранном узле."""
+        """Плавно центрирует холст на выбранном узле в бесконечном пространстве."""
         try:
             cw = self.winfo_width()
             ch = self.winfo_height()
             if cw <= 1 or ch <= 1:
                 return
 
-            limit = 50000
-            # Нормализация координат для scrollregion (0, -limit, limit, limit)
             target_cx = node.x + node.width / 2
             target_cy = node.y + node.height / 2
 
-            # xview_moveto принимает значение от 0.0 до 1.0 относительно полной ширины limit
-            norm_x = max(0.0, min(1.0, (target_cx - cw / 2) / limit))
-            # yview_moveto принимает значение относительно полной высоты 2 * limit
-            norm_y = max(0.0, min(1.0, (target_cy + limit - ch / 2) / (2 * limit)))
+            norm_x = max(0.0, min(1.0, (target_cx + self.LIMIT - cw / 2) / (2 * self.LIMIT)))
+            norm_y = max(0.0, min(1.0, (target_cy + self.LIMIT - ch / 2) / (2 * self.LIMIT)))
 
             self.xview_moveto(norm_x)
             self.yview_moveto(norm_y)
+            self.update_grid()
         except Exception:
             pass

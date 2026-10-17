@@ -203,21 +203,5 @@ class GraphValidatorPlugin(Plugin):
         self.editor.selected_connection = None
         
         # Центрируем холст на ноде
-        canvas = self.editor.canvas
-        canvas_w = canvas.winfo_width() or 800
-        canvas_h = canvas.winfo_height() or 600
-
-        # Scrollregion: (0, -limit, limit, limit) где limit = 50000
-        limit = 50000
-        total_w = limit
-        total_h = 2 * limit
-
-        target_x = max(0, node.x - canvas_w / 2 + node.width / 2)
-        target_y = node.y - canvas_h / 2 + node.height / 2
-
-        x_frac = target_x / total_w
-        y_frac = (target_y + limit) / total_h
-
-        canvas.xview_moveto(max(0.0, min(1.0, x_frac)))
-        canvas.yview_moveto(max(0.0, min(1.0, y_frac)))
+        self.editor.focus_on_node(node)
         self.editor.redraw()
