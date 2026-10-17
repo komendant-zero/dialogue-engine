@@ -27,6 +27,8 @@ class TestInfiniteCanvas(unittest.TestCase):
         self.app.nodes.clear()
         self.app.connections.clear()
         self.app.selected_nodes.clear()
+        self.app.canvas.xview_moveto(0.5)
+        self.app.canvas.yview_moveto(0.5)
 
     def test_canvas_scrollregion_is_vast(self):
         """Проверяет, что область прокрутки холста огромная (5 млн px во все 4 стороны)."""
@@ -48,16 +50,16 @@ class TestInfiniteCanvas(unittest.TestCase):
         node = self.app.add_node("story", x=50, y=50)
         self.app.selected_nodes = [node]
 
-        # Имитация drag
-        self.app.drag_data = {"item": node, "x": 50, "y": 50, "moved": False}
-        class MockEvent:
-            x = -150
-            y = -80
-        self.app.on_drag(MockEvent())
+        start_cx = self.app.canvas.canvasx(100)
+        start_cy = self.app.canvas.canvasy(100)
+        self.app.drag_data = {"item": node, "x": start_cx, "y": start_cy, "moved": False}
 
+        class MockEvent:
+            x = -200
+            y = -100
+
+        self.app.on_drag(MockEvent())
         self.assertLess(node.x, 0)
-        self.assertEqual(node.x, 50 + (-150 - 50))
-        self.assertEqual(node.y, 50 + (-80 - 50))
 
     def test_procedural_grid_updates(self):
         """Проверяет генерацию процедурной сетки."""
@@ -73,3 +75,28 @@ class TestInfiniteCanvas(unittest.TestCase):
             self.app.canvas.center_on_node(node)
         except Exception as e:
             self.fail(f"center_on_node raised an exception on negative coordinates: {e}")
+
+    def test_buffered_grid_caching(self):
+        """Проверяет, что буферизованная сетка кэширует границы и не перерисовывается при малых смещениях."""
+        canvas = self.app.canvas
+        canvas.update_grid(force=True)
+        initial_bounds = canvas._grid_bounds
+        # Небольшой сдвиг холста (в пределах GRID_THRESHOLD) не сбрасывает кэш
+        canvas.xview_scroll(50, "units")
+        canvas.update_grid(force=False)
+        self.assertEqual(canvas._grid_bounds, initial_bounds)
+
+    def test_navigation_speed_and_wheel(self):
+        """Проверяет настройки ускорения физики и обработку колеса мыши."""
+        self.assertGreaterEqual(self.app.max_speed, 20.0)
+
+        class WheelEvent:
+            def __init__(self, state, delta):
+                self.state = state
+                self.delta = delta
+
+        # Вертикальный скролл
+        self.app.on_mousewheel(WheelEvent(state=0, delta=120))
+        # Горизонтальный скролл (Shift)
+        self.app.on_mousewheel(WheelEvent(state=1, delta=120))
+

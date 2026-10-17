@@ -101,8 +101,8 @@ class ScenarioEditor(tk.Tk):
         self.velocity_x = 0.0
         self.velocity_y = 0.0
         self.friction = 0.9
-        self.keyboard_accel = 0.5
-        self.max_speed = 10.0
+        self.keyboard_accel = 0.18
+        self.max_speed = 22.0
         self.scroll_remainder_x = 0.0
         self.scroll_remainder_y = 0.0
         self.mouse_last_x = 0
@@ -517,13 +517,17 @@ class ScenarioEditor(tk.Tk):
         target_vy = 0.0
 
         if not self.is_panning:
-            if self.pressed_keys.get("Left"): target_vx = -self.max_speed
-            if self.pressed_keys.get("Right"): target_vx = self.max_speed
-            if self.pressed_keys.get("Up"): target_vy = -self.max_speed
-            if self.pressed_keys.get("Down"): target_vy = self.max_speed
+            mult = 2.5 if (self.pressed_keys.get("Shift_L") or self.pressed_keys.get("Shift_R")) else 1.0
+            spd = self.max_speed * mult
 
-            self.velocity_x += (target_vx - self.velocity_x) * 0.05
-            self.velocity_y += (target_vy - self.velocity_y) * 0.05
+            if self.pressed_keys.get("Left"): target_vx = -spd
+            if self.pressed_keys.get("Right"): target_vx = spd
+            if self.pressed_keys.get("Up"): target_vy = -spd
+            if self.pressed_keys.get("Down"): target_vy = spd
+
+            accel = getattr(self, "keyboard_accel", 0.18)
+            self.velocity_x += (target_vx - self.velocity_x) * accel
+            self.velocity_y += (target_vy - self.velocity_y) * accel
 
         if target_vx == 0 and not self.is_panning:
             self.velocity_x *= self.friction
@@ -1053,6 +1057,7 @@ class ScenarioEditor(tk.Tk):
 
     def stop_pan(self, event: Any) -> None:
         self.is_panning = False
+        self.canvas.update_grid()
 
     def _export_to_project_data(self) -> ProjectData:
         node_datas = [n.to_node_data() for n in self.nodes]
@@ -1138,11 +1143,19 @@ class ScenarioEditor(tk.Tk):
         self.apply_zoom(1.0 / self.zoom_level, event, target_zoom=1.0)
 
     def on_mousewheel(self, event: Any) -> None:
-        if event.state & 0x0004 or event.state & 0x0001:  # Ctrl or Shift
+        if event.state & 0x0004:  # Ctrl -> Zoom
             if event.delta > 0:
                 self.zoom_in(event)
             elif event.delta < 0:
                 self.zoom_out(event)
+        elif event.state & 0x0001:  # Shift -> Горизонтальный скролл
+            delta = -int(event.delta / 2) if event.delta else 0
+            self.canvas.xview_scroll(delta, "units")
+            self.canvas.update_grid()
+        else:  # Обычный скролл -> Вертикальный скролл
+            delta = -int(event.delta / 2) if event.delta else 0
+            self.canvas.yview_scroll(delta, "units")
+            self.canvas.update_grid()
 
     def apply_zoom(self, factor: float, event: Any = None, target_zoom: float | None = None) -> None:
         new_zoom = target_zoom if target_zoom is not None else round(self.zoom_level * factor, 3)
