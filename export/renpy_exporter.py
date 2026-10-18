@@ -105,6 +105,7 @@ class RenPyExporter(BaseExporter):
                 )
 
                 f.write("label start:\n")
+                f.write("    stop music fadeout 1.0\n")
                 f.write(f"    jump node_{start_node.id}\n\n")
 
                 for node in nodes:
@@ -265,6 +266,74 @@ class RenPyExporter(BaseExporter):
             for line in lines:
                 if line.strip():
                     f.write(f"    $ {line.strip()}\n")
+            self.write_jump(f, node.id, connections)
+
+        # 7. Узел Паузы (Pause)
+        elif node.node_type == "pause":
+            p_mode = node.custom_data.get("pause_mode", "time")
+            p_dur = node.custom_data.get("pause_duration", 1.0)
+            try:
+                if p_mode == "time" and float(p_dur) > 0:
+                    f.write(f"    pause {float(p_dur):.1f}\n")
+                else:
+                    f.write("    pause\n")
+            except (ValueError, TypeError):
+                f.write("    pause\n")
+            self.write_jump(f, node.id, connections)
+
+        # 8. Узел Анимации (Animation)
+        elif node.node_type == "animation":
+            try:
+                data = json.loads(node.content) if isinstance(node.content, str) else node.content
+                anim = str(data.get("animation", "fade to black")).lower()
+                dur = float(data.get("duration", 0.5))
+                if anim in ("fade to black", "fade_to_black", "black"):
+                    f.write(f"    scene black with Fade({dur/2.0:.2f}, 0.1, {dur/2.0:.2f})\n")
+                elif anim == "fade":
+                    f.write(f"    with Fade({dur/2.0:.2f}, 0.1, {dur/2.0:.2f})\n")
+                elif anim == "dissolve":
+                    f.write(f"    with Dissolve({dur:.2f})\n")
+                else:
+                    f.write(f"    with Dissolve({dur:.2f})\n")
+            except Exception:
+                f.write("    with dissolve\n")
+            self.write_jump(f, node.id, connections)
+
+        # 9. Узел Условия (Condition)
+        elif node.node_type == "condition":
+            cond_expr = node.content.strip()
+            out_conns = [c for c in connections if c.from_node == node.id]
+            true_conn = next((c for c in out_conns if c.out_idx == 0), None)
+            false_conn = next((c for c in out_conns if c.out_idx == 1), None)
+            if true_conn and false_conn:
+                f.write(f"    if {cond_expr}:\n")
+                f.write(f"        jump node_{true_conn.to_node}\n")
+                f.write(f"    else:\n")
+                f.write(f"        jump node_{false_conn.to_node}\n")
+            elif true_conn:
+                f.write(f"    if {cond_expr}:\n")
+                f.write(f"        jump node_{true_conn.to_node}\n")
+                other_conns = [c for c in connections if c != true_conn and c.from_node == node.id]
+                if other_conns:
+                    f.write(f"    else:\n")
+                    f.write(f"        jump node_{other_conns[0].to_node}\n")
+                else:
+                    f.write(f"    else:\n")
+                    f.write(f"        return\n")
+            else:
+                self.write_jump(f, node.id, connections)
+
+        # 10. Узел Python Кода (Python Code)
+        elif node.node_type == "python_code":
+            lines = node.content.split("\n")
+            f.write("    python:\n")
+            for line in lines:
+                if line.strip():
+                    f.write(f"        {line}\n")
+            self.write_jump(f, node.id, connections)
+
+        # 11. Резервный переход (гарантирует, что сценарий никогда не провалится)
+        else:
             self.write_jump(f, node.id, connections)
 
     def write_jump(self, f: Any, node_id: str, connections: List[ConnectionData]) -> None:
