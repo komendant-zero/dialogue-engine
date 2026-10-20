@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Каталог плагинов — Dialogue Engine</title>
+  <meta name="description" content="Обзор более 20 встроенных плагинов для Dialogue Engine: экспорт в Ren'Py, авто-лейаут, валидация графа, ATL-анимации, плеер и Live Sync.">
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⬡</text></svg>">
+</head>
+<body>
+
+  <!-- ========================================================================
+       Header / Navbar
+       ======================================================================== -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="brand">
+        <div class="brand-icon">⬡</div>
+        <div class="brand-title">
+          <span>Dialogue Engine</span>
+          <span class="brand-badge">Plugins</span>
+        </div>
+      </a>
+
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="index.html" class="nav-link">Главная</a></li>
+          <li><a href="mcp.html" class="nav-link">MCP Сервер</a></li>
+          <li><a href="plugins.html" class="nav-link active">Плагины</a></li>
+          <li><a href="api.html" class="nav-link">Plugin API</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="https://github.com/komendant-zero/dialogue-engine" target="_blank" rel="noopener noreferrer" class="btn-github">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          <span>GitHub</span>
+        </a>
+        <button class="mobile-toggle" aria-label="Открыть меню" aria-expanded="false">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       Hero Section
+       ======================================================================== -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-pill">
+        <span>Модульная архитектура с изоляцией ошибок</span>
+      </div>
+      <h1 class="hero-title">
+        Расширяемая экосистема <br>
+        <span class="gradient-text">20+ встроенных плагинов</span>
+      </h1>
+      <p class="hero-subtitle">
+        Все ключевые возможности Dialogue Engine построены на плагинной архитектуре.
+        Любой разработчик может добавить новые типы узлов, валидаторы или форматы экспорта без изменения ядра.
+      </p>
+
+      <div class="hero-cta">
+        <a href="#builtin" class="btn btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Каталог плагинов
+        </a>
+        <a href="api.html" class="btn btn-secondary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>
+          Руководство по созданию плагина
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Plugin System Architecture
+       ======================================================================== -->
+  <section class="section section-alt" id="architecture">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Надёжность ядра</span>
+        <h2 class="section-title">Error Boundary & Безопасность</h2>
+        <p class="section-desc">Почему падение стороннего скрипта никогда не приведёт к потере вашего сценария.</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="feature-card">
+          <div class="feature-icon icon-purple">🛡️</div>
+          <h3 class="feature-title">Error Boundary</h3>
+          <p class="feature-desc">
+            Все вызовы событий <code>on_event()</code> обёрнуты в защищённые контексты перехвата исключений. Ошибка в плагине логируется, но не прерывает работу GUI-цикла и других расширений.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon icon-amber">🩺</div>
+          <h3 class="feature-title">Health Check & Auto-Disable</h3>
+          <p class="feature-desc">
+            Менеджер плагинов отслеживает количество последовательных ошибок. При превышении порога нестабильный плагин переводится в статус <code>ERROR</code> и отключается.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon icon-green">⚡</div>
+          <h3 class="feature-title">Zero Overhead</h3>
+          <p class="feature-desc">
+            Плагины подписываются только на интересующие их события (рендеринг, контекстное меню, экспорт). При отсутствии подписчиков накладные расходы равны нулю.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Builtin Plugins Directory
+       ======================================================================== -->
+  <section class="section" id="builtin">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Каталог</span>
+        <h2 class="section-title">Встроенные плагины</h2>
+        <p class="section-desc">Поставляются "из коробки" и активируются автоматически при старте редактора.</p>
+      </div>
+
+      <div class="grid-2">
+        <!-- 1. renpy_exporter.py -->
+        <div class="tool-card">
+          <div class="tool-header">
+            <span class="tool-name">renpy_exporter.py</span>
+            <span class="badge badge-amber">Core Export</span>
+          </div>
+          <p class="tool-desc">
+            Превращает визуальный граф диалогов в чистый и читаемый исходный код <code>script.rpy</code>. Поддерживает структурирование по меткам (labels), блоки выборов, ветвление <code>if / elif / else</code>, вызовы jump и call.
+          </p>
+          <div class="params-title">Ключевые возможности:</div>
+          <ul class="params-list">
+            <li>Экспорт как через GUI диалог, так и через headless CLI / MCP</li>
+            <li>Автогенерация идентификаторов меток по номерам глав и сцен</li>
+            <li>Поддержка кастомных отступов и Ren'Py синтаксиса</li>
+          </ul>
+        </div>
+
+        <!-- 2. ai_live_sync.py -->
+        <div class="tool-card">
+          <div class="tool-header">
+            <span class="tool-name">ai_live_sync.py</span>
+            <span class="badge badge-purple">AI Integration</span>
+          </div>
+          <p class="tool-desc">
+            Слушает локальный TCP-сокет на порту <code>48123</code>. Обеспечивает мгновенный отклик холста при выполнении команд MCP-сервера внешними языковыми моделями.
+          </p>
+          <div class="params-title">Ключевые возможности:</div>
+          <ul class="params-list">
+            <li>Анимация спавна узлов без блокировки главного потока GUI</li>
+            <li>Плавная авто-фокусировка камеры на свежесозданных репликах</li>
+            <li>Обновление статусной строки при активности AI Copilot</li>
+          </ul>
+        </div>
+
+        <!-- 3. condition_node.py -->
+        <div class="tool-card">
+          <div class="tool-header">
+            <span class="tool-name">condition_node.py</span>
+            <span class="badge badge-green">Narrative Logic</span>
+          </div>
+          <p class="tool-desc">
+            Реализует узлы проверки условий. Добавляет два цветных выходных порта: зелёный (True) и красный (False/Else), позволяя строить сложные нелинейные развилки сюжета.
+          </p>
+          <div class="params-title">Ключевые возможности:</div>
+          <ul class="params-list">
+            <li>Удобный редактор выражения с подсветкой синтаксиса</li>
+            <li>Поддержка составных условий: <code>and</code>, <code>or</code>, <code>not</code></li>
+            <li>Автоматическая трансляция в Ren'Py конструкцию <code>if ...: else:</code></li>
+          </ul>
+        </div>
+
+        <!-- 4. graph_validator.py -->
+        <div class="tool-card">
+          <div class="tool-header">
+            <span class="tool-name">graph_validator.py</span>
+            <span class="badge badge-cyan">Diagnostics</span>
+          </div>
+          <p class="tool-desc">
+            Сканирует топологию графа на предмет логических ошибок перед релизом или экспортом новеллы. Предупреждает о сюжетных тупиках и битых связях.
+          </p>
+          <div class="params-title">Ключевые возможности:</div>
+          <ul class="params-list">
+            <li>Поиск "висячих" узлов без входящих линий (сироты)</li>
+            <li>Поиск забытых вариантов в узлах выбора без продолжения</li>
+            <li>Детекция бесконечных замкнутых циклов без выхода</li>
+          </ul>
+        </div>
+
+        <!-- 5. auto_layout.py -->
+        <div class="tool-card">
+          <div class="tool-header">
+            <span class="tool-name">auto_layout.py</span>
+            <span class="badge badge-cyan">Canvas Layout</span>
+          </div>
+          <p class="tool-desc">
+            Интеллектуальная автораскладка графа по нажатию <kbd>Ctrl+L</kbd>. Расставляет узлы по слоям (Sugiyama-like hierarchy) слева направо с оптимальными отступами.
+          </p>
+          <div class="params-title">Ключевые возможности:</div>
+          <ul class="params-list">
+            <li>Минимизация пересечений соединительных линий</li>
+            <li>Равномерное распределение параллельных сюжетных веток</li>
+            <li>Анимированное перемещение узлов на новые позиции</li>
+          </ul>
+        </div>
+
+        <!-- 6. quick_playtest.py -->
+        <div class="tool-card">
+          <div class="tool-header">
+            <span class="tool-name">quick_playtest.py</span>
+            <span class="badge badge-green">Testing</span>
+          </div>
+          <p class="tool-desc">
+            Встроенное окно симулятора новеллы. Позволяет мгновенно начать чтение сценария с любого выбранного узла графа без запуска тяжеловесного Ren'Py движка.
+          </p>
+          <div class="params-title">Ключевые возможности:</div>
+          <ul class="params-list">
+            <li>Интерактивные кнопки выбора и переход по веткам</li>
+            <li>Отслеживание значений игровых переменных в реальном времени</li>
+            <li>Подсветка текущего узла на холсте по мере прохождения</li>
+          </ul>
+        </div>
+
+        <!-- 7. interactive_player.py -->
+        <div class="tool-card">
+          <div class="tool-header">
+            <span class="tool-name">interactive_player.py</span>
+            <span class="badge badge-amber">Ren'Py Launcher</span>
+          </div>
+          <p class="tool-desc">
+            Связующее звено между Dialogue Engine и установленным дистрибутивом Ren'Py. Экспортирует сценарий и запускает игровой процесс одной кнопкой.
+          </p>
+          <div class="params-title">Ключевые возможности:</div>
+          <ul class="params-list">
+            <li>Автоматический поиск исполняемого файла <code>renpy.exe</code></li>
+            <li>Быстрый перезапуск игры с сохранением позиции</li>
+            <li>Вывод консольных логов Ren'Py в интерфейс редактора</li>
+          </ul>
+        </div>
+
+        <!-- 8. media_node.py -->
+        <div class="tool-card">
+          <div class="tool-header">
+            <span class="tool-name">media_node.py</span>
+            <span class="badge badge-rose">Visual Assets</span>
+          </div>
+          <p class="tool-desc">
+            Управление графическими ассетами новеллы: смена фонов (scene), появление и скрытие персонажей (show/hide), а также превью спрайтов прямо на узле.
+          </p>
+          <div class="params-title">Ключевые возможности:</div>
+          <ul class="params-list">
+            <li>Миниатюры изображений и GIF на карточке узла</li>
+            <li>Настройка позиций отображения (left, right, center, truecenter)</li>
+            <li>Быстрый выбор из каталога <code>game/images/</code></li>
+          </ul>
+        </div>
+
+        <!-- 9. music_plugin.py -->
+        <div class="tool-card">
+          <div class="tool-header">
+            <span class="tool-name">music_plugin.py</span>
+            <span class="badge badge-purple">Audio</span>
+          </div>
+          <p class="tool-desc">
+            Полный контроль над звуковым оформлением: фоновая музыка, звуковые эффекты (SFX), озвучка персонажей (Voice) и команды плавного затухания.
+          </p>
+          <div class="params-title">Ключевые возможности:</div>
+          <ul class="params-list">
+            <li>Режимы bgm, sfx, voice, stop</li>
+            <li>Параметры fadein и fadeout в секундах</li>
+            <li>Предварительное прослушивание треков в редакторе</li>
+          </ul>
+        </div>
+
+        <!-- 10. animations_plugin.py -->
+        <div class="tool-card">
+          <div class="tool-header">
+            <span class="tool-name">animations_plugin.py</span>
+            <span class="badge badge-rose">ATL FX</span>
+          </div>
+          <p class="tool-desc">
+            Поддержка Ren'Py Animation & Transformation Language (ATL). Позволяет вставлять эффекты тряски экрана, плавные переходы (dissolve), вспышки и зум.
+          </p>
+          <div class="params-title">Ключевые возможности:</div>
+          <ul class="params-list">
+            <li>Пресеты популярных переходов (fade, dissolve, vpunch, hpunch)</li>
+            <li>Кастомный редактор блоков ATL трансформаций</li>
+            <li>Привязка анимаций к конкретным медиа-узлам</li>
+          </ul>
+        </div>
+
+        <!-- 11. word_counter.py -->
+        <div class="tool-card">
+          <div class="tool-header">
+            <span class="tool-name">word_counter.py</span>
+            <span class="badge badge-cyan">Analytics</span>
+          </div>
+          <p class="tool-desc">
+            Аналитика объёма сценария: подсчёт символов, слов, реплик и приблизительного времени чтения как для всего проекта, так и по отдельным персонажам.
+          </p>
+          <div class="params-title">Ключевые возможности:</div>
+          <ul class="params-list">
+            <li>Детальная статистика реплик по каждому герою новеллы</li>
+            <li>Оценка хронометража прохождения игры</li>
+            <li>Быстрый просмотр метрик в статусной строке</li>
+          </ul>
+        </div>
+
+        <!-- 12. advanced_scripting.py -->
+        <div class="tool-card">
+          <div class="tool-header">
+            <span class="tool-name">advanced_scripting.py</span>
+            <span class="badge badge-amber">Scripting</span>
+          </div>
+          <p class="tool-desc">
+            Узлы прямого скриптинга: произвольный Python-код (блок <code>python:</code>) и однострочные модификации переменных (<code>$ flags['met_hero'] = True</code>).
+          </p>
+          <div class="params-title">Ключевые возможности:</div>
+          <ul class="params-list">
+            <li>Полноценный многострочный редактор кода</li>
+            <li>Поддержка глобальных списков и словарей Ren'Py</li>
+            <li>Безопасная сериализация кода внутри JSON проекта</li>
+          </ul>
+        </div>
+
+        <!-- 13. reload_plugin.py -->
+        <div class="tool-card">
+          <div class="tool-header">
+            <span class="tool-name">reload_plugin.py</span>
+            <span class="badge badge-green">Hot Reload</span>
+          </div>
+          <p class="tool-desc">
+            Файловый наблюдатель (Live Watcher): отслеживает внешние изменения JSON-файла проекта и автоматически обновляет холст без необходимости перезапуска редактора.
+          </p>
+          <div class="params-title">Ключевые возможности:</div>
+          <ul class="params-list">
+            <li>Бесшовное сотрудничество сценаристов через системы контроля версий (Git)</li>
+            <li>Защита от конфликтов при одновременной правке</li>
+            <li>Звуковое или визуальное уведомление об обновлении</li>
+          </ul>
+        </div>
+
+        <!-- 14. mcp_plugin.py -->
+        <div class="tool-card">
+          <div class="tool-header">
+            <span class="tool-name">mcp_plugin.py</span>
+            <span class="badge badge-purple">MCP Status</span>
+          </div>
+          <p class="tool-desc">
+            Визуальный индикатор состояния MCP-сервера в шапке редактора. Показывает текущий статус подключения LLM, порт 48123 и количество выполненных ИИ-запросов.
+          </p>
+          <div class="params-title">Ключевые возможности:</div>
+          <ul class="params-list">
+            <li>Кнопка быстрого перезапуска MCP-сервера</li>
+            <li>Лог последних вызванных инструментов</li>
+            <li>Индикация активных сессий AI-ассистентов</li>
+          </ul>
+        </div>
+
+        <!-- 15. pause_plugin.py -->
+        <div class="tool-card">
+          <div class="tool-header">
+            <span class="tool-name">pause_plugin.py</span>
+            <span class="badge badge-gray">Flow Control</span>
+          </div>
+          <p class="tool-desc">
+            Узлы временных задержек и ожиданий клика игрока. Необходимы для создания драматических пауз, ожидания завершения фоновых звуков или анимаций.
+          </p>
+          <div class="params-title">Ключевые возможности:</div>
+          <ul class="params-list">
+            <li>Фиксированная пауза (в секундах)</li>
+            <li>Ожидание нажатия пользователем</li>
+            <li>Трансляция в вызов <code>renpy.pause()</code></li>
+          </ul>
+        </div>
+
+        <!-- 16. fs_plugin.py -->
+        <div class="tool-card">
+          <div class="tool-header">
+            <span class="tool-name">fs_plugin.py</span>
+            <span class="badge badge-cyan">Asset Browser</span>
+          </div>
+          <p class="tool-desc">
+            Встроенный браузер файлов проекта. Позволяет перетаскивать графические и аудиофайлы прямо из боковой панели на холст для создания соответствующих узлов.
+          </p>
+          <div class="params-title">Ключевые возможности:</div>
+          <ul class="params-list">
+            <li>Быстрый предпросмотр изображений и воспроизведение звука</li>
+            <li>Drag & Drop на бесконечный холст</li>
+            <li>Фильтрация по расширениям: .png, .jpg, .ogg, .mp3, .rpy</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       How to Install External Plugins
+       ======================================================================== -->
+  <section class="section section-alt" id="installation">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Кастомизация</span>
+        <h2 class="section-title">Как установить сторонний плагин</h2>
+        <p class="section-desc">Установка пользовательских модулей происходит без сборки и компиляции.</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="feature-card">
+          <div class="feature-icon">1</div>
+          <h3 class="feature-title">Скачайте файл плагина</h3>
+          <p class="feature-desc">Плагин представляет собой обычный файл Python (например, <code>custom_export.py</code>).</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">2</div>
+          <h3 class="feature-title">Скопируйте в plugins/</h3>
+          <p class="feature-desc">Поместите файл в папку <code>plugins/</code> в корневой директории Dialogue Engine.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">3</div>
+          <h3 class="feature-title">Перезапустите редактор</h3>
+          <p class="feature-desc">Менеджер плагинов автоматически обнаружит класс-наследник <code>Plugin</code> и инициализирует его.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Footer
+       ======================================================================== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="brand">
+            <div class="brand-icon">⬡</div>
+            <div class="brand-title"><span>Dialogue Engine</span></div>
+          </div>
+          <p class="footer-desc">
+            Более 20 встроенных модулей для любых задач визуальной новеллы.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Документация</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Главная страница</a></li>
+            <li><a href="mcp.html">MCP AI Сервер</a></li>
+            <li><a href="plugins.html">Каталог плагинов</a></li>
+            <li><a href="api.html">Plugin API & События</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Плагины</h4>
+          <ul class="footer-links">
+            <li><a href="#builtin">Встроенные модули</a></li>
+            <li><a href="#architecture">Error Boundary</a></li>
+            <li><a href="#installation">Установка сторонних</a></li>
+            <li><a href="api.html">Создать свой плагин</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Репозиторий</h4>
+          <ul class="footer-links">
+            <li><a href="https://github.com/komendant-zero/dialogue-engine" target="_blank" rel="noopener noreferrer">GitHub Репозиторий</a></li>
+            <li><a href="https://github.com/komendant-zero/dialogue-engine/tree/master/plugins" target="_blank" rel="noopener noreferrer">Исходники плагинов</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2026 Dialogue Engine Team. Выпущено под лицензией MIT.</span>
+        <span>Python 3.10+ • Modular Architecture</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/nav.js"></script>
+</body>
+</html>

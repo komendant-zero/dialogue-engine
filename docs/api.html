@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plugin API & Архитектура ядра — Dialogue Engine</title>
+  <meta name="description" content="Справочник разработчика плагинов Dialogue Engine: структура моделей NodeData и ConnectionData, методы GraphModel, события и пример плагина.">
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⬡</text></svg>">
+</head>
+<body>
+
+  <!-- ========================================================================
+       Header / Navbar
+       ======================================================================== -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="brand">
+        <div class="brand-icon">⬡</div>
+        <div class="brand-title">
+          <span>Dialogue Engine</span>
+          <span class="brand-badge">Plugin API</span>
+        </div>
+      </a>
+
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="index.html" class="nav-link">Главная</a></li>
+          <li><a href="mcp.html" class="nav-link">MCP Сервер</a></li>
+          <li><a href="plugins.html" class="nav-link">Плагины</a></li>
+          <li><a href="api.html" class="nav-link active">Plugin API</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="https://github.com/komendant-zero/dialogue-engine" target="_blank" rel="noopener noreferrer" class="btn-github">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          <span>GitHub</span>
+        </a>
+        <button class="mobile-toggle" aria-label="Открыть меню" aria-expanded="false">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       Hero Section
+       ======================================================================== -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-pill">
+        <span>Спецификация Plugin API v2.0</span>
+      </div>
+      <h1 class="hero-title">
+        Разработка расширений <br>
+        <span class="gradient-text">Plugin API & Core Models</span>
+      </h1>
+      <p class="hero-subtitle">
+        Создавайте собственные типы узлов, модификаторы холста, генераторы кода и интеграции.
+        Чистая архитектура с датаклассами, строгой типизацией и защитой от падений.
+      </p>
+
+      <div class="hero-cta">
+        <a href="#sample" class="btn btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          Пример плагина
+        </a>
+        <a href="#models" class="btn btn-secondary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          Справочник моделей данных
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Architecture Diagram
+       ======================================================================== -->
+  <section class="section section-alt" id="arch-overview">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Архитектура</span>
+        <h2 class="section-title">Схема взаимодействия модулей</h2>
+        <p class="section-desc">Изоляция ответственности между графическим интерфейсом, менеджером расширений и ядром графа.</p>
+      </div>
+
+      <div class="diagram-box">
+        <div class="diagram-flow">
+          <div class="diagram-node" style="border-color: var(--neon-cyan);">
+            <div class="diagram-node-title">🧩 Plugin Instance</div>
+            <div class="diagram-node-subtitle">User Plugin Code</div>
+          </div>
+
+          <div class="diagram-arrow">
+            <span>⇄</span>
+            <span class="diagram-arrow-label">Events & Hooks</span>
+          </div>
+
+          <div class="diagram-node" style="border-color: var(--neon-purple); box-shadow: var(--glow-purple);">
+            <div class="diagram-node-title">🛡️ PluginManager</div>
+            <div class="diagram-node-subtitle">plugin_system/manager.py</div>
+          </div>
+
+          <div class="diagram-arrow">
+            <span>⇄</span>
+            <span class="diagram-arrow-label">State & Data</span>
+          </div>
+
+          <div class="diagram-node" style="border-color: var(--neon-green);">
+            <div class="diagram-node-title">⚙️ GraphModel & Core</div>
+            <div class="diagram-node-subtitle">core/models.py, graph.py</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Data Models (NodeData & ConnectionData)
+       ======================================================================== -->
+  <section class="section" id="models">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Модели данных</span>
+        <h2 class="section-title">Класс NodeData</h2>
+        <p class="section-desc">Определён в <code>core/models.py</code> как чистый <code>@dataclass</code>. Представляет один узел графа.</p>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="table-custom">
+          <thead>
+            <tr>
+              <th>Поле</th>
+              <th>Тип</th>
+              <th>По умолчанию</th>
+              <th>Описание</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>id</code></td>
+              <td><code>str</code></td>
+              <td>13-значный ID</td>
+              <td>Уникальный строковый идентификатор узла, генерируемый через <code>uuid.uuid4().int</code>.</td>
+            </tr>
+            <tr>
+              <td><code>x</code></td>
+              <td><code>float</code></td>
+              <td><code>0.0</code></td>
+              <td>Горизонтальная координата верхнего левого угла узла на бесконечном холсте.</td>
+            </tr>
+            <tr>
+              <td><code>y</code></td>
+              <td><code>float</code></td>
+              <td><code>0.0</code></td>
+              <td>Вертикальная координата верхнего левого угла узла на холсте.</td>
+            </tr>
+            <tr>
+              <td><code>width</code></td>
+              <td><code>float</code></td>
+              <td><code>180.0</code></td>
+              <td>Ширина карточки узла в пикселях холста.</td>
+            </tr>
+            <tr>
+              <td><code>height</code></td>
+              <td><code>float</code></td>
+              <td><code>100.0</code></td>
+              <td>Высота карточки узла (может пересчитываться динамически по объёму текста).</td>
+            </tr>
+            <tr>
+              <td><code>title</code></td>
+              <td><code>str</code></td>
+              <td><code>""</code></td>
+              <td>Заголовок узла или имя персонажа (например, <code>"Алиса"</code> или <code>"#Сцена"</code>).</td>
+            </tr>
+            <tr>
+              <td><code>content</code></td>
+              <td><code>str</code></td>
+              <td><code>""</code></td>
+              <td>Основное текстовое наполнение: реплика диалога, строки выбора через перевод строки или код.</td>
+            </tr>
+            <tr>
+              <td><code>node_type</code></td>
+              <td><code>str</code></td>
+              <td><code>"story"</code></td>
+              <td>Тип узла: <code>story</code>, <code>choice</code>, <code>condition</code>, <code>music</code>, <code>media</code> и т.д.</td>
+            </tr>
+            <tr>
+              <td><code>mode</code></td>
+              <td><code>str</code></td>
+              <td><code>"standard"</code></td>
+              <td>Режим отображения узла.</td>
+            </tr>
+            <tr>
+              <td><code>custom_data</code></td>
+              <td><code>Dict[str, Any]</code></td>
+              <td><code>{}</code></td>
+              <td>Словарь произвольных пользовательских параметров (цвета плашки, тайминги, флаги).</td>
+            </tr>
+            <tr>
+              <td><code>is_character</code></td>
+              <td><code>Optional[bool]</code></td>
+              <td><code>None</code></td>
+              <td>Признак спикера: если <code>None</code>, вычисляется автоматически по отсутствию символа <code>#</code> в заголовке.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ConnectionData -->
+      <div style="margin-top: 40px;">
+        <h3 style="font-size: 1.4rem; color: var(--text-bright); margin-bottom: 12px;">Класс ConnectionData</h3>
+        <p style="color: var(--text-muted); font-size: 0.94rem; margin-bottom: 14px;">Описывает направленное соединение между портом выхода одного узла и входом другого.</p>
+        
+        <div class="table-wrapper">
+          <table class="table-custom">
+            <thead>
+              <tr>
+                <th>Поле</th>
+                <th>Тип</th>
+                <th>Описание</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>from_node</code></td>
+                <td><code>str</code></td>
+                <td>ID узла-источника.</td>
+              </tr>
+              <tr>
+                <td><code>out_idx</code></td>
+                <td><code>int</code></td>
+                <td>Индекс выходного порта (0 для обычной реплики, 0..N-1 для вариантов выбора или ветвлений).</td>
+              </tr>
+              <tr>
+                <td><code>to_node</code></td>
+                <td><code>str</code></td>
+                <td>ID целевого узла-приёмника.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       GraphModel API
+       ======================================================================== -->
+  <section class="section section-alt" id="graph-model">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Методы ядра</span>
+        <h2 class="section-title">Методы класса GraphModel</h2>
+        <p class="section-desc">Доступен через <code>self.editor.graph</code> или экземпляр проекта.</p>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="table-custom">
+          <thead>
+            <tr>
+              <th>Метод / Свойство</th>
+              <th>Сигнатура</th>
+              <th>Описание</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>nodes</code></td>
+              <td><code>@property -&gt; List[NodeData]</code></td>
+              <td>Возвращает список всех узлов текущего графа.</td>
+            </tr>
+            <tr>
+              <td><code>connections</code></td>
+              <td><code>@property -&gt; List[ConnectionData]</code></td>
+              <td>Возвращает список всех связей графа.</td>
+            </tr>
+            <tr>
+              <td><code>get_node()</code></td>
+              <td><code>get_node(node_id: str) -&gt; Optional[NodeData]</code></td>
+              <td>Возвращает объект узла по его ID или <code>None</code>.</td>
+            </tr>
+            <tr>
+              <td><code>add_node()</code></td>
+              <td><code>add_node(node: NodeData) -&gt; NodeData</code></td>
+              <td>Добавляет узел в граф и возвращает его.</td>
+            </tr>
+            <tr>
+              <td><code>remove_node()</code></td>
+              <td><code>remove_node(node_id: str) -&gt; Optional[NodeData]</code></td>
+              <td>Удаляет узел и все связанные входящие/исходящие линии.</td>
+            </tr>
+            <tr>
+              <td><code>add_connection()</code></td>
+              <td><code>add_connection(from_node: str, out_idx: int, to_node: str) -&gt; bool</code></td>
+              <td>Создаёт связь. Автоматически заменяет существующую связь с того же выхода при моногамном порте.</td>
+            </tr>
+            <tr>
+              <td><code>remove_connection()</code></td>
+              <td><code>remove_connection(from_node: str, out_idx: int, to_node: Optional[str] = None) -&gt; bool</code></td>
+              <td>Удаляет связь по порту выхода или точечно к целевому узлу.</td>
+            </tr>
+            <tr>
+              <td><code>get_outgoing()</code></td>
+              <td><code>get_outgoing(node_id: str) -&gt; List[ConnectionData]</code></td>
+              <td>Возвращает все исходящие связи узла.</td>
+            </tr>
+            <tr>
+              <td><code>get_incoming()</code></td>
+              <td><code>get_incoming(node_id: str) -&gt; List[ConnectionData]</code></td>
+              <td>Возвращает все входящие связи узла.</td>
+            </tr>
+            <tr>
+              <td><code>get_start_nodes()</code></td>
+              <td><code>get_start_nodes() -&gt; List[NodeData]</code></td>
+              <td>Ищет стартовые узлы: по заголовку (start/старт/начало) или узлы без входящих линий.</td>
+            </tr>
+            <tr>
+              <td><code>clear()</code></td>
+              <td><code>clear() -&gt; None</code></td>
+              <td>Полностью очищает граф.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Plugin Events Catalog
+       ======================================================================== -->
+  <section class="section" id="events">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Событийная модель</span>
+        <h2 class="section-title">События plugin_system/events.py</h2>
+        <p class="section-desc">Метод <code>on_event(self, event_type: str, data: Any)</code> принимает события со следующими полезными нагрузками:</p>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="table-custom">
+          <thead>
+            <tr>
+              <th>Событие (event_type)</th>
+              <th>Передаваемые данные (data)</th>
+              <th>Назначение</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>setup_ui</code></td>
+              <td><code>toolbar: Frame</code></td>
+              <td>Инициализация плагина при загрузке UI: можно добавить свои кнопки на панель инструментов.</td>
+            </tr>
+            <tr>
+              <td><code>context_menu</code></td>
+              <td><code>{'target': Node, 'x': float, 'y': float, 'menu': Menu}</code></td>
+              <td>Клик ПКМ по холсту или узлу: добавление кастомных пунктов контекстного меню.</td>
+            </tr>
+            <tr>
+              <td><code>autosave_tick</code></td>
+              <td><code>None</code></td>
+              <td>Периодический тик автосохранения (каждые 30 секунд).</td>
+            </tr>
+            <tr>
+              <td><code>project_loaded</code></td>
+              <td><code>project_data: ProjectData</code></td>
+              <td>Файл проекта успешно загружен и отрисован на холсте.</td>
+            </tr>
+            <tr>
+              <td><code>project_saved</code></td>
+              <td><code>filepath: str</code></td>
+              <td>Проект успешно записан на диск.</td>
+            </tr>
+            <tr>
+              <td><code>node_added</code></td>
+              <td><code>node: NodeData</code></td>
+              <td>На холст добавлен новый узел.</td>
+            </tr>
+            <tr>
+              <td><code>node_deleted</code></td>
+              <td><code>node: NodeData</code></td>
+              <td>Узел был удалён пользователем или скриптом.</td>
+            </tr>
+            <tr>
+              <td><code>node_edit_dialog</code></td>
+              <td><code>{'node': Node, 'frame': Frame, 'dialog': Toplevel}</code></td>
+              <td>Открыт диалог редактирования узла: можно встроить кастомные поля ввода.</td>
+            </tr>
+            <tr>
+              <td><code>node_edit_save</code></td>
+              <td><code>{'node': Node}</code></td>
+              <td>Сохранение изменений из диалога редактирования.</td>
+            </tr>
+            <tr>
+              <td><code>draw_node</code></td>
+              <td><code>{'node': Node, 'canvas': Canvas}</code></td>
+              <td>Событие рендеринга узла на Canvas.</td>
+            </tr>
+            <tr>
+              <td><code>draw_node_content</code></td>
+              <td><code>{'node': Node, 'canvas': Canvas, 'handled': bool}</code></td>
+              <td>Кастомный рендеринг содержимого карточки узла (спрайты, иконки).</td>
+            </tr>
+            <tr>
+              <td><code>draw_node_ports</code></td>
+              <td><code>{'node': Node, 'canvas': Canvas, 'handled': bool}</code></td>
+              <td>Отрисовка портов входа и выхода.</td>
+            </tr>
+            <tr>
+              <td><code>calculate_node_size</code></td>
+              <td><code>{'node': Node, 'base_h': int, 'display_content': str, 'height': int, 'handled': dict}</code></td>
+              <td>Динамический расчёт габаритов карточки узла.</td>
+            </tr>
+            <tr>
+              <td><code>renpy_export_init</code></td>
+              <td><code>{'file': file, 'nodes': list, 'connections': list, 'export_dir': str}</code></td>
+              <td>Старт процесса генерации скрипта Ren'Py.</td>
+            </tr>
+            <tr>
+              <td><code>renpy_export_check</code></td>
+              <td><code>{'node': Node, 'skip': bool}</code></td>
+              <td>Проверка перед экспортом: плагин может установить <code>skip = True</code>, чтобы пропустить узел.</td>
+            </tr>
+            <tr>
+              <td><code>renpy_export_node</code></td>
+              <td><code>{'node': Node, 'file': file, 'connections': list, 'export_dir': str, 'handled': bool}</code></td>
+              <td>Генерация Ren'Py-кода для специфического кастомного узла.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Sample Plugin Code
+       ======================================================================== -->
+  <section class="section section-alt" id="sample">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Практика</span>
+        <h2 class="section-title">Пример минимального плагина</h2>
+        <p class="section-desc">Создание плагина счётчика выборов, добавляющего кнопку на панель инструментов и перехватывающего добавление узлов.</p>
+      </div>
+
+      <div class="code-box">
+        <div class="code-header">
+          <span class="code-title"><span class="code-lang-dot python"></span>plugins/choice_tracker.py</span>
+          <button class="copy-btn">Копировать код</button>
+        </div>
+        <pre><span class="c-kw">from</span> <span class="c-prop">plugin_system.base</span> <span class="c-kw">import</span> Plugin, PluginManifest
+<span class="c-kw">from</span> <span class="c-prop">plugin_system.events</span> <span class="c-kw">import</span> EVENT_SETUP_UI, EVENT_NODE_ADDED, EVENT_CONTEXT_MENU
+<span class="c-kw">import</span> tkinter <span class="c-kw">as</span> tk
+<span class="c-kw">from</span> tkinter <span class="c-kw">import</span> messagebox
+
+
+<span class="c-kw">class</span> <span class="c-fn">ChoiceTrackerPlugin</span>(Plugin):
+    name = <span class="c-str">"Choice Tracker"</span>
+    version = <span class="c-str">"1.0.0"</span>
+    author = <span class="c-str">"Community Developer"</span>
+    description = <span class="c-str">"Подсчитывает развилки и выводит статистику выборов сценария."</span>
+    min_engine_version = <span class="c-str">"2.0.0"</span>
+
+    <span class="c-kw">def</span> <span class="c-fn">on_enable</span>(self) -&gt; <span class="c-kw">None</span>:
+        <span class="c-comm"># Вызывается при загрузке плагина</span>
+        self.choice_count = 0
+        print(f<span class="c-str">"[{self.name}] Успешно активирован."</span>)
+
+    <span class="c-kw">def</span> <span class="c-fn">on_disable</span>(self) -&gt; <span class="c-kw">None</span>:
+        print(f<span class="c-str">"[{self.name}] Деактивирован."</span>)
+
+    <span class="c-kw">def</span> <span class="c-fn">on_event</span>(self, event_type: str, data: any = <span class="c-kw">None</span>) -&gt; <span class="c-kw">None</span>:
+        <span class="c-kw">if</span> event_type == EVENT_SETUP_UI:
+            <span class="c-comm"># Добавляем кнопку на панель инструментов (toolbar)</span>
+            toolbar = data
+            btn = tk.Button(
+                toolbar,
+                text=<span class="c-str">"📊 Анализ выборов"</span>,
+                command=self.show_stats,
+                bg=<span class="c-str">"#21262d"</span>,
+                fg=<span class="c-str">"#00b4ff"</span>,
+                relief=tk.FLAT
+            )
+            btn.pack(side=tk.LEFT, padx=4, pady=2)
+
+        <span class="c-kw">elif</span> event_type == EVENT_NODE_ADDED:
+            node = data
+            <span class="c-kw">if</span> node.node_type == <span class="c-str">"choice"</span>:
+                self.choice_count += 1
+
+        <span class="c-kw">elif</span> event_type == EVENT_CONTEXT_MENU:
+            <span class="c-comm"># Добавляем пункт в контекстное меню ПКМ</span>
+            menu = data.get(<span class="c-str">"menu"</span>)
+            <span class="c-kw">if</span> menu:
+                menu.add_separator()
+                menu.add_command(label=<span class="c-str">"Быстрая статистика выборов"</span>, command=self.show_stats)
+
+    <span class="c-kw">def</span> <span class="c-fn">show_stats</span>(self) -&gt; <span class="c-kw">None</span>:
+        total_nodes = len(self.editor.graph.nodes)
+        choices = [n <span class="c-kw">for</span> n <span class="c-kw">in</span> self.editor.graph.nodes <span class="c-kw">if</span> n.node_type == <span class="c-str">"choice"</span>]
+        msg = f<span class="c-str">"Всего узлов: {total_nodes}\nУзлов развилок (choice): {len(choices)}"</span>
+        messagebox.showinfo(<span class="c-str">"Статистика выборов"</span>, msg)</pre>
+      </div>
+
+      <div class="callout callout-success" style="margin-top: 24px;">
+        <div class="callout-icon">✨</div>
+        <div class="callout-content">
+          <strong>Готово к запуску:</strong> Сохраните приведённый код как <code>plugins/choice_tracker.py</code>. Редактор автоматически подхватит его при старте, добавит кнопку на верхнюю панель и зарегистрирует пункт контекстного меню.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Footer
+       ======================================================================== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="brand">
+            <div class="brand-icon">⬡</div>
+            <div class="brand-title"><span>Dialogue Engine</span></div>
+          </div>
+          <p class="footer-desc">
+            Полный справочник по разработке расширений и Plugin API Dialogue Engine v2.0.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Документация</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Главная страница</a></li>
+            <li><a href="mcp.html">MCP AI Сервер</a></li>
+            <li><a href="plugins.html">Каталог плагинов</a></li>
+            <li><a href="api.html">Plugin API & События</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">API Разделы</h4>
+          <ul class="footer-links">
+            <li><a href="#models">Модели NodeData</a></li>
+            <li><a href="#graph-model">Методы GraphModel</a></li>
+            <li><a href="#events">События ядра</a></li>
+            <li><a href="#sample">Пример кода плагина</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Исходники</h4>
+          <ul class="footer-links">
+            <li><a href="https://github.com/komendant-zero/dialogue-engine/tree/master/core" target="_blank" rel="noopener noreferrer">core/models.py</a></li>
+            <li><a href="https://github.com/komendant-zero/dialogue-engine/tree/master/plugin_system" target="_blank" rel="noopener noreferrer">plugin_system/</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2026 Dialogue Engine Team. Выпущено под лицензией MIT.</span>
+        <span>Python 3.10+ • Dataclasses Architecture</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/nav.js"></script>
+</body>
+</html>

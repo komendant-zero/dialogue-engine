@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCP Server v2.0 — Dialogue Engine AI Copilot</title>
+  <meta name="description" content="Полная спецификация MCP Server для Dialogue Engine: 22 инструмента, 3 промпта, live sync порт 48123, интеграция с Claude Desktop, Antigravity и Cursor.">
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⬡</text></svg>">
+</head>
+<body>
+
+  <!-- ========================================================================
+       Header / Navbar
+       ======================================================================== -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="brand">
+        <div class="brand-icon">⬡</div>
+        <div class="brand-title">
+          <span>Dialogue Engine</span>
+          <span class="brand-badge">MCP v2.0</span>
+        </div>
+      </a>
+
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="index.html" class="nav-link">Главная</a></li>
+          <li><a href="mcp.html" class="nav-link active">MCP Сервер</a></li>
+          <li><a href="plugins.html" class="nav-link">Плагины</a></li>
+          <li><a href="api.html" class="nav-link">Plugin API</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="https://github.com/komendant-zero/dialogue-engine" target="_blank" rel="noopener noreferrer" class="btn-github">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          <span>GitHub</span>
+        </a>
+        <button class="mobile-toggle" aria-label="Открыть меню" aria-expanded="false">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       Hero Section
+       ======================================================================== -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-pill">
+        <span>Стандарт Model Context Protocol (MCP 2024-11-05)</span>
+      </div>
+      <h1 class="hero-title">
+        AI Copilot для сценария <br>
+        <span class="gradient-text">через MCP Server v2.0</span>
+      </h1>
+      <p class="hero-subtitle">
+        Подключайте современные большие языковые модели напрямую к холсту диалогов.
+        22 специализированных инструмента позволяют читать сюжет, ветвить истории и спавнить узлы на глазах у пользователя.
+      </p>
+
+      <div class="hero-cta">
+        <a href="#quick-config" class="btn btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+          Конфигурация подключения
+        </a>
+        <a href="#tools" class="btn btn-secondary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          Справочник 22 инструментов
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Architecture Diagram & Explanation
+       ======================================================================== -->
+  <section class="section section-alt" id="architecture">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Архитектура взаимодействия</span>
+        <h2 class="section-title">Как работает экосистема MCP</h2>
+        <p class="section-desc">Полный цикл: от промпта пользователя к LLM до появления нового узла на холсте редактора.</p>
+      </div>
+
+      <div class="diagram-box">
+        <div class="diagram-flow">
+          <div class="diagram-node">
+            <div class="diagram-node-title">🤖 AI Agent</div>
+            <div class="diagram-node-subtitle">Antigravity / Claude / Cursor</div>
+          </div>
+          
+          <div class="diagram-arrow">
+            <span>⇄</span>
+            <span class="diagram-arrow-label">stdio (JSON-RPC)</span>
+          </div>
+
+          <div class="diagram-node" style="border-color: var(--neon-cyan); box-shadow: var(--glow-cyan);">
+            <div class="diagram-node-title">⚙️ MCP Server</div>
+            <div class="diagram-node-subtitle">mcp_server.py (v2.0.0)</div>
+          </div>
+
+          <div class="diagram-arrow">
+            <span>⇄</span>
+            <span class="diagram-arrow-label">GraphModel</span>
+          </div>
+
+          <div class="diagram-node">
+            <div class="diagram-node-title">📄 Project JSON</div>
+            <div class="diagram-node-subtitle">Диск (.json + .bak)</div>
+          </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px;">
+          <div class="diagram-arrow" style="margin: 0 auto; display: inline-flex;">
+            <span>⇣ TCP порт 48123 (Live Sync)</span>
+          </div>
+          <div class="diagram-node" style="display: inline-block; margin-top: 10px; border-color: var(--neon-green);">
+            <div class="diagram-node-title">🖥️ Dialogue Engine GUI</div>
+            <div class="diagram-node-subtitle">Открытый холст, анимация спавна узла и авто-фокус</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-3" style="margin-top: 30px;">
+        <div class="feature-card">
+          <h4 class="feature-title" style="color: var(--neon-cyan);">1. Двусторонний stdio</h4>
+          <p class="feature-desc">
+            Обмен сообщениями стандартизирован через JSON-RPC 2.0 (Model Context Protocol). Поддерживается Windows с автоматическим переключением stdin/stdout на UTF-8.
+          </p>
+        </div>
+        <div class="feature-card">
+          <h4 class="feature-title" style="color: var(--neon-purple);">2. Умное автопозиционирование</h4>
+          <p class="feature-desc">
+            Сервер сам вычисляет оптимальные координаты X/Y: реплики размещаются аккуратно правее родительского узла с правильными отступами, не перекрывая соседние ветки.
+          </p>
+        </div>
+        <div class="feature-card">
+          <h4 class="feature-title" style="color: var(--neon-green);">3. Live Sync без перезапуска</h4>
+          <p class="feature-desc">
+            При каждом действии ИИ сервер отправляет TCP-дейтаграмму на <code>127.0.0.1:48123</code>. Редактор моментально отрисовывает новый узел и плавно центрирует на нём камеру.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Quick Config
+       ======================================================================== -->
+  <section class="section" id="quick-config">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Интеграция</span>
+        <h2 class="section-title">Быстрое подключение</h2>
+        <p class="section-desc">Добавьте блок сервера в конфигурационный файл вашего AI-клиента.</p>
+      </div>
+
+      <div class="code-box">
+        <div class="code-header">
+          <span class="code-title"><span class="code-lang-dot json"></span>mcp_settings.json / claude_desktop_config.json</span>
+          <button class="copy-btn">Копировать конфиг</button>
+        </div>
+        <pre><span class="c-punct">{</span>
+  <span class="c-prop">"mcpServers"</span><span class="c-punct">:</span> <span class="c-punct">{</span>
+    <span class="c-prop">"dialogue-engine"</span><span class="c-punct">:</span> <span class="c-punct">{</span>
+      <span class="c-prop">"command"</span><span class="c-punct">:</span> <span class="c-str">"python"</span><span class="c-punct">,</span>
+      <span class="c-prop">"args"</span><span class="c-punct">:</span> <span class="c-punct">[</span>
+        <span class="c-str">"D:/DE/mcp_server.py"</span><span class="c-punct">,</span>
+        <span class="c-str">"D:/projects/MyNovel/game/story.json"</span>
+      <span class="c-punct">]</span><span class="c-punct">,</span>
+      <span class="c-prop">"env"</span><span class="c-punct">:</span> <span class="c-punct">{</span>
+        <span class="c-prop">"PYTHONIOENCODING"</span><span class="c-punct">:</span> <span class="c-str">"utf-8"</span>
+      <span class="c-punct">}</span>
+    <span class="c-punct">}</span>
+  <span class="c-punct">}</span>
+<span class="c-punct">}</span></pre>
+      </div>
+
+      <div class="callout callout-warning">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-content">
+          <strong>Важное замечание:</strong> Переменная <code>PYTHONIOENCODING=utf-8</code> обязательна для корректной передачи кириллических реплик через стандартный ввод/вывод в среде Windows.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Tools Directory (22 Tools)
+       ======================================================================== -->
+  <section class="section section-alt" id="tools">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Каталог инструментов</span>
+        <h2 class="section-title">22 MCP Инструмента</h2>
+        <p class="section-desc">Полный набор функций для автоматического управления сюжетом, доступный языковой модели.</p>
+      </div>
+
+      <!-- Группа 1: Проект -->
+      <div class="tool-group-title">
+        <span>📁 1. Управление проектом</span>
+        <span class="badge badge-cyan">3 инструмента</span>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <span class="tool-name">de_load_project</span>
+          <span class="badge badge-gray">Project Lifecycle</span>
+        </div>
+        <p class="tool-desc">Загрузить указанный файл проекта Dialogue Engine (.json) в память сервера. Если путь не передан, открывает последний активный файл.</p>
+        <div class="params-title">Параметры:</div>
+        <ul class="params-list">
+          <li>
+            <span class="param-name">file_path</span> <span class="param-type">(string, optional)</span>
+            <span class="param-desc">— Абсолютный путь к целевому JSON-файлу.</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <span class="tool-name">de_save_project</span>
+          <span class="badge badge-gray">Project Lifecycle</span>
+        </div>
+        <p class="tool-desc">Сохранить граф на диск с автоматическим созданием резервной копии <code>.bak</code>.</p>
+        <div class="params-title">Параметры:</div>
+        <ul class="params-list">
+          <li>
+            <span class="param-name">target_path</span> <span class="param-type">(string, optional)</span>
+            <span class="param-desc">— Путь назначения. По умолчанию перезаписывает открытый файл.</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <span class="tool-name">de_reload_server</span>
+          <span class="badge badge-gray">Maintenance</span>
+        </div>
+        <p class="tool-desc">Перезагрузить процесс MCP-сервера для подхвата свежих изменений в коде плагинов и модулей.</p>
+        <div class="params-title">Параметры: отсутствует (пустой объект)</div>
+      </div>
+
+      <!-- Группа 2: Анализ -->
+      <div class="tool-group-title">
+        <span>🔍 2. Анализ и инспекция графа</span>
+        <span class="badge badge-purple">6 инструментов</span>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <span class="tool-name">de_get_stats</span>
+          <span class="badge badge-purple">Analysis</span>
+        </div>
+        <p class="tool-desc">Возвращает комплексную сводку: количество узлов, связей, распределение по типам, персонажи, стартовые точки, листья и изолированные узлы.</p>
+        <div class="params-title">Параметры: отсутствует</div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <span class="tool-name">de_get_characters</span>
+          <span class="badge badge-purple">Analysis</span>
+        </div>
+        <p class="tool-desc">Возвращает список всех персонажей сценария с количеством произнесённых реплик и присвоенным hex-цветом плашки.</p>
+        <div class="params-title">Параметры: отсутствует</div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <span class="tool-name">de_find_leaf_endpoints</span>
+          <span class="badge badge-purple">Analysis</span>
+        </div>
+        <p class="tool-desc">Находит все листовые узлы (тупики сценария без исходящих связей). Ключевой инструмент для AI-продолжения недописанных сцен.</p>
+        <div class="params-title">Параметры: отсутствует</div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <span class="tool-name">de_get_node</span>
+          <span class="badge badge-purple">Analysis</span>
+        </div>
+        <p class="tool-desc">Получить детальные данные конкретного узла: спикер, текст, координаты, custom_data, входящие и исходящие связи с номерами портов.</p>
+        <div class="params-title">Параметры:</div>
+        <ul class="params-list">
+          <li>
+            <span class="param-name">node_id</span> <span class="param-type">(string)</span> <span class="param-required">Обязательный</span>
+            <span class="param-desc">— 13-значный числовой ID узла.</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <span class="tool-name">de_search_nodes</span>
+          <span class="badge badge-purple">Analysis</span>
+        </div>
+        <p class="tool-desc">Полнотекстовый поиск по узлам с фильтрацией по персонажу и типу узла.</p>
+        <div class="params-title">Параметры:</div>
+        <ul class="params-list">
+          <li><span class="param-name">query</span> <span class="param-type">(string, optional)</span> <span class="param-desc">— Подстрока в тексте или заголовке.</span></li>
+          <li><span class="param-name">character</span> <span class="param-type">(string, optional)</span> <span class="param-desc">— Имя спикера.</span></li>
+          <li><span class="param-name">node_type</span> <span class="param-type">(string, optional)</span> <span class="param-desc">— Фильтр типа (story, choice, condition, etc.).</span></li>
+          <li><span class="param-name">limit</span> <span class="param-type">(integer, optional)</span> <span class="param-desc">— Лимит вывода (по умолчанию 20).</span></li>
+        </ul>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <span class="tool-name">de_trace_branch</span>
+          <span class="badge badge-purple">Analysis</span>
+        </div>
+        <p class="tool-desc">Трассирует сюжетную ветку от узла до листьев, формируя отформатированный древовидный сценарий с учётом ветвлений.</p>
+        <div class="params-title">Параметры:</div>
+        <ul class="params-list">
+          <li><span class="param-name">start_node_id</span> <span class="param-type">(string, optional)</span> <span class="param-desc">— Старт ветки (по умолчанию — со всех корневых узлов).</span></li>
+          <li><span class="param-name">max_depth</span> <span class="param-type">(integer, optional)</span> <span class="param-desc">— Предельная глубина обхода (по умолчанию 30).</span></li>
+        </ul>
+      </div>
+
+      <!-- Группа 3: Создание -->
+      <div class="tool-group-title">
+        <span>✨ 3. Создание узлов</span>
+        <span class="badge badge-green">5 инструментов</span>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <span class="tool-name">de_add_story_node</span>
+          <span class="badge badge-green">Creation</span>
+        </div>
+        <p class="tool-desc">Добавить сюжетную реплику или описание. Автоматически рассчитывает координаты X/Y справа от родителя и сохраняет проект.</p>
+        <div class="params-title">Параметры:</div>
+        <ul class="params-list">
+          <li><span class="param-name">character</span> <span class="param-type">(string)</span> <span class="param-required">Обязательный</span> <span class="param-desc">— Имя спикера или <code>#Сцена</code> для нарратива.</span></li>
+          <li><span class="param-name">content</span> <span class="param-type">(string)</span> <span class="param-required">Обязательный</span> <span class="param-desc">— Текст реплики.</span></li>
+          <li><span class="param-name">connect_from_id</span> <span class="param-type">(string, optional)</span> <span class="param-desc">— ID родителя для связки.</span></li>
+          <li><span class="param-name">connect_out_idx</span> <span class="param-type">(integer, optional)</span> <span class="param-desc">— Порт родителя (0 по умолчанию).</span></li>
+          <li><span class="param-name">x, y</span> <span class="param-type">(number, optional)</span> <span class="param-desc">— Точные координаты (если не заданы — авто).</span></li>
+          <li><span class="param-name">auto_save</span> <span class="param-type">(boolean, optional)</span> <span class="param-desc">— Автосохранение (true).</span></li>
+        </ul>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <span class="tool-name">de_add_choice_node</span>
+          <span class="badge badge-green">Creation</span>
+        </div>
+        <p class="tool-desc">Создать узел выбора с несколькими вариантами ответов. Каждый вариант получает собственный выходной порт.</p>
+        <div class="params-title">Параметры:</div>
+        <ul class="params-list">
+          <li><span class="param-name">choices</span> <span class="param-type">(array of strings)</span> <span class="param-required">Обязательный</span> <span class="param-desc">— Массив текстов выборов.</span></li>
+          <li><span class="param-name">title</span> <span class="param-type">(string, optional)</span> <span class="param-desc">— Заголовок узла (по умолчанию «Выбор»).</span></li>
+          <li><span class="param-name">connect_from_id</span> <span class="param-type">(string, optional)</span> <span class="param-desc">— Родительский узел.</span></li>
+          <li><span class="param-name">connect_out_idx</span> <span class="param-type">(integer, optional)</span> <span class="param-desc">— Порт родителя.</span></li>
+        </ul>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <span class="tool-name">de_add_condition_node</span>
+          <span class="badge badge-green">Creation</span>
+        </div>
+        <p class="tool-desc">Создать узел ветвления по выражению (например, <code>trust &gt; 5</code>). Генерирует 2 порта выхода: 0=True, 1=False (Else).</p>
+        <div class="params-title">Параметры:</div>
+        <ul class="params-list">
+          <li><span class="param-name">condition</span> <span class="param-type">(string)</span> <span class="param-required">Обязательный</span> <span class="param-desc">— Python-выражение для Ren'Py.</span></li>
+          <li><span class="param-name">title</span> <span class="param-type">(string, optional)</span> <span class="param-desc">— Название узла.</span></li>
+          <li><span class="param-name">connect_from_id</span> <span class="param-type">(string, optional)</span> <span class="param-desc">— Родительский узел.</span></li>
+        </ul>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <span class="tool-name">de_add_music_node</span>
+          <span class="badge badge-green">Creation</span>
+        </div>
+        <p class="tool-desc">Добавить музыкальный узел или SFX. Поддерживает вставку в разрыв между двумя уже соединёнными узлами через <code>connect_to_id</code>.</p>
+        <div class="params-title">Параметры:</div>
+        <ul class="params-list">
+          <li><span class="param-name">music_file</span> <span class="param-type">(string)</span> <span class="param-required">Обязательный</span> <span class="param-desc">— Путь к файлу (напр. <code>audio/ambient.ogg</code>).</span></li>
+          <li><span class="param-name">music_mode</span> <span class="param-type">(string: bg|sfx|voice|stop)</span> <span class="param-desc">— Режим воспроизведения.</span></li>
+          <li><span class="param-name">connect_to_id</span> <span class="param-type">(string, optional)</span> <span class="param-desc">— Узел, перед которым встраивается музыка.</span></li>
+          <li><span class="param-name">fadein, fadeout</span> <span class="param-type">(number, optional)</span> <span class="param-desc">— Время нарастания/затухания в секундах.</span></li>
+        </ul>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <span class="tool-name">de_bulk_add_nodes</span>
+          <span class="badge badge-green">Batch Operation</span>
+        </div>
+        <p class="tool-desc">Пакетное создание целых сцен и сюжетных арок за один сетевой запрос. Принимает список дескрипторов узлов и соединений.</p>
+        <div class="params-title">Параметры:</div>
+        <ul class="params-list">
+          <li><span class="param-name">nodes</span> <span class="param-type">(array of objects)</span> <span class="param-required">Обязательный</span> <span class="param-desc">— Список спецификаций узлов с типом и параметрами.</span></li>
+          <li><span class="param-name">auto_save</span> <span class="param-type">(boolean, optional)</span> <span class="param-desc">— Автосохранение после пакетной вставки.</span></li>
+        </ul>
+      </div>
+
+      <!-- Группа 4: Редактирование -->
+      <div class="tool-group-title">
+        <span>✏️ 4. Редактирование и трансформация</span>
+        <span class="badge badge-amber">4 инструмента</span>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <span class="tool-name">de_update_node</span>
+          <span class="badge badge-amber">Mutation</span>
+        </div>
+        <p class="tool-desc">Модифицирует любые свойства существующего узла: текст, персонажа, тип, координаты или данные словаря custom_data.</p>
+        <div class="params-title">Параметры:</div>
+        <ul class="params-list">
+          <li><span class="param-name">node_id</span> <span class="param-type">(string)</span> <span class="param-required">Обязательный</span> <span class="param-desc">— ID обновляемого узла.</span></li>
+          <li><span class="param-name">character / title / content</span> <span class="param-type">(string, optional)</span> <span class="param-desc">— Новые текстовые поля.</span></li>
+          <li><span class="param-name">custom_data</span> <span class="param-type">(object, optional)</span> <span class="param-desc">— Слияние словаря кастомных полей.</span></li>
+        </ul>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <span class="tool-name">de_move_node</span>
+          <span class="badge badge-amber">Layout</span>
+        </div>
+        <p class="tool-desc">Переместить узел на абсолютные координаты (x, y) либо со сдвигом по дельте (delta_x, delta_y).</p>
+        <div class="params-title">Параметры:</div>
+        <ul class="params-list">
+          <li><span class="param-name">node_id</span> <span class="param-type">(string)</span> <span class="param-required">Обязательный</span></li>
+          <li><span class="param-name">x, y</span> <span class="param-type">(number, optional)</span> <span class="param-desc">— Абсолютные координаты.</span></li>
+          <li><span class="param-name">delta_x, delta_y</span> <span class="param-type">(number, optional)</span> <span class="param-desc">— Относительный сдвиг.</span></li>
+        </ul>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <span class="tool-name">de_duplicate_node</span>
+          <span class="badge badge-amber">Clone</span>
+        </div>
+        <p class="tool-desc">Создаёт точную копию узла со всеми параметрами со сдвигом вправо (+240px по умолчанию) без привязки связей.</p>
+        <div class="params-title">Параметры:</div>
+        <ul class="params-list">
+          <li><span class="param-name">node_id</span> <span class="param-type">(string)</span> <span class="param-required">Обязательный</span> <span class="param-desc">— ID исходного узла.</span></li>
+          <li><span class="param-name">offset_x, offset_y</span> <span class="param-type">(number, optional)</span> <span class="param-desc">— Смещение дубликата.</span></li>
+        </ul>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <span class="tool-name">de_delete_node</span>
+          <span class="badge badge-amber">Deletion</span>
+        </div>
+        <p class="tool-desc">Удаляет узел из графа и аккуратно подчищает все входящие и исходящие линии соединений.</p>
+        <div class="params-title">Параметры:</div>
+        <ul class="params-list">
+          <li><span class="param-name">node_id</span> <span class="param-type">(string)</span> <span class="param-required">Обязательный</span></li>
+          <li><span class="param-name">auto_save</span> <span class="param-type">(boolean, optional)</span></li>
+        </ul>
+      </div>
+
+      <!-- Группа 5: Связи -->
+      <div class="tool-group-title">
+        <span>🔗 5. Управление связями</span>
+        <span class="badge badge-cyan">2 инструмента</span>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <span class="tool-name">de_connect_nodes</span>
+          <span class="badge badge-cyan">Wiring</span>
+        </div>
+        <p class="tool-desc">Соединить выходной порт узла-источника со входом целевого узла.</p>
+        <div class="params-title">Параметры:</div>
+        <ul class="params-list">
+          <li><span class="param-name">from_node</span> <span class="param-type">(string)</span> <span class="param-required">Обязательный</span> <span class="param-desc">— ID исходного узла.</span></li>
+          <li><span class="param-name">to_node</span> <span class="param-type">(string)</span> <span class="param-required">Обязательный</span> <span class="param-desc">— ID целевого узла.</span></li>
+          <li><span class="param-name">out_idx</span> <span class="param-type">(integer, optional)</span> <span class="param-desc">— Индекс выходного порта (0 по умолчанию).</span></li>
+        </ul>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <span class="tool-name">de_disconnect_nodes</span>
+          <span class="badge badge-cyan">Wiring</span>
+        </div>
+        <p class="tool-desc">Разорвать соединение между узлами по номеру выхода или удалить все связи с порта.</p>
+        <div class="params-title">Параметры:</div>
+        <ul class="params-list">
+          <li><span class="param-name">from_node</span> <span class="param-type">(string)</span> <span class="param-required">Обязательный</span></li>
+          <li><span class="param-name">out_idx</span> <span class="param-type">(integer, optional)</span> <span class="param-desc">— Индекс выхода (0 по умолчанию).</span></li>
+          <li><span class="param-name">to_node</span> <span class="param-type">(string, optional)</span> <span class="param-desc">— Конкретный целевой узел.</span></li>
+        </ul>
+      </div>
+
+      <!-- Группа 6: Проверка и Экспорт -->
+      <div class="tool-group-title">
+        <span>🚀 6. Проверка и экспорт</span>
+        <span class="badge badge-green">2 инструмента</span>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <span class="tool-name">de_validate_graph</span>
+          <span class="badge badge-green">Validation</span>
+        </div>
+        <p class="tool-desc">Комплексная диагностика: битые ссылки, висячие условия, изолированные узлы, циклы и пустые реплики.</p>
+        <div class="params-title">Параметры: отсутствует</div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <span class="tool-name">de_export_renpy</span>
+          <span class="badge badge-green">Export</span>
+        </div>
+        <p class="tool-desc">Автоматическая компиляция графа в рабочий <code>script.rpy</code> с разметкой для движка Ren'Py.</p>
+        <div class="params-title">Параметры:</div>
+        <ul class="params-list">
+          <li><span class="param-name">output_dir</span> <span class="param-type">(string, optional)</span> <span class="param-desc">— Директория игры <code>game/</code> проекта Ren'Py.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Prompts & Resources
+       ======================================================================== -->
+  <section class="section" id="prompts">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Сценарии использования</span>
+        <h2 class="section-title">Встроенные MCP Промпты</h2>
+        <p class="section-desc">Готовые контекстные инструкции для мгновенного выполнения нарративных задач.</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="feature-card">
+          <div class="badge badge-cyan" style="width: fit-content; margin-bottom: 12px;">Prompt</div>
+          <h3 class="feature-title">continue_scene</h3>
+          <p class="feature-desc">
+            Находит все незавершённые листья сюжета (или начинает от переданного <code>leaf_id</code>) и генерирует логичное нарративное продолжение реплик.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="badge badge-purple" style="width: fit-content; margin-bottom: 12px;">Prompt</div>
+          <h3 class="feature-title">review_branch</h3>
+          <p class="feature-desc">
+            Трассирует ветку от <code>start_node_id</code> и выполняет глубокую редакторскую вычитку: темп повествования, характер персонажей и сюжетные дыры.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="badge badge-green" style="width: fit-content; margin-bottom: 12px;">Prompt</div>
+          <h3 class="feature-title">add_choice_branch</h3>
+          <p class="feature-desc">
+            Создаёт узел развилки с <code>num_choices</code> вариантами после <code>parent_id</code> и автоматически генерирует скелеты сцен для каждого пути.
+          </p>
+        </div>
+      </div>
+
+      <!-- Resource section -->
+      <div style="margin-top: 50px;">
+        <div class="section-header">
+          <span class="section-tag">Ресурсы MCP</span>
+          <h2 class="section-title">Единый ресурс активного проекта</h2>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-header">
+            <span class="tool-name">de://project/active</span>
+            <span class="badge badge-cyan">application/json</span>
+          </div>
+          <p class="tool-desc">
+            Предоставляет AI-клиенту полный слепок текущего графа в виде JSON. Позволяет модели мгновенно загрузить всю топологию проекта в свой контекст для сквозного анализа сценария.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Live Sync Details
+       ======================================================================== -->
+  <section class="section section-alt" id="livesync">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Интерактивность</span>
+        <h2 class="section-title">Механизм Live Sync (Порт 48123)</h2>
+        <p class="section-desc">Как сервер и редактор общаются во время работы нейросети.</p>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <p style="margin-bottom: 16px; color: var(--text-main);">
+            Когда AI вызывает любой создающий или модифицирующий инструмент (например, <code>de_add_story_node</code>), MCP Server не просто обновляет JSON на диске — он отправляет сокетное уведомление на локальный TCP-порт <code>48123</code>.
+          </p>
+          <ul class="roadmap-list" style="margin-bottom: 20px;">
+            <li>Редактор получает команду <code>node_spawn</code></li>
+            <li>Создаётся плавная анимация появления узла</li>
+            <li>Автоматически рисуется соединительная кривая Безье</li>
+            <li>Камера холста плавно центрируется на созданном узле</li>
+          </ul>
+        </div>
+
+        <div class="code-box" style="margin: 0;">
+          <div class="code-header">
+            <span class="code-title"><span class="code-lang-dot json"></span>Пакет синхронизации TCP</span>
+          </div>
+          <pre><span class="c-punct">{</span>
+  <span class="c-prop">"action"</span><span class="c-punct">:</span> <span class="c-str">"node_spawn"</span><span class="c-punct">,</span>
+  <span class="c-prop">"node"</span><span class="c-punct">:</span> <span class="c-punct">{</span>
+    <span class="c-prop">"id"</span><span class="c-punct">:</span> <span class="c-str">"8392019485712"</span><span class="c-punct">,</span>
+    <span class="c-prop">"type"</span><span class="c-punct">:</span> <span class="c-str">"story"</span><span class="c-punct">,</span>
+    <span class="c-prop">"title"</span><span class="c-punct">:</span> <span class="c-str">"Алиса"</span><span class="c-punct">,</span>
+    <span class="c-prop">"content"</span><span class="c-punct">:</span> <span class="c-str">"Мы наконец нашли вход в лабораторию..."</span><span class="c-punct">,</span>
+    <span class="c-prop">"x"</span><span class="c-punct">:</span> <span class="c-num">840.0</span><span class="c-punct">,</span>
+    <span class="c-prop">"y"</span><span class="c-punct">:</span> <span class="c-num">220.0</span>
+  <span class="c-punct">}</span><span class="c-punct">,</span>
+  <span class="c-prop">"connection"</span><span class="c-punct">:</span> <span class="c-punct">{</span>
+    <span class="c-prop">"from"</span><span class="c-punct">:</span> <span class="c-str">"8392019485001"</span><span class="c-punct">,</span>
+    <span class="c-prop">"out_idx"</span><span class="c-punct">:</span> <span class="c-num">0</span><span class="c-punct">,</span>
+    <span class="c-prop">"to"</span><span class="c-punct">:</span> <span class="c-str">"8392019485712"</span>
+  <span class="c-punct">}</span><span class="c-punct">,</span>
+  <span class="c-prop">"focus"</span><span class="c-punct">:</span> <span class="c-kw">true</span>
+<span class="c-punct">}</span></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Footer
+       ======================================================================== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="brand">
+            <div class="brand-icon">⬡</div>
+            <div class="brand-title"><span>Dialogue Engine</span></div>
+          </div>
+          <p class="footer-desc">
+            MCP Server v2.0 реализует спецификацию протокола Model Context Protocol 2024-11-05.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Документация</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Главная страница</a></li>
+            <li><a href="mcp.html">MCP AI Сервер</a></li>
+            <li><a href="plugins.html">Каталог плагинов</a></li>
+            <li><a href="api.html">Plugin API & События</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">MCP Разделы</h4>
+          <ul class="footer-links">
+            <li><a href="#quick-config">Конфигурация</a></li>
+            <li><a href="#tools">22 Инструмента</a></li>
+            <li><a href="#prompts">Промпты и Ресурсы</a></li>
+            <li><a href="#livesync">Live Sync :48123</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Репозиторий</h4>
+          <ul class="footer-links">
+            <li><a href="https://github.com/komendant-zero/dialogue-engine" target="_blank" rel="noopener noreferrer">GitHub Репозиторий</a></li>
+            <li><a href="https://github.com/komendant-zero/dialogue-engine/blob/master/mcp_server.py" target="_blank" rel="noopener noreferrer">Код mcp_server.py</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2026 Dialogue Engine Team. Выпущено под лицензией MIT.</span>
+        <span>Model Context Protocol 2024-11-05 • stdio + TCP 48123</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/nav.js"></script>
+</body>
+</html>

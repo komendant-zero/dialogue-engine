@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dialogue Engine — Визуальный редактор сценариев и диалогов для Ren'Py</title>
+  <meta name="description" content="Визуальный node-based редактор диалогов и нелинейных сценариев для Ren'Py и визуальных новелл. AI Copilot через MCP, система плагинов, автосохранение.">
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⬡</text></svg>">
+</head>
+<body>
+
+  <!-- ========================================================================
+       Header / Navbar
+       ======================================================================== -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="brand">
+        <div class="brand-icon">⬡</div>
+        <div class="brand-title">
+          <span>Dialogue Engine</span>
+          <span class="brand-badge">v2.1</span>
+        </div>
+      </a>
+
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="index.html" class="nav-link active">Главная</a></li>
+          <li><a href="mcp.html" class="nav-link">MCP Сервер</a></li>
+          <li><a href="plugins.html" class="nav-link">Плагины</a></li>
+          <li><a href="api.html" class="nav-link">Plugin API</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="https://github.com/komendant-zero/dialogue-engine" target="_blank" rel="noopener noreferrer" class="btn-github">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          <span>GitHub</span>
+        </a>
+        <button class="mobile-toggle" aria-label="Открыть меню" aria-expanded="false">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       Hero Section
+       ======================================================================== -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-pill">
+        <span>✨ Релиз v2.1: Полноценный AI Copilot через MCP 2024-11-05</span>
+      </div>
+      <h1 class="hero-title">
+        Визуальный редактор сценариев <br>
+        <span class="gradient-text">нового поколения для Ren'Py</span>
+      </h1>
+      <p class="hero-subtitle">
+        Проектируйте ветвящиеся сюжеты, реплики персонажей, музыку и логику в узловом интерфейсе.
+        Подключайте нейросети через стандарт Model Context Protocol (MCP) прямо к холсту.
+      </p>
+      
+      <div class="hero-cta">
+        <a href="#quickstart" class="btn btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          Быстрый старт
+        </a>
+        <a href="mcp.html" class="btn btn-secondary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          Документация MCP
+        </a>
+        <a href="https://github.com/komendant-zero/dialogue-engine" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
+          Исходный код
+        </a>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="hero-stats">
+        <div class="stat-card">
+          <span class="stat-val">233+</span>
+          <span class="stat-label">Узлов в реальном проекте</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-val">22</span>
+          <span class="stat-label">MCP AI инструментов</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-val">20+</span>
+          <span class="stat-label">Встроенных плагинов</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-val">MIT</span>
+          <span class="stat-label">Бесплатный & Open Source</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Features Grid
+       ======================================================================== -->
+  <section class="section section-alt" id="features">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Возможности</span>
+        <h2 class="section-title">Создан для сценаристов и разработчиков</h2>
+        <p class="section-desc">Сочетание лёгкого настольного интерфейса и инструментов автоматизации для нелинейных нарративов любого масштаба.</p>
+      </div>
+
+      <div class="grid-3">
+        <!-- Feature 1 -->
+        <div class="feature-card">
+          <div class="feature-icon">⬡</div>
+          <h3 class="feature-title">Бесконечный холст</h3>
+          <p class="feature-desc">
+            Инерционный скролл, плавный зум колёсиком мыши, автораскладка графа (<kbd>Ctrl+L</kbd>) и поддержка сотен связанных узлов без потери производительности.
+          </p>
+          <div style="margin-top: 14px;">
+            <span class="badge badge-cyan">Infinite Canvas</span>
+            <span class="badge badge-gray">Auto Layout</span>
+          </div>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="feature-card">
+          <div class="feature-icon icon-purple">🤖</div>
+          <h3 class="feature-title">AI Copilot (MCP v2.0)</h3>
+          <p class="feature-desc">
+            Встроенный MCP Server стандарта 2024-11-05. Подключайте Antigravity, Claude Desktop или Cursor: нейросеть читает граф, создаёт реплики и развилки в реальном времени.
+          </p>
+          <div style="margin-top: 14px;">
+            <span class="badge badge-purple">MCP 2024-11-05</span>
+            <span class="badge badge-cyan">Live Sync :48123</span>
+          </div>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="feature-card">
+          <div class="feature-icon icon-green">🧩</div>
+          <h3 class="feature-title">Модульная система плагинов</h3>
+          <p class="feature-desc">
+            Изолированная архитектура плагинов с механизмом Error Boundary. Падение отдельного расширения не ломает холст и сохраняет данные пользователя в безопасности.
+          </p>
+          <div style="margin-top: 14px;">
+            <span class="badge badge-green">Plugin API</span>
+            <span class="badge badge-gray">Error Boundary</span>
+          </div>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="feature-card">
+          <div class="feature-icon icon-amber">📜</div>
+          <h3 class="feature-title">Чистый экспорт в Ren'Py</h3>
+          <p class="feature-desc">
+            Генерация структурированного <code>script.rpy</code> с поддержкой меток, меню выбора, проверок условий <code>if / elif / else</code>, звуковых эффектов и ATL-анимаций.
+          </p>
+          <div style="margin-top: 14px;">
+            <span class="badge badge-amber">Ren'Py 7 & 8</span>
+            <span class="badge badge-rose">Headless CLI</span>
+          </div>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="feature-card">
+          <div class="feature-icon">💾</div>
+          <h3 class="feature-title">Атомный автосейв и .bak</h3>
+          <p class="feature-desc">
+            Фоновое автосохранение каждые 30 секунд. Атомарная запись через временные файлы и автоматическое создание резервных копий <code>.bak</code> исключают потерю данных.
+          </p>
+          <div style="margin-top: 14px;">
+            <span class="badge badge-cyan">Atomic Write</span>
+            <span class="badge badge-green">30s Interval</span>
+          </div>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="feature-card">
+          <div class="feature-icon icon-purple">🎮</div>
+          <h3 class="feature-title">Встроенный плейтест</h3>
+          <p class="feature-desc">
+            Проверяйте ветвление и читайте диалоги во встроенном легковесном плеере или запускайте реальный движок Ren'Py в один клик без ручного копирования файлов.
+          </p>
+          <div style="margin-top: 14px;">
+            <span class="badge badge-purple">Playtest</span>
+            <span class="badge badge-amber">Interactive Run</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Quick Start Section
+       ======================================================================== -->
+  <section class="section" id="quickstart">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Установка и запуск</span>
+        <h2 class="section-title">Быстрый старт за 2 минуты</h2>
+        <p class="section-desc">Dialogue Engine написан на чистом Python и использует стандартный Tkinter — никаких тяжёлых фреймворков и веб-контейнеров.</p>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <h3 style="font-size: 1.2rem; color: var(--text-bright); margin-bottom: 12px;">1. Клонирование и зависимости</h3>
+          <p style="font-size: 0.94rem; color: var(--text-muted); margin-bottom: 14px;">
+            Требуется Python 3.10 или новее. Установите зависимости одной командой:
+          </p>
+          <div class="code-box">
+            <div class="code-header">
+              <span class="code-title"><span class="code-lang-dot bash"></span>bash</span>
+              <button class="copy-btn">Копировать</button>
+            </div>
+            <pre><span class="c-comm"># Клонирование репозитория</span>
+git clone https://github.com/komendant-zero/dialogue-engine.git
+cd dialogue-engine
+
+<span class="c-comm"># Запуск редактора (графический интерфейс)</span>
+python main.py
+
+<span class="c-comm"># Или открытие конкретного файла проекта:</span>
+python main.py D:/projects/MyNovel/game/story.json</pre>
+          </div>
+        </div>
+
+        <div>
+          <h3 style="font-size: 1.2rem; color: var(--text-bright); margin-bottom: 12px;">2. Запуск MCP AI Сервера</h3>
+          <p style="font-size: 0.94rem; color: var(--text-muted); margin-bottom: 14px;">
+            Для подключения ассистентов (Antigravity / Claude / Cursor) запустите сервер по протоколу stdio:
+          </p>
+          <div class="code-box">
+            <div class="code-header">
+              <span class="code-title"><span class="code-lang-dot bash"></span>bash</span>
+              <button class="copy-btn">Копировать</button>
+            </div>
+            <pre><span class="c-comm"># Запуск MCP-сервера со стандартным вводом/выводом</span>
+python mcp_server.py D:/projects/MyNovel/game/story.json
+
+<span class="c-comm"># Проверка работоспособности (тестовый запуск)</span>
+python mcp_server.py --test</pre>
+          </div>
+          <div class="callout callout-info" style="margin-top: 14px;">
+            <div class="callout-icon">💡</div>
+            <div class="callout-content">
+              Сервер автоматически подключается к запущенному редактору через локальный порт <code>48123</code> и обновляет холст на лету!
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Node Types Table
+       ======================================================================== -->
+  <section class="section section-alt" id="nodes">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Справочник</span>
+        <h2 class="section-title">Типы узлов графа</h2>
+        <p class="section-desc">Каждый узел представляет конкретное игровое событие или реплику в сценарии визуальной новеллы.</p>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="table-custom">
+          <thead>
+            <tr>
+              <th>Тип (type)</th>
+              <th>Назначение</th>
+              <th>Порты выхода</th>
+              <th>Параметры и Custom Data</th>
+              <th>В Ren'Py</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-cyan">story</span></td>
+              <td>Реплика персонажа или нарративное описание сцены</td>
+              <td>1 выход</td>
+              <td><code>character</code> (спикер или <code>#Сцена</code>), <code>content</code> (текст), <code>header_text_color</code></td>
+              <td><code>e "Привет, мир!"</code></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-purple">choice</span></td>
+              <td>Выбор игрока с N вариантами ответа</td>
+              <td>N выходов (по варианту)</td>
+              <td>Каждая строка в <code>content</code> формирует отдельный порт выхода</td>
+              <td><code>menu: "Вариант 1": ...</code></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-green">condition</span></td>
+              <td>Ветвление логики по условию (If / Else)</td>
+              <td>2 выхода (0=True, 1=False)</td>
+              <td><code>condition</code> (выражение, напр. <code>points &gt;= 10</code>)</td>
+              <td><code>if points &gt;= 10: ... else:</code></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-amber">music</span></td>
+              <td>Управление фоновой музыкой, SFX или голосом</td>
+              <td>1 выход (сквозной)</td>
+              <td><code>music_mode</code> (bg, sfx, voice, stop), <code>fadein</code>, <code>fadeout</code></td>
+              <td><code>play music "audio/bgm.ogg"</code></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-rose">media</span></td>
+              <td>Смена фона (scene), спрайта персонажа (show/hide), GIF</td>
+              <td>1 выход</td>
+              <td><code>image_path</code>, <code>display_mode</code> (scene/show/hide), теги позиции</td>
+              <td><code>scene bg room</code> / <code>show eileen</code></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-gray">label</span></td>
+              <td>Метка точки входа или переход (Jump/Call)</td>
+              <td>1 выход</td>
+              <td><code>label_name</code> (имя метки в скрипте)</td>
+              <td><code>label chapter_1:</code></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-cyan">variable</span></td>
+              <td>Присвоение или модификация переменной</td>
+              <td>1 выход</td>
+              <td><code>var_name</code>, <code>operator</code> (=, +=, -=), <code>var_value</code></td>
+              <td><code>$ karma += 1</code></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-purple">animation</span></td>
+              <td>ATL-анимация перехода, шейка экрана или трансформация</td>
+              <td>1 выход</td>
+              <td><code>atl_code</code>, <code>target_displayable</code></td>
+              <td><code>with dissolve</code> / <code>with hpunch</code></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-amber">python_code</span></td>
+              <td>Произвольный блок Python кода в логике сцены</td>
+              <td>1 выход</td>
+              <td><code>code</code> (многострочный скрипт)</td>
+              <td><code>python:</code> блок</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-gray">pause</span></td>
+              <td>Пауза или ожидание клика игрока</td>
+              <td>1 выход</td>
+              <td><code>duration</code> (секунды или бесконечность до клика)</td>
+              <td><code>$ renpy.pause(2.0)</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Shortcuts Section
+       ======================================================================== -->
+  <section class="section" id="shortcuts">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Продуктивность</span>
+        <h2 class="section-title">Горячие клавиши</h2>
+        <p class="section-desc">Управляйте холстом и узлами без отрыва рук от клавиатуры.</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="table-wrapper">
+          <table class="table-custom">
+            <thead>
+              <tr>
+                <th>Комбинация</th>
+                <th>Действие</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>Ctrl + S</code></td>
+                <td>Быстрое сохранение проекта с созданием резервной копии</td>
+              </tr>
+              <tr>
+                <td><code>Ctrl + O</code></td>
+                <td>Открыть существующий файл проекта <code>.json</code></td>
+              </tr>
+              <tr>
+                <td><code>Ctrl + F</code></td>
+                <td>Поиск узла по тексту, спикеру или ID</td>
+              </tr>
+              <tr>
+                <td><code>Ctrl + Z</code> / <code>Ctrl + Y</code></td>
+                <td>Отмена / Повтор действия (Undo / Redo)</td>
+              </tr>
+              <tr>
+                <td><code>Ctrl + L</code></td>
+                <td>Интеллектуальная автораскладка графа слева направо</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="table-custom">
+            <thead>
+              <tr>
+                <th>Комбинация / Мышь</th>
+                <th>Действие</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>Ctrl + C</code> / <code>Ctrl + V</code></td>
+                <td>Копирование и вставка выбранных узлов</td>
+              </tr>
+              <tr>
+                <td><code>Ctrl + D</code></td>
+                <td>Быстрое дублирование узла со сдвигом вправо</td>
+              </tr>
+              <tr>
+                <td><code>Delete</code></td>
+                <td>Удаление выбранного узла и всех его связей</td>
+              </tr>
+              <tr>
+                <td><code>Ctrl + Колёсико</code></td>
+                <td>Плавное масштабирование (Zoom In / Out)</td>
+              </tr>
+              <tr>
+                <td><code>ПКМ / ДКМ</code></td>
+                <td>Контекстное меню холста / Редактирование узла</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Roadmap Section
+       ======================================================================== -->
+  <section class="section section-alt" id="roadmap">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Развитие проекта</span>
+        <h2 class="section-title">Дорожная карта (Roadmap)</h2>
+        <p class="section-desc">Динамичное развитие от прототипа до экосистемы визуального нарратива.</p>
+      </div>
+
+      <div class="roadmap-timeline">
+        <!-- v1.0 -->
+        <div class="roadmap-card done">
+          <div class="roadmap-version">
+            <span>v1.0 Core Engine</span>
+            <span class="badge badge-green">Выпущено</span>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Базовый редактор и экспорт</p>
+          <ul class="roadmap-list">
+            <li>Бесконечный холст, панорамирование и зум</li>
+            <li>Базовые типы узлов (Story, Choice, Condition)</li>
+            <li>Диагностика графа и базовый плейтест</li>
+            <li>Автораскладка узлов по уровням</li>
+          </ul>
+        </div>
+
+        <!-- v2.0 -->
+        <div class="roadmap-card done">
+          <div class="roadmap-version">
+            <span>v2.0 Modular Architecture</span>
+            <span class="badge badge-green">Выпущено</span>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Чистый код и масштабируемость</p>
+          <ul class="roadmap-list">
+            <li>Разделение на core/, ui/, export/, plugin_system/</li>
+            <li>Датаклассы NodeData, ConnectionData, ProjectData</li>
+            <li>Error Boundary и безопасный вызов плагинов</li>
+            <li>Комплект из 24 автоматических юнит-тестов</li>
+          </ul>
+        </div>
+
+        <!-- v2.1 -->
+        <div class="roadmap-card done">
+          <div class="roadmap-version">
+            <span>v2.1 AI Copilot & MCP</span>
+            <span class="badge badge-green">Текущая</span>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Нейросетевое соавторство</p>
+          <ul class="roadmap-list">
+            <li>MCP Сервер 2024-11-05 (22 инструмента, 3 промпта)</li>
+            <li>Реалтайм синхронизация холста через порт 48123</li>
+            <li>Пакетное создание узлов de_bulk_add_nodes</li>
+            <li>Умное вычисление координат и цветов персонажей</li>
+          </ul>
+        </div>
+
+        <!-- v2.2 -->
+        <div class="roadmap-card wip">
+          <div class="roadmap-version">
+            <span>v2.2 Visual Characters</span>
+            <span class="badge badge-cyan">В разработке</span>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Менеджер персонажей</p>
+          <ul class="roadmap-list">
+            <li>Визуальный профиль и палитра для каждого героя</li>
+            <li>Автоподстановка реплик и вариантов эмоций</li>
+            <li>Пакетный переименование персонажей в сценарии</li>
+          </ul>
+        </div>
+
+        <!-- v2.3 -->
+        <div class="roadmap-card planned">
+          <div class="roadmap-version">
+            <span>v2.3 Navigation Minimap</span>
+            <span class="badge badge-purple">Запланировано</span>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Навигация для огромных проектов</p>
+          <ul class="roadmap-list">
+            <li>Интерактивная миникарта холста в углу экрана</li>
+            <li>Закладки для быстрых прыжков между главами</li>
+            <li>Тепловая карта плотности сюжета</li>
+          </ul>
+        </div>
+
+        <!-- v3.0 -->
+        <div class="roadmap-card planned">
+          <div class="roadmap-version">
+            <span>v3.0 Multi-Format Export</span>
+            <span class="badge badge-purple">Будущее</span>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Универсальный экспорт</p>
+          <ul class="roadmap-list">
+            <li>Экспорт в форматы Twine 2 (Harlowe, SugarCube)</li>
+            <li>Поддержка интерактивной литературы Ink (Inkle)</li>
+            <li>Экспорт сценария в PDF/DOCX для продюсеров</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Footer
+       ======================================================================== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="brand">
+            <div class="brand-icon">⬡</div>
+            <div class="brand-title"><span>Dialogue Engine</span></div>
+          </div>
+          <p class="footer-desc">
+            Бесплатный и открытый редактор диалогов для Ren'Py, объединяющий визуальное проектирование и возможности современных нейросетей через стандарт MCP.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Документация</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Главная страница</a></li>
+            <li><a href="mcp.html">MCP AI Сервер</a></li>
+            <li><a href="plugins.html">Каталог плагинов</a></li>
+            <li><a href="api.html">Plugin API & События</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Инструменты</h4>
+          <ul class="footer-links">
+            <li><a href="mcp.html#tools">22 MCP Инструмента</a></li>
+            <li><a href="mcp.html#prompts">MCP Промпты</a></li>
+            <li><a href="plugins.html#builtin">Встроенные расширения</a></li>
+            <li><a href="api.html#sample">Пример плагина</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Сообщество</h4>
+          <ul class="footer-links">
+            <li><a href="https://github.com/komendant-zero/dialogue-engine" target="_blank" rel="noopener noreferrer">GitHub Репозиторий</a></li>
+            <li><a href="https://github.com/komendant-zero/dialogue-engine/issues" target="_blank" rel="noopener noreferrer">Сообщить об ошибке</a></li>
+            <li><a href="https://github.com/komendant-zero/dialogue-engine/blob/master/LICENSE" target="_blank" rel="noopener noreferrer">Лицензия MIT</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2026 Dialogue Engine Team. Выпущено под лицензией MIT.</span>
+        <span>Совместимо с Ren'Py 7 & 8 • Python 3.10+</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/nav.js"></script>
+</body>
+</html>
