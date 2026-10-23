@@ -776,6 +776,15 @@ class ScenarioEditor(tk.Tk):
                         self.selected_nodes = [node]
 
                 self.drag_data.update({"item": node, "x": x, "y": y})
+                sel_ids = {n.id for n in self.selected_nodes}
+                node_map = {n.id: n for n in self.nodes}
+                conn_pairs = [
+                    (c, node_map.get(c["from"]), node_map.get(c["to"]))
+                    for c in self.connections
+                    if (c["from"] in sel_ids or c["to"] in sel_ids)
+                    and node_map.get(c["from"]) and node_map.get(c["to"])
+                ]
+                self.drag_data["conn_pairs"] = conn_pairs
                 self.save_state()
                 self.redraw()
                 return
@@ -796,14 +805,40 @@ class ScenarioEditor(tk.Tk):
         elif self.marquee_start:
             self.canvas.coords(self.marquee_id, self.marquee_start[0], self.marquee_start[1], x, y)
         elif self.drag_data.get("item"):
-            self.drag_data["moved"] = True
             dx = x - self.drag_data["x"]
             dy = y - self.drag_data["y"]
+            if dx == 0 and dy == 0:
+                return
+
+            if not self.drag_data.get("moved", False):
+                self.drag_data["moved"] = True
+                for node in self.selected_nodes:
+                    self.canvas.tag_raise(node.id)
+
             for node in self.selected_nodes:
                 node.x += dx
                 node.y += dy
+                for out in getattr(node, "outputs", []):
+                    out["x"] += dx
+                    out["y"] += dy
+                self.canvas.move(node.id, dx, dy)
+
+            conn_pairs = self.drag_data.get("conn_pairs")
+            if conn_pairs is None:
+                sel_ids = {n.id for n in self.selected_nodes}
+                node_map = {n.id: n for n in self.nodes}
+                conn_pairs = [
+                    (c, node_map.get(c["from"]), node_map.get(c["to"]))
+                    for c in self.connections
+                    if (c["from"] in sel_ids or c["to"] in sel_ids)
+                    and node_map.get(c["from"]) and node_map.get(c["to"])
+                ]
+                self.drag_data["conn_pairs"] = conn_pairs
+
+            for c, fn, tn in conn_pairs:
+                self.canvas.update_connection(c, from_node=fn, to_node=tn)
+
             self.drag_data.update({"x": x, "y": y})
-            self.redraw()
 
     def on_release(self, event: Any) -> None:
         x, y = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
@@ -854,10 +889,14 @@ class ScenarioEditor(tk.Tk):
             self.marquee_id = None
             self.redraw()
 
-        elif self.drag_data.get("item") and not self.drag_data.get("moved", False):
-            self.history_manager.pop_last_undo()
+        elif self.drag_data.get("item"):
+            if not self.drag_data.get("moved", False):
+                self.history_manager.pop_last_undo()
+            else:
+                self.set_dirty(True)
 
         self.drag_data["item"] = None
+        self.drag_data["conn_pairs"] = None
 
     def on_double_click(self, event: Any) -> None:
         x, y = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)

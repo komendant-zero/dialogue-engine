@@ -125,6 +125,30 @@ class EditorCanvas(tk.Canvas):
             conn_tag = f"conn_{conn['from']}_{conn['out_idx']}_{conn['to']}"
             self.draw_bezier(start, end, tags=("conn", conn_tag), fill=color)
 
+    def update_connection(
+        self,
+        conn: Dict[str, Any],
+        from_node: Optional[Any] = None,
+        to_node: Optional[Any] = None
+    ) -> None:
+        """Быстро обновляет координаты кривой Безье без перерисовки холста."""
+        if from_node is None:
+            from_node = self.editor.find_node_by_id(conn["from"])
+        if to_node is None:
+            to_node = self.editor.find_node_by_id(conn["to"])
+
+        if from_node and to_node:
+            start = from_node.get_output_pos(conn["out_idx"])
+            end = to_node.get_input_pos()
+            x1, y1 = start
+            x2, y2 = end
+            dist = abs(x2 - x1) * 0.5
+            conn_tag = f"conn_{conn['from']}_{conn['out_idx']}_{conn['to']}"
+            if self.find_withtag(conn_tag):
+                self.coords(conn_tag, x1, y1, x1 + dist, y1, x2 - dist, y2, x2, y2)
+            else:
+                self.draw_connection(conn)
+
     def redraw_all(self) -> None:
         """Перерисовывает все узлы, соединения и процедурную сетку."""
         self.delete("node")

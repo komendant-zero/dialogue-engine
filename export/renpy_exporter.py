@@ -187,11 +187,18 @@ class RenPyExporter(BaseExporter):
         elif node.node_type == "music":
             mode = node.custom_data.get("music_mode", "bg")
             path = self.clean_rel_path(node.custom_data.get("music_file", ""), output_dir)
-            if path:
+            fade_clauses = ""
+            if "fadein" in node.custom_data and float(node.custom_data["fadein"]) > 0:
+                fade_clauses += f" fadein {float(node.custom_data['fadein']):.1f}"
+            if "fadeout" in node.custom_data and float(node.custom_data["fadeout"]) > 0:
+                fade_clauses += f" fadeout {float(node.custom_data['fadeout']):.1f}"
+            if mode == "stop":
+                f.write(f'    stop music{fade_clauses or " fadeout 1.0"}\n')
+            elif path:
                 if mode == "bg":
-                    f.write(f'    play music "{path}"\n')
+                    f.write(f'    play music "{path}"{fade_clauses}\n')
                 elif mode == "sfx":
-                    f.write(f'    play sound "{path}"\n')
+                    f.write(f'    play sound "{path}"{fade_clauses}\n')
                 else:
                     f.write(f'    voice "{path}"\n')
             self.write_jump(f, node.id, connections)

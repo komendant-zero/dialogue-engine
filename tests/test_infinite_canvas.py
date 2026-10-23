@@ -100,3 +100,45 @@ class TestInfiniteCanvas(unittest.TestCase):
         # Горизонтальный скролл (Shift)
         self.app.on_mousewheel(WheelEvent(state=1, delta=120))
 
+    def test_fast_node_drag_preserves_connections_and_ports(self):
+        """Проверяет быстрое перемещение ноды и синхронизацию связанных линий без полной перерисовки."""
+        n1 = self.app.add_node("story", x=100, y=100)
+        n2 = self.app.add_node("story", x=400, y=100)
+        conn = {"from": n1.id, "out_idx": 0, "to": n2.id}
+        self.app.connections.append(conn)
+        self.app.redraw()
+
+        conn_tag = f"conn_{n1.id}_0_{n2.id}"
+        initial_coords = self.app.canvas.coords(conn_tag)
+        self.assertTrue(len(initial_coords) > 0)
+
+        # Выбираем первую ноду и эмулируем перетаскивание на (50, 30)
+        self.app.selected_nodes = [n1]
+        start_x = self.app.canvas.canvasx(100)
+        start_y = self.app.canvas.canvasy(100)
+        self.app.drag_data = {"item": n1, "x": start_x, "y": start_y, "moved": False}
+
+        class DragEvent:
+            x = 150
+            y = 130
+
+        self.app.on_drag(DragEvent())
+        self.assertEqual(n1.x, 150)
+        self.assertEqual(n1.y, 130)
+
+        # Проверяем, что координаты линии Безье сместились на новые координаты порта
+        new_coords = self.app.canvas.coords(conn_tag)
+        expected_start = n1.get_output_pos(0)
+        self.assertAlmostEqual(new_coords[0], expected_start[0])
+        self.assertAlmostEqual(new_coords[1], expected_start[1])
+
+        # Проверяем, что порт ноды также переместился
+        port_tag = f"port_out_{n1.id}_0"
+        port_coords = self.app.canvas.coords(port_tag)
+        self.assertTrue(len(port_coords) == 4)
+        port_center_x = (port_coords[0] + port_coords[2]) / 2
+        port_center_y = (port_coords[1] + port_coords[3]) / 2
+        self.assertAlmostEqual(port_center_x, expected_start[0])
+        self.assertAlmostEqual(port_center_y, expected_start[1])
+
+

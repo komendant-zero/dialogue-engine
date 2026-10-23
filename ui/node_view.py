@@ -168,13 +168,13 @@ class Node:
     def draw_port(self, canvas: tk.Canvas, px: float, py: float, index: int) -> None:
         r = 5
         tag = f"port_out_{self.id}_{index}"
-        canvas.create_oval(px - r, py - r, px + r, py + r, fill=COLORS["port"], outline="", tags=("port", "output", tag))
+        canvas.create_oval(px - r, py - r, px + r, py + r, fill=COLORS["port"], outline="", tags=("port", "output", tag, self.id))
         self.outputs.append({"id": index, "x": px, "y": py, "tag": tag})
 
     def draw_input_port(self, canvas: tk.Canvas, px: float, py: float) -> None:
         r = 5
         tag = f"port_in_{self.id}"
-        canvas.create_oval(px - r, py - r, px + r, py + r, fill=COLORS["port"], outline="", tags=("port", "input", tag))
+        canvas.create_oval(px - r, py - r, px + r, py + r, fill=COLORS["port"], outline="", tags=("port", "input", tag, self.id))
 
     def get_output_pos(self, index: int) -> Tuple[float, float]:
         if self.node_type in ("choice", "battle", "condition"):

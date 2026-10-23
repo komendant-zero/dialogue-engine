@@ -98,7 +98,7 @@ class ConditionNodePlugin(Plugin):
     def draw_colored_port(self, node, canvas, px, py, index, color):
         r = 5
         tag = f"port_out_{node.id}_{index}"
-        canvas.create_oval(px-r, py-r, px+r, py+r, fill=color, outline="#222222", width=1, tags=("port", "output", tag))
+        canvas.create_oval(px-r, py-r, px+r, py+r, fill=color, outline="#222222", width=1, tags=("port", "output", tag, node.id))
         node.outputs.append({'id': index, 'x': px, 'y': py, 'tag': tag})
 
     def add_toolbar_item(self, toolbar):
