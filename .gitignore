@@ -17,6 +17,7 @@ env/
 
 # Project save files (user data)
 Save/
+*.bak
 *.json
 !plugins/fs_settings.json
 !examples/*.json

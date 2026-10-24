@@ -163,6 +163,29 @@ class TestRussianHotkeys(unittest.TestCase):
 
         dlg.dialog.destroy()
 
+    def test_alt_menu_unbound_for_layout_switch(self):
+        """Проверяет, что перехват tk::WinMenuKey для Alt_L/Alt_R снят со всего приложения,
+        что исключает зависание фокуса при переключении раскладки по Alt+Shift."""
+        for seq in ("<Alt_L>", "<Alt_R>", "<KeyRelease-Alt_L>", "<KeyRelease-Alt_R>"):
+            bind_val = self.app.bind_class("all", seq)
+            self.assertEqual(bind_val, "", f"Binding on 'all' for {seq} must be empty, got {bind_val}")
+
+    def test_input_field_focus_does_not_trigger_canvas_hotkeys(self):
+        """Проверяет, что при фокусе в поле ввода (Entry) нажатие клавиш (например '1')
+        не перехватывается как хоткей создания нод."""
+        top = tk.Toplevel(self.app)
+        entry = tk.Entry(top)
+        entry.pack()
+        entry.focus_set()
+
+        # Имитируем событие в Entry с '1'
+        event = MockKeyEvent(state=0, keycode=49, keysym="1")
+        event.widget = entry
+
+        res = self.app.on_key_press(event)
+        self.assertIsNone(res, "on_key_press should return None when typing in an Entry")
+        top.destroy()
+
 
 if __name__ == "__main__":
     unittest.main()

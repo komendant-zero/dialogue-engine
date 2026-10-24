@@ -344,6 +344,8 @@ class ScenarioEditor(tk.Tk):
         self.bind("<Control-v>", self.paste)
         self.bind("<Control-d>", self.duplicate)
         self.bind("<Control-a>", self.select_all)
+        self.bind("<Control-l>", lambda e: self.trigger_auto_layout())
+        self.bind("<Control-L>", lambda e: self.trigger_auto_layout())
         self.bind("<Delete>", self.delete_selected)
         self.bind("<Control-s>", lambda e: self.save_project())
         self.bind("<Control-S>", lambda e: self.save_project())
@@ -468,7 +470,34 @@ class ScenarioEditor(tk.Tk):
         self.bind_class("Entry", "<Control-KeyPress>", handle_entry_ctrl)
         self.bind_class("Text", "<Control-KeyPress>", handle_text_ctrl)
 
+        # Отключаем встроенный в Tkinter перехват клавиши Alt для меню Windows (tk::WinMenuKey).
+        # В Tkinter на Windows нажатие Alt_L / Alt_R по умолчанию вызывает tk::WinMenuKey,
+        # что отправляет WM_SYSCOMMAND (SC_KEYMENU) и переводит окно в модальный режим навигации по меню.
+        # Из-за этого при переключении раскладки по Alt+Shift поле ввода теряет фокус,
+        # и раскладка в поле ввода не переключается сразу, проглатывая первый символ.
+        for seq in ("<Alt_L>", "<Alt_R>", "<KeyRelease-Alt_L>", "<KeyRelease-Alt_R>"):
+            try:
+                self.unbind_class("all", seq)
+            except Exception:
+                pass
+
+        # Гарантируем, что поля ввода не блокируются при нажатии Alt
+        for cls in ("Entry", "Text", "TEntry", "TCombobox"):
+            self.bind_class(cls, "<Alt-KeyPress>", lambda e: None)
+            self.bind_class(cls, "<Alt-KeyRelease>", lambda e: None)
+
     def on_key_press(self, event: Any) -> str | None:
+        # Если фокус находится в поле ввода текста (Entry, Text, Combobox),
+        # не перехватываем горячие клавиши редактора и холста, чтобы не ломать набор текста
+        # и переключение раскладок.
+        focus_w = self.focus_get()
+        target_w = getattr(event, "widget", None)
+        active_w = focus_w or target_w
+        if active_w:
+            w_cls = getattr(active_w, "winfo_class", lambda: "")()
+            if isinstance(active_w, (tk.Entry, tk.Text)) or w_cls in ("Entry", "Text", "TEntry", "TCombobox"):
+                return None
+
         self.pressed_keys[event.keysym] = True
 
         # 1. Проверяем динамический HotkeyManager (пользовательские хоткеи и хоткеи создания нод)

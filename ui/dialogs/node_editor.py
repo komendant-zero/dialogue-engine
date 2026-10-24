@@ -23,6 +23,7 @@ class NodeEditorDialog:
         self.dialog.title("Редактор блока")
         self.dialog.geometry("520x760")
         self.dialog.configure(bg=COLORS["bg"])
+        self.dialog.transient(parent)
         self.dialog.attributes("-topmost", True)
 
         self._build_ui()
@@ -160,6 +161,12 @@ class NodeEditorDialog:
 
         self.e_title.bind("<KeyRelease>", self._auto_save)
         self.t_content.bind("<KeyRelease>", self._auto_save)
+
+        # Фокус на поле ввода для немедленной готовности к набору текста
+        if hasattr(self, "e_title"):
+            self.e_title.focus_set()
+        elif hasattr(self, "t_content"):
+            self.t_content.focus_set()
 
         tk.Button(
             self.dialog, text="Сохранить и Закрыть", command=self._save_and_close,

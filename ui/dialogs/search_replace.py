@@ -23,6 +23,7 @@ class SearchReplaceDialog:
         self.dialog.title("Поиск и Замена")
         self.dialog.geometry("380x300")
         self.dialog.configure(bg=COLORS["bg"])
+        self.dialog.transient(parent)
         self.dialog.attributes("-topmost", True)
 
         self._build_ui()
