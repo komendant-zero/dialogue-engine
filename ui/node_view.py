@@ -4,13 +4,23 @@ Dialogue Engine - Node Visual Canvas Item.
 
 from __future__ import annotations
 import math
+import os
 import tkinter as tk
 import tkinter.font as tkfont
 from typing import Any, Dict, List, Optional, Tuple
 import uuid
 
 from core.models import NodeData
+from core.sprites import SpriteResolver
 from ui.theme import COLORS, PC_USER
+
+try:
+    from PIL import Image, ImageTk
+    HAS_PIL = True
+except ImportError:
+    HAS_PIL = False
+
+CANVAS_SPRITE_CACHE: Dict[str, Any] = {}
 
 
 class Node:
@@ -114,6 +124,7 @@ class Node:
         final_title = display_title
         title_font = ("Segoe UI", 9, "bold")
         title_fill = header_text_col
+        title_x = x + 10
 
         if display_title.startswith("#") or not display_title.strip():
             if self.node_type == "story":
@@ -125,10 +136,40 @@ class Node:
                 final_title = ""
         else:
             if self.node_type == "story":
-                final_title = f"👤 {display_title}"
+                emo = self.custom_data.get("emotion")
+                spr_path = self.custom_data.get("sprite_path")
+                if not spr_path and self.title:
+                    spr_path = SpriteResolver.resolve_sprite(self.title, emo or "", editor=self.editor)
+
+                has_drawn_icon = False
+                if spr_path and os.path.exists(spr_path) and HAS_PIL:
+                    try:
+                        if spr_path not in CANVAS_SPRITE_CACHE:
+                            with Image.open(spr_path) as im:
+                                w_im, h_im = im.size
+                                crop_h = max(10, int(h_im * 0.35))
+                                bust = im.crop((0, 0, w_im, crop_h))
+                                thumb = bust.resize((18, 18), Image.Resampling.LANCZOS)
+                                CANVAS_SPRITE_CACHE[spr_path] = ImageTk.PhotoImage(thumb)
+
+                        tk_icon = CANVAS_SPRITE_CACHE.get(spr_path)
+                        if tk_icon:
+                            if not hasattr(canvas, "_node_sprite_refs"):
+                                canvas._node_sprite_refs = []
+                            canvas._node_sprite_refs.append(tk_icon)
+                            canvas.create_image(x + 19, y + 12, image=tk_icon, tags=("node", self.id))
+                            title_x = x + 31
+                            has_drawn_icon = True
+                    except Exception:
+                        pass
+
+                if has_drawn_icon:
+                    final_title = f"{display_title}" + (f" ({emo})" if emo else "")
+                else:
+                    final_title = f"👤 {display_title}" + (f" ({emo})" if emo else "")
 
         canvas.create_text(
-            x + 10, y + 12, text=final_title, fill=title_fill, anchor="w", font=title_font, tags=("node", self.id)
+            title_x, y + 12, text=final_title, fill=title_fill, anchor="w", font=title_font, tags=("node", self.id)
         )
 
         # Индикатор режима Continue

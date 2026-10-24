@@ -139,7 +139,7 @@ dialogue-engine/
   <b>Overall Project Progress:</b>
 </p>
 <p align="center">
-  <code>[ ████████████████████████████░░ ] 85% Completed</code>
+  <code>[ █████████████████████████████░ ] 90% Completed</code>
 </p>
 
 <br>
@@ -153,8 +153,8 @@ dialogue-engine/
 | ![Completed](https://img.shields.io/badge/Completed-2ecc71?style=flat-square) | **Auto-Layout Graph** | Automatic grid alignment and node arrangement (`Ctrl+L`) | `v1.0` |
 | ![Completed](https://img.shields.io/badge/Completed-2ecc71?style=flat-square) | **Modular Architecture v2.0** | Decoupled core, UI, exporter, and plugin system v2 with 24 automated tests | `v2.0` |
 | ![Completed](https://img.shields.io/badge/Completed-2ecc71?style=flat-square) | **AI Copilot & MCP Server** | Model Context Protocol server + real-time canvas sync with neon animations | `v2.1` |
-| ![In Progress](https://img.shields.io/badge/In_Progress-f39c12?style=flat-square) | **Visual Character Manager** | Dedicated character palette, avatar previews, and color presets modal | `v2.2` |
-| ![Planned](https://img.shields.io/badge/Planned-3498db?style=flat-square) | **Navigation Minimap** | Interactive radar view in the canvas corner for massive projects (500+ nodes) | `v2.3` |
+| ![Completed](https://img.shields.io/badge/Completed-2ecc71?style=flat-square) | **Visual Character Manager** | Dedicated character palette, avatar previews, emotion presets, and batch rename | `v2.2` |
+| ![In Progress](https://img.shields.io/badge/In_Progress-f39c12?style=flat-square) | **Navigation Minimap** | Interactive radar view in the canvas corner for massive projects (500+ nodes) | `v2.3` |
 | ![Idea](https://img.shields.io/badge/Idea-9b59b6?style=flat-square) | **Multi-Format Export** | Export branching stories to Twine 2, Ink, and custom JSON targets | `v3.0` |
 
 ---

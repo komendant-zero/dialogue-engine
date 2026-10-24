@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Optional
 
 
 CURRENT_FORMAT_VERSION = "2.0"
-ENGINE_VERSION = "2.0.0"
+ENGINE_VERSION = "2.2.0"
 
 
 @dataclass
@@ -85,6 +85,44 @@ class NodeData:
 
 
 @dataclass
+class CharacterData:
+    """Представление персонажа в сценарии."""
+    name: str
+    color: str = "#ffffff"                                  # Цвет текста/имени
+    header_color: str = ""                                  # Цвет шапки блока (опционально)
+    bg_color: str = ""                                      # Цвет фона блока (опционально)
+    avatar_path: str = ""                                   # Относительный или абсолютный путь к аватарке
+    emotions: List[str] = field(default_factory=list)       # Список эмоций (например: neutral, happy, angry)
+    description: str = ""                                   # Краткие заметки / роль персонажа
+    custom_data: Dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "name": self.name,
+            "color": self.color,
+            "header_color": self.header_color,
+            "bg_color": self.bg_color,
+            "avatar_path": self.avatar_path,
+            "emotions": list(self.emotions),
+            "description": self.description,
+            "custom_data": dict(self.custom_data)
+        }
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> CharacterData:
+        return cls(
+            name=str(data.get("name", "")),
+            color=str(data.get("color", "#ffffff")),
+            header_color=str(data.get("header_color", "")),
+            bg_color=str(data.get("bg_color", "")),
+            avatar_path=str(data.get("avatar_path", "")),
+            emotions=list(data.get("emotions", [])),
+            description=str(data.get("description", "")),
+            custom_data=dict(data.get("custom_data", {}))
+        )
+
+
+@dataclass
 class ProjectMetadata:
     """Метаданные проекта."""
     format_version: str = CURRENT_FORMAT_VERSION
@@ -121,12 +159,14 @@ class ProjectData:
     nodes: List[NodeData] = field(default_factory=list)
     connections: List[ConnectionData] = field(default_factory=list)
     metadata: ProjectMetadata = field(default_factory=ProjectMetadata)
+    characters: List[CharacterData] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
             "metadata": self.metadata.to_dict(),
             "nodes": [n.to_dict() for n in self.nodes],
-            "connections": [c.to_dict() for c in self.connections]
+            "connections": [c.to_dict() for c in self.connections],
+            "characters": [c.to_dict() for c in self.characters]
         }
 
     @classmethod
@@ -134,7 +174,9 @@ class ProjectData:
         meta = ProjectMetadata.from_dict(data.get("metadata"))
         nodes = [NodeData.from_dict(nd) for nd in data.get("nodes", [])]
         conns = [ConnectionData.from_dict(cd) for cd in data.get("connections", [])]
-        return cls(nodes=nodes, connections=conns, metadata=meta)
+        raw_chars = data.get("characters", [])
+        chars = [CharacterData.from_dict(c) for c in raw_chars if isinstance(c, dict)]
+        return cls(nodes=nodes, connections=conns, metadata=meta, characters=chars)
 
 
 @dataclass

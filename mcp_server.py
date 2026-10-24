@@ -33,7 +33,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 if SCRIPT_DIR not in sys.path:
     sys.path.insert(0, SCRIPT_DIR)
 
-from core.models import ConnectionData, NodeData, ProjectData
+from core.models import ConnectionData, NodeData, ProjectData, CharacterData
 from core.graph import GraphModel
 from core.serialization import ProjectSerializer
 from export.renpy_exporter import RenPyExporter
@@ -127,6 +127,7 @@ class DialogueEngineMCPServer:
     def __init__(self, initial_project_path: Optional[str] = None) -> None:
         self.project_path: Optional[str] = None
         self.graph = GraphModel()
+        self.characters: List[CharacterData] = []
         self.exporter = RenPyExporter()
 
         # Автопоиск файла проекта
@@ -152,6 +153,7 @@ class DialogueEngineMCPServer:
             raise FileNotFoundError(f"Файл не найден: {file_path}")
         proj_data = ProjectSerializer.load_from_file(file_path)
         self.graph.load_from_project_data(proj_data)
+        self.characters = list(getattr(proj_data, "characters", []))
         self.project_path = file_path
         log.info("Проект загружен: %s (%d узлов)", file_path, len(self.graph.nodes))
         return {
@@ -167,6 +169,7 @@ class DialogueEngineMCPServer:
             raise ValueError("Путь для сохранения не указан и нет открытого проекта.")
         path = os.path.abspath(path)
         proj_data = self.graph.to_project_data()
+        proj_data.characters = list(self.characters)
         ProjectSerializer.save_to_file(proj_data, path, create_backup=True)
         self.project_path = path
         log.info("Проект сохранён: %s", path)
@@ -316,6 +319,14 @@ class DialogueEngineMCPServer:
     def tool_get_characters(self, args: Dict[str, Any]) -> str:  # noqa: ARG002
         """Возвращает список всех уникальных персонажей с их цветами и числом реплик."""
         char_data: Dict[str, Dict[str, Any]] = {}
+        for ch in getattr(self, "characters", []):
+            if ch.name.strip():
+                char_data[ch.name.strip()] = {
+                    "count": 0,
+                    "color": ch.color,
+                    "emotions": list(ch.emotions),
+                }
+
         for n in self.graph.nodes:
             if n.node_type != "story" or not n.title or n.title.startswith("#"):
                 continue
@@ -324,6 +335,7 @@ class DialogueEngineMCPServer:
                 char_data[name] = {
                     "count": 0,
                     "color": n.custom_data.get("header_text_color", ""),
+                    "emotions": [],
                 }
             char_data[name]["count"] += 1
             if not char_data[name]["color"]:
@@ -335,7 +347,8 @@ class DialogueEngineMCPServer:
         lines = [f"Персонажи ({len(char_data)} шт.):\n"]
         for name, info in sorted(char_data.items(), key=lambda kv: -kv[1]["count"]):
             color = info["color"] or DEFAULT_CHAR_COLORS.get(name, "—")
-            lines.append(f"  {name:<20} {info['count']:>4} реплик   цвет: {color}")
+            emo_str = f"   эмоции: [{', '.join(info['emotions'])}]" if info.get("emotions") else ""
+            lines.append(f"  {name:<20} {info['count']:>4} реплик   цвет: {color}{emo_str}")
         return "\n".join(lines)
 
     def tool_find_leaf_endpoints(self, args: Dict[str, Any]) -> str:  # noqa: ARG002

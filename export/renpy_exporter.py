@@ -9,7 +9,33 @@ import os
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from core.models import ConnectionData, NodeData, ProjectData
+from core.sprites import SpriteResolver
 from export.base_exporter import BaseExporter
+
+
+CYRILLIC_TO_LATIN = {
+    'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo',
+    'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm',
+    'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
+    'ф': 'f', 'х': 'h', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'shch',
+    'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya'
+}
+
+
+def to_renpy_var_name(name: str) -> str:
+    """Генерирует чистый ASCII идентификатор переменной для Ren'Py."""
+    slug = []
+    for char in name.strip().lower():
+        if char in CYRILLIC_TO_LATIN:
+            slug.append(CYRILLIC_TO_LATIN[char])
+        elif ('a' <= char <= 'z') or ('0' <= char <= '9') or char == '_':
+            slug.append(char)
+        elif char.isspace() or char in ('-', '.'):
+            slug.append('_')
+    res = "".join(slug).strip('_')
+    if not res or res[0].isdigit():
+        res = f"char_{res}"
+    return res
 
 
 class RenPyExporter(BaseExporter):
@@ -17,6 +43,7 @@ class RenPyExporter(BaseExporter):
 
     def __init__(self, plugin_manager: Any = None):
         self.plugin_manager = plugin_manager
+        self._active_sprites: Dict[str, str] = {}
 
     @staticmethod
     def clean_rel_path(path: str, export_dir: str = "") -> str:
@@ -78,6 +105,7 @@ class RenPyExporter(BaseExporter):
         os.makedirs(output_dir, exist_ok=True)
         rpy_path = os.path.join(output_dir, "script.rpy")
         nodes_map = {n.id: n for n in nodes}
+        self._active_sprites.clear()
 
         try:
             with open(rpy_path, "w", encoding="utf-8") as f:
@@ -92,6 +120,18 @@ class RenPyExporter(BaseExporter):
                         "export_dir": output_dir
                     }
                     self.plugin_manager.notify("renpy_export_init", init_data)
+
+                # Определение персонажей
+                characters = getattr(project, "characters", [])
+                if characters:
+                    f.write("# --- Персонажи ---\n")
+                    for ch in characters:
+                        if ch.name.strip():
+                            safe_name = ch.name.replace('"', '\\"')
+                            color_arg = f', color="{ch.color}"' if ch.color else ""
+                            var_name = to_renpy_var_name(ch.name)
+                            f.write(f'define {var_name} = Character("{safe_name}"{color_arg})\n')
+                    f.write("\n")
 
                 # Поиск стартового узла
                 target_ids = {c.to_node for c in connections}
@@ -148,8 +188,34 @@ class RenPyExporter(BaseExporter):
         nodes_map: Optional[Dict[str, NodeData]] = None
     ) -> None:
         """Стандартная логика генерации контента для базовых типов узлов."""
+        if getattr(self, "_active_sprites", None) is None:
+            self._active_sprites = {}
+
         # 1. Текстовый узел (Story)
         if node.node_type == "story":
+            # Автоматическая активация спрайта персонажа (Auto-Sprite Resolver)
+            speaker_name = node.title.strip()
+            if speaker_name and not speaker_name.startswith("#") and speaker_name not in ("Сцена", "Персонаж"):
+                sprite_path = node.custom_data.get("sprite_path")
+                if not sprite_path and node.custom_data.get("auto_sprite", True):
+                    emotion = node.custom_data.get("emotion", "")
+                    sprite_path = SpriteResolver.resolve_sprite(
+                        speaker_name,
+                        emotion,
+                        project_path=output_dir,
+                        editor=self.plugin_manager.editor if self.plugin_manager else None
+                    )
+
+                if sprite_path:
+                    rel_sprite = self.clean_rel_path(sprite_path, output_dir)
+                    pos = node.custom_data.get("sprite_position", "center")
+                    trans = node.custom_data.get("sprite_animation", "dissolve")
+                    with_clause = f" with {trans}" if trans and trans.lower() != "none" else ""
+
+                    if self._active_sprites.get(speaker_name) != rel_sprite:
+                        f.write(f'    show expression "{rel_sprite}" at {pos}{with_clause}\n')
+                        self._active_sprites[speaker_name] = rel_sprite
+
             if node.custom_data.get("pause_before"):
                 p_mode = node.custom_data.get("pause_before_mode", "click")
                 p_dur = node.custom_data.get("pause_before_duration", 1.0)
@@ -224,9 +290,11 @@ class RenPyExporter(BaseExporter):
 
                 if path:
                     if mode == "background":
+                        self._active_sprites.clear()
                         f.write(f'    scene expression "{path}"{with_clause}\n')
                     else:
                         align = data.get("position", "center")
+                        self._active_sprites[align] = path
                         f.write(f'    show expression "{path}" at {align}{with_clause}\n')
 
                 if data.get("pause", False) or (nodes_map and self.should_pause_after_media(node, connections, nodes_map)):

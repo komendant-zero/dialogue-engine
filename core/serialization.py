@@ -12,7 +12,7 @@ import tempfile
 import time
 from typing import Any, Dict, Optional, Tuple
 
-from core.models import CURRENT_FORMAT_VERSION, ConnectionData, NodeData, ProjectData, ProjectMetadata
+from core.models import CURRENT_FORMAT_VERSION, CharacterData, ConnectionData, NodeData, ProjectData, ProjectMetadata
 
 
 class SerializationError(Exception):
@@ -124,7 +124,17 @@ class ProjectSerializer:
         meta_raw = data.get("metadata")
         metadata = ProjectMetadata.from_dict(meta_raw if isinstance(meta_raw, dict) else {})
 
-        return ProjectData(nodes=nodes, connections=connections, metadata=metadata)
+        chars_raw = data.get("characters")
+        characters: list[CharacterData] = []
+        if isinstance(chars_raw, list):
+            for item in chars_raw:
+                if isinstance(item, dict) and item.get("name"):
+                    try:
+                        characters.append(CharacterData.from_dict(item))
+                    except Exception:
+                        continue
+
+        return ProjectData(nodes=nodes, connections=connections, metadata=metadata, characters=characters)
 
     @staticmethod
     def load_from_json(json_str: str) -> ProjectData:

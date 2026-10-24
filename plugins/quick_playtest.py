@@ -1,6 +1,14 @@
+import os
 import tkinter as tk
 from tkinter import messagebox
 from plugin_system import Plugin
+from core.sprites import SpriteResolver
+
+try:
+    from PIL import Image, ImageTk
+    HAS_PIL = True
+except ImportError:
+    HAS_PIL = False
 
 class QuickPlaytestPlugin(Plugin):
     name = "Quick Playtest (In-Editor)"
@@ -83,17 +91,29 @@ class PlaytestWindow(tk.Toplevel):
         self.var_bar = tk.Label(self, text="Переменные: {}", bg='#1a1a1a', fg='#666666', font=("Consolas", 8), anchor='w', padx=10)
         self.var_bar.pack(side=tk.TOP, fill=tk.X)
 
-        # Основная сцена (текстовое поле / фон)
-        self.scene_frame = tk.Frame(self, bg='#181818', padx=25, pady=20)
+        # Основная сцена (текстовое поле / спрайт)
+        self.scene_frame = tk.Frame(self, bg='#181818', padx=20, pady=15)
         self.scene_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
+        content_box = tk.Frame(self.scene_frame, bg='#181818')
+        content_box.pack(fill=tk.BOTH, expand=True)
+
+        # Спрайтовая зона персонажа справа
+        self.sprite_stage = tk.Canvas(content_box, width=130, height=190, bg='#181818', bd=0, highlightthickness=0)
+        self.sprite_stage.pack(side=tk.RIGHT, padx=(15, 0))
+        self._playtest_sprite_photo = None
+
+        # Текстовая зона слева
+        text_zone = tk.Frame(content_box, bg='#181818')
+        text_zone.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
         # Имя говорящего
-        self.lbl_speaker = tk.Label(self.scene_frame, text="", bg='#181818', fg='#5dade2', font=("Segoe UI", 13, "bold"), anchor='w')
+        self.lbl_speaker = tk.Label(text_zone, text="", bg='#181818', fg='#5dade2', font=("Segoe UI", 13, "bold"), anchor='w')
         self.lbl_speaker.pack(fill=tk.X, pady=(0, 8))
 
         # Текст диалога
-        self.lbl_dialogue = tk.Label(self.scene_frame, text="", bg='#252526', fg='#e0e0e0', font=("Segoe UI", 11), 
-                                     wraplength=640, justify='left', anchor='nw', padx=18, pady=16, relief='flat')
+        self.lbl_dialogue = tk.Label(text_zone, text="", bg='#252526', fg='#e0e0e0', font=("Segoe UI", 11), 
+                                     wraplength=480, justify='left', anchor='nw', padx=18, pady=16, relief='flat')
         self.lbl_dialogue.pack(fill=tk.BOTH, expand=True)
 
         # Нижняя панель: Кнопки выбора или кнопка "Далее"
@@ -212,10 +232,44 @@ class PlaytestWindow(tk.Toplevel):
 
         else: # story или любой другой текстовый узел
             speaker = node.title if not node.title.startswith('#') else ""
-            self.lbl_speaker.config(text=speaker)
+            emo = node.custom_data.get("emotion", "") if hasattr(node, "custom_data") and isinstance(node.custom_data, dict) else ""
+            speaker_display = f"{speaker} ({emo})" if (speaker and emo) else speaker
+            self.lbl_speaker.config(text=speaker_display)
             display_text = node._get_display_text(node.content)
             self.lbl_dialogue.config(text=display_text)
+            self._update_stage_sprite(node)
             self.show_next_button(0)
+
+    def _update_stage_sprite(self, node):
+        if not hasattr(self, "sprite_stage"):
+            return
+        speaker = node.title if not node.title.startswith('#') else ""
+        if not speaker:
+            self.sprite_stage.delete("all")
+            return
+
+        emo = node.custom_data.get("emotion", "") if hasattr(node, "custom_data") and isinstance(node.custom_data, dict) else ""
+        spr_path = node.custom_data.get("sprite_path") if hasattr(node, "custom_data") and isinstance(node.custom_data, dict) else ""
+        if not spr_path:
+            editor = getattr(self.plugin, "editor", None)
+            spr_path = SpriteResolver.resolve_sprite(speaker, emo, editor=editor)
+
+        if spr_path and os.path.exists(spr_path) and HAS_PIL:
+            try:
+                with Image.open(spr_path) as im:
+                    w_im, h_im = im.size
+                    scale = min(130.0 / w_im, 190.0 / h_im)
+                    new_w = max(1, int(w_im * scale))
+                    new_h = max(1, int(h_im * scale))
+                    resized = im.resize((new_w, new_h), Image.Resampling.LANCZOS)
+                    self._playtest_sprite_photo = ImageTk.PhotoImage(resized)
+                    self.sprite_stage.delete("all")
+                    self.sprite_stage.create_image(65, 95, image=self._playtest_sprite_photo)
+                    return
+            except Exception:
+                pass
+
+        self.sprite_stage.delete("all")
 
     def show_next_button(self, out_idx):
         btn_next = tk.Button(

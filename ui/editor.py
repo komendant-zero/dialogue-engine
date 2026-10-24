@@ -43,12 +43,14 @@ CYRILLIC_KEY_MAP: dict[str, tuple[str, str]] = {
 }
 
 from core.autosave import AutosaveManager
+from core.characters import CharacterManager
 from core.history import HistoryManager
 from core.hotkeys import HotkeyManager
 from core.models import ConnectionData, NodeData, ProjectData
 from core.serialization import ProjectSerializer, SerializationError
 from plugin_system.manager import PluginManager
 from ui.canvas import EditorCanvas
+from ui.dialogs.character_manager import CharacterManagerDialog
 from ui.dialogs.hotkey_settings import HotkeySettingsDialog
 from ui.dialogs.node_editor import NodeEditorDialog
 from ui.dialogs.search_replace import SearchReplaceDialog
@@ -80,6 +82,7 @@ class ScenarioEditor(tk.Tk):
         self.autosave_manager = AutosaveManager()
         self.plugin_manager = PluginManager(self)
         self.hotkey_manager = HotkeyManager()
+        self.character_manager = CharacterManager()
 
         # State Variables
         self.selected_nodes: list[Node] = []
@@ -212,6 +215,9 @@ class ScenarioEditor(tk.Tk):
         self.plugin_menu = tk.Menu(self.plugin_menu_btn, **MENU_CFG_STYLE)
         self.plugin_menu_btn["menu"] = self.plugin_menu
 
+        # Кнопка Персонажи (База героев)
+        tk.Button(self.toolbar_left, text="👥 Персонажи", command=self.open_character_manager, **BTN_ACTION_STYLE).pack(side=tk.LEFT, padx=3)
+
         tk.Label(self.toolbar_left, text="|", bg=COLORS["bg"], fg="#555555").pack(side=tk.LEFT, padx=5)
 
         # Меню Проект
@@ -223,6 +229,7 @@ class ScenarioEditor(tk.Tk):
         self.project_menu.add_command(label="💾 Сохранить (Ctrl+S)", command=self.save_project)
         self.project_menu.add_command(label="📂 Загрузить (Ctrl+O)", command=self.load_project)
         self.project_menu.add_separator()
+        self.project_menu.add_command(label="👥 База персонажей... (Ctrl+Shift+C)", command=self.open_character_manager)
         self.project_menu.add_command(label="⌨️ Горячие клавиши...", command=self.open_hotkey_settings)
         self.project_menu.add_separator()
         self.project_menu.add_command(label="⚠️ Очистить холст", command=self.clear_all)
@@ -322,6 +329,7 @@ class ScenarioEditor(tk.Tk):
         self.hotkey_manager.register_action("save_project", lambda e=None: self.save_project())
         self.hotkey_manager.register_action("load_project", lambda e=None: self.load_project())
         self.hotkey_manager.register_action("search", lambda e=None: self.open_search_replace())
+        self.hotkey_manager.register_action("characters", lambda e=None: self.open_character_manager())
         self.hotkey_manager.register_action("undo", self.undo)
         self.hotkey_manager.register_action("redo", self.redo)
         self.hotkey_manager.register_action("copy", self.copy)
@@ -353,6 +361,8 @@ class ScenarioEditor(tk.Tk):
         self.bind("<Control-O>", lambda e: self.load_project())
         self.bind("<Control-f>", lambda e: self.open_search_replace())
         self.bind("<Control-F>", lambda e: self.open_search_replace())
+        self.bind("<Control-Shift-c>", lambda e: self.open_character_manager())
+        self.bind("<Control-Shift-C>", lambda e: self.open_character_manager())
         self.bind("<Control-plus>", lambda e: self.zoom_in())
         self.bind("<Control-equal>", lambda e: self.zoom_in())
         self.bind("<Control-minus>", lambda e: self.zoom_out())
@@ -1036,6 +1046,13 @@ class ScenarioEditor(tk.Tk):
     def open_search_replace(self) -> None:
         SearchReplaceDialog(parent=self, editor=self)
 
+    def open_character_manager(self) -> None:
+        CharacterManagerDialog(parent=self, editor=self, on_change=self.on_characters_changed)
+
+    def on_characters_changed(self) -> None:
+        self.set_dirty(True)
+        self.redraw()
+
     def delete_node(self, node: Node) -> None:
         self.save_state()
         if node in self.nodes:
@@ -1130,11 +1147,18 @@ class ScenarioEditor(tk.Tk):
     def _export_to_project_data(self) -> ProjectData:
         node_datas = [n.to_node_data() for n in self.nodes]
         conn_datas = [ConnectionData.from_dict(c) for c in self.connections]
-        return ProjectData(nodes=node_datas, connections=conn_datas)
+        return ProjectData(
+            nodes=node_datas,
+            connections=conn_datas,
+            characters=self.character_manager.to_list()
+        )
 
     def _load_project_data(self, project: ProjectData) -> None:
         self._reset_canvas()
         self.history_manager.clear()
+        self.character_manager.load_from_characters(getattr(project, "characters", []))
+        if not self.character_manager.list() and project.nodes:
+            self.character_manager.scan_from_nodes(project.nodes)
 
         for n_data in project.nodes:
             node = Node.from_node_data(self, n_data)
