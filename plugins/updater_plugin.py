@@ -1,49 +1,28 @@
-import tkinter as tk
-from tkinter import messagebox
-from plugin_system import Plugin
-import subprocess
-import sys
-import os
+"""
+Dialogue Engine - Auto-Updater & Reloader Plugin.
+Обеспечивает интеграцию автообновления и горячей перезагрузки движка.
+"""
 
-class DevReloaderPlugin(Plugin):
-    name = "Dev Reloader"
-    version = "1.0"
+import sys
+import tkinter as tk
+from plugin_system.base import Plugin
+from ui.dialogs.update_dialog import ManualUpdateDialog
+
+
+class AutoUpdaterPlugin(Plugin):
+    name = "Auto-Updater & GitHub Sync"
+    version = "2.0"
+    author = "Dialogue Engine Team"
+    description = "Автоматическое обновление движка через GitHub и безопасный перезапуск с сохранением"
 
     def on_event(self, event_type, data=None):
-        if event_type == 'setup_ui':
-            if hasattr(self.editor, 'dev_menu'):
-                self.editor.dev_menu.add_command(label="🔄 Перезапустить редактор (Dev)", command=self.restart_engine)
-            else:
-                toolbar = data
-                btn = tk.Button(
-                    toolbar, text="🔄 Перезапустить", 
-                    command=self.restart_engine, 
-                    bg='#c0392b', fg='white', relief='flat', 
-                    padx=8, pady=3, font=('Segoe UI', 9)
+        if event_type == "setup_ui":
+            if hasattr(self.editor, "dev_menu") and not hasattr(self.editor, "open_update_dialog"):
+                self.editor.dev_menu.add_separator()
+                self.editor.dev_menu.add_command(
+                    label="🚀 Проверить обновления GitHub...",
+                    command=self.trigger_update
                 )
-                btn.pack(side=tk.RIGHT, padx=3)
 
-    def restart_engine(self):
-        # 1. Сначала сохраняем проект
-        self.editor.save_project()
-
-        # Если после сохранения файл так и не был выбран (пользователь отменил Save As)
-        # можно всё равно перезапустить, но лучше предупредить
-        if self.editor.is_dirty:
-            if not messagebox.askyesno("Внимание", "Проект не был сохранен. Точно перезапустить движок с потерей изменений?"):
-                return
-        
-        # 2. Формируем команду для запуска
-        args = [sys.executable, sys.argv[0]]
-        
-        # Если проект был сохранен в файл, передаем его путь как аргумент,
-        # чтобы при перезапуске проект сразу открылся (так как main.py это поддерживает)
-        if hasattr(self.editor, 'current_file') and self.editor.current_file:
-            args.append(self.editor.current_file)
-            
-        # 3. Перезапускаем процесс
-        subprocess.Popen(args)
-        
-        # 4. Убиваем текущий
-        self.editor.quit()
-        sys.exit(0)
+    def trigger_update(self):
+        ManualUpdateDialog(self.editor)

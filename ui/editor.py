@@ -48,12 +48,15 @@ from core.history import HistoryManager
 from core.hotkeys import HotkeyManager
 from core.models import ConnectionData, NodeData, ProjectData
 from core.serialization import ProjectSerializer, SerializationError
+from core.cowork_client import DesktopCoworkClient
 from plugin_system.manager import PluginManager
 from ui.canvas import EditorCanvas
 from ui.dialogs.character_manager import CharacterManagerDialog
 from ui.dialogs.hotkey_settings import HotkeySettingsDialog
 from ui.dialogs.node_editor import NodeEditorDialog
 from ui.dialogs.search_replace import SearchReplaceDialog
+from ui.dialogs.update_dialog import ManualUpdateDialog
+from ui.dialogs.cowork_dialog import CoworkServerManagerDialog
 from ui.node_view import Node
 from ui.theme import (
     BTN_ACTION_STYLE,
@@ -89,6 +92,11 @@ class ScenarioEditor(tk.Tk):
         self.selected_connection: dict[str, Any] | None = None
         self.clipboard: dict[str, Any] = {}
         self.is_dirty = False
+
+        # Cowork Server & Sync
+        self.cowork_server_proc = None
+        self.cowork_client: DesktopCoworkClient | None = None
+        self.cowork_sync_enabled: bool = False
 
         # Interaction & Drag Data
         self.drag_data: dict[str, Any] = {"x": 0, "y": 0, "item": None, "moved": False}
@@ -169,7 +177,20 @@ class ScenarioEditor(tk.Tk):
                 pass
         self.after(self.autosave_manager.interval_seconds * 1000, self.autosave_loop)
 
+    def _cleanup_cowork(self) -> None:
+        if hasattr(self, "cowork_client") and self.cowork_client:
+            try:
+                self.cowork_client.disconnect()
+            except Exception:
+                pass
+        if hasattr(self, "cowork_server_proc") and self.cowork_server_proc:
+            try:
+                self.cowork_server_proc.terminate()
+            except Exception:
+                pass
+
     def on_close(self) -> None:
+        self._cleanup_cowork()
         if self.is_dirty:
             res = messagebox.askyesnocancel("Выход", "В проекте есть несохраненные изменения. Сохранить перед выходом?")
             if res is True:
@@ -205,22 +226,7 @@ class ScenarioEditor(tk.Tk):
         self.lbl_path = tk.Label(self.nav_bar, text="Root", bg="#282828", fg="#4a90e2", font=("Segoe UI", 9, "bold"))
         self.lbl_path.pack(side=tk.LEFT, padx=10)
 
-        # Левые кнопки создания нод
-        tk.Button(self.toolbar_left, text="📝 Сюжет", command=lambda: self.add_node("story"), **BTN_ACTION_STYLE).pack(side=tk.LEFT, padx=3)
-        tk.Button(self.toolbar_left, text="🔀 Выбор", command=lambda: self.add_node("choice"), **BTN_ACTION_STYLE).pack(side=tk.LEFT, padx=3)
-
-        # Меню Компоненты
-        self.plugin_menu_btn = tk.Menubutton(self.toolbar_left, text="🧩 Компоненты ▾", **BTN_ACTION_STYLE)
-        self.plugin_menu_btn.pack(side=tk.LEFT, padx=3)
-        self.plugin_menu = tk.Menu(self.plugin_menu_btn, **MENU_CFG_STYLE)
-        self.plugin_menu_btn["menu"] = self.plugin_menu
-
-        # Кнопка Персонажи (База героев)
-        tk.Button(self.toolbar_left, text="👥 Персонажи", command=self.open_character_manager, **BTN_ACTION_STYLE).pack(side=tk.LEFT, padx=3)
-
-        tk.Label(self.toolbar_left, text="|", bg=COLORS["bg"], fg="#555555").pack(side=tk.LEFT, padx=5)
-
-        # Меню Проект
+        # ── 1. Меню "Проект" (первое слева) ───────────────────────────────
         self.project_menu_btn = tk.Menubutton(self.toolbar_left, text="📁 Проект ▾", **BTN_NORMAL_STYLE)
         self.project_menu_btn.pack(side=tk.LEFT, padx=3)
         self.project_menu = tk.Menu(self.project_menu_btn, **MENU_CFG_STYLE)
@@ -230,22 +236,41 @@ class ScenarioEditor(tk.Tk):
         self.project_menu.add_command(label="📂 Загрузить (Ctrl+O)", command=self.load_project)
         self.project_menu.add_separator()
         self.project_menu.add_command(label="👥 База персонажей... (Ctrl+Shift+C)", command=self.open_character_manager)
-        self.project_menu.add_command(label="⌨️ Горячие клавиши...", command=self.open_hotkey_settings)
+        self.project_menu.add_command(label="🔍 Поиск и замена (Ctrl+F)", command=self.open_search_replace)
+        self.project_menu.add_separator()
+        self.project_menu.add_command(label="🌐 Совместная работа (Коворк)...", command=self.open_cowork_dialog)
+        self.project_menu.add_command(label="🚀 Проверить обновления GitHub...", command=self.open_update_dialog)
         self.project_menu.add_separator()
         self.project_menu.add_command(label="⚠️ Очистить холст", command=self.clear_all)
 
-        # Поиск
+        tk.Label(self.toolbar_left, text="|", bg=COLORS["bg"], fg="#555555").pack(side=tk.LEFT, padx=5)
+
+        # ── 2. Быстрое создание нод ───────────────────────────────────────
+        tk.Button(self.toolbar_left, text="📝 Сюжет", command=lambda: self.add_node("story"), **BTN_ACTION_STYLE).pack(side=tk.LEFT, padx=3)
+        tk.Button(self.toolbar_left, text="🔀 Выбор", command=lambda: self.add_node("choice"), **BTN_ACTION_STYLE).pack(side=tk.LEFT, padx=3)
+
+        # Меню Компоненты (ноды плагинов: условия, музыка, код и др.)
+        self.plugin_menu_btn = tk.Menubutton(self.toolbar_left, text="🧩 Компоненты ▾", **BTN_ACTION_STYLE)
+        self.plugin_menu_btn.pack(side=tk.LEFT, padx=3)
+        self.plugin_menu = tk.Menu(self.plugin_menu_btn, **MENU_CFG_STYLE)
+        self.plugin_menu_btn["menu"] = self.plugin_menu
+
+        tk.Label(self.toolbar_left, text="|", bg=COLORS["bg"], fg="#555555").pack(side=tk.LEFT, padx=5)
+
+        # ── 3. Инструменты сценария ───────────────────────────────────────
+        tk.Button(self.toolbar_left, text="👥 Персонажи", command=self.open_character_manager, **BTN_NORMAL_STYLE).pack(side=tk.LEFT, padx=3)
         tk.Button(self.toolbar_left, text="🔍 Поиск", command=self.open_search_replace, **BTN_NORMAL_STYLE).pack(side=tk.LEFT, padx=3)
 
-        # Правое меню инструментов
+        # ── 4. Правая сторона тулбара ─────────────────────────────────────
+        # Правое меню инструментов (крайнее правое)
         self.dev_menu_btn = tk.Menubutton(self.toolbar_right, text="⚙️ Меню ▾", **BTN_NORMAL_STYLE)
         self.dev_menu_btn.pack(side=tk.RIGHT, padx=3)
         self.dev_menu = tk.Menu(self.dev_menu_btn, **MENU_CFG_STYLE)
         self.dev_menu_btn["menu"] = self.dev_menu
-        self.dev_menu.add_command(label="⌨️ Настройки горячих клавиш...", command=self.open_hotkey_settings)
-
-        # Кнопка настроек хоткеев на тулбаре
-        tk.Button(self.toolbar_right, text="⌨️ Хоткеи", command=self.open_hotkey_settings, **BTN_NORMAL_STYLE).pack(side=tk.RIGHT, padx=3)
+        self.dev_menu.add_command(label="🌐 Совместная работа (Коворк)...", command=self.open_cowork_dialog)
+        self.dev_menu.add_command(label="🚀 Обновить движок из GitHub...", command=self.open_update_dialog)
+        self.dev_menu.add_separator()
+        self.dev_menu.add_command(label="⌨️ Горячие клавиши...", command=self.open_hotkey_settings)
 
         # Масштабирование (Zoom)
         self.zoom_frame = tk.Frame(self.toolbar_right, bg=COLORS["bg"])
@@ -1048,6 +1073,14 @@ class ScenarioEditor(tk.Tk):
 
     def open_character_manager(self) -> None:
         CharacterManagerDialog(parent=self, editor=self, on_change=self.on_characters_changed)
+
+    def open_update_dialog(self) -> None:
+        """Открывает диалог проверки и установки обновлений движка из GitHub."""
+        ManualUpdateDialog(self)
+
+    def open_cowork_dialog(self) -> None:
+        """Открывает диалог управления сервером совместной работы (коворк)."""
+        CoworkServerManagerDialog(self)
 
     def on_characters_changed(self) -> None:
         self.set_dirty(True)

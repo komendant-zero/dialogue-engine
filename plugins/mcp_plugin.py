@@ -18,21 +18,11 @@ class MCPPlugin(Plugin):
 
     def on_event(self, event_type: str, data: Any = None) -> None:
         if event_type == "setup_ui":
-            parent = getattr(self.editor, "toolbar_right", data)
-            tk.Button(
-                parent,
-                text="🤖 MCP AI",
-                command=self.show_mcp_info,
-                bg="#2c3e50",
-                activebackground="#34495e",
-                fg="#1abc9c",
-                activeforeground="#2ecc71",
-                relief="flat",
-                font=("Segoe UI", 9, "bold"),
-                padx=8,
-                pady=3,
-                cursor="hand2"
-            ).pack(side=tk.RIGHT, padx=3)
+            if hasattr(self.editor, "dev_menu") and self.editor.dev_menu:
+                self.editor.dev_menu.add_command(
+                    label="🤖 Интеграция MCP AI...",
+                    command=self.show_mcp_info
+                )
 
     def show_mcp_info(self) -> None:
         proj = getattr(self.editor, "current_file", "D:/projects/Violant/game/violant.json") or "D:/projects/Violant/game/violant.json"

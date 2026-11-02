@@ -81,23 +81,15 @@ class TestSpriteResolver(unittest.TestCase):
         self.assertIsNotNone(spr3)
         self.assertTrue(spr3.endswith("river_happy.png"))
 
-    def test_renpy_export_auto_sprite(self):
+    def test_renpy_export_no_auto_sprite_in_story(self):
         exporter = RenPyExporter()
 
-        # Создаем 3 реплики подряд:
-        # Реплика 1: Ника (pose_01) -> должен быть show expression
-        # Реплика 2: Ника (pose_01) -> НЕ должно быть дублирующего show expression
-        # Реплика 3: Ника (pose_02) -> смена эмоции, должен быть show expression
-        n1 = NodeData(id="1", title="Ника", content="Привет!", node_type="story",
-                      custom_data={"sprite_path": os.path.join(self.temp_dir, "nika", "nika_pose_01.png")})
-        n2 = NodeData(id="2", title="Ника", content="Как дела?", node_type="story",
-                      custom_data={"sprite_path": os.path.join(self.temp_dir, "nika", "nika_pose_01.png")})
-        n3 = NodeData(id="3", title="Ника", content="Смотри сюда!", node_type="story",
-                      custom_data={"sprite_path": os.path.join(self.temp_dir, "nika", "nika_pose_02.png")})
+        # Реплики персонажей не должны автоматически привязываться к show expression
+        n1 = NodeData(id="1", title="Ника", content="Привет!", node_type="story")
+        n2 = NodeData(id="2", title="Ника", content="Как дела?", node_type="story")
 
         c1 = ConnectionData(from_node="1", out_idx=0, to_node="2")
-        c2 = ConnectionData(from_node="2", out_idx=0, to_node="3")
-        project = ProjectData(nodes=[n1, n2, n3], connections=[c1, c2])
+        project = ProjectData(nodes=[n1, n2], connections=[c1])
 
         out_export = tempfile.mkdtemp(prefix="de_rpy_sprite_")
         try:
@@ -107,11 +99,9 @@ class TestSpriteResolver(unittest.TestCase):
             with open(os.path.join(out_export, "script.rpy"), "r", encoding="utf-8") as f:
                 content = f.read()
 
-            # Должно быть ровно 2 show expression (один для pose_01, один для pose_02), без дубля на второй реплике
+            # В текстовых репликах не должно быть авто-сгенерированных show expression
             count_show = content.count("show expression")
-            self.assertEqual(count_show, 2)
-            self.assertIn("nika_pose_01.png", content)
-            self.assertIn("nika_pose_02.png", content)
+            self.assertEqual(count_show, 0)
         finally:
             if os.path.exists(out_export):
                 shutil.rmtree(out_export)

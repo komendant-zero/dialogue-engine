@@ -193,24 +193,7 @@ class AutoLayoutPlugin(Plugin):
         if not tk:
             return
 
-        # Добавляем кнопку на тулбар справа
-        parent = getattr(self.editor, 'toolbar_right', toolbar)
-        tk.Button(
-            parent,
-            text="📐 Расставить ноды",
-            command=self.run_auto_layout,
-            bg='#1f618d',
-            activebackground='#2980b9',
-            fg='white',
-            activeforeground='white',
-            relief='flat',
-            font=('Segoe UI', 9, 'bold'),
-            padx=8,
-            pady=3,
-            cursor='hand2'
-        ).pack(side=tk.RIGHT, padx=3)
-
-        # Добавляем в dev_menu (Меню)
+        # Добавляем команду в dev_menu (Меню)
         if hasattr(self.editor, 'dev_menu') and self.editor.dev_menu:
             self.editor.dev_menu.add_separator()
             self.editor.dev_menu.add_command(

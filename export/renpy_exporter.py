@@ -193,29 +193,6 @@ class RenPyExporter(BaseExporter):
 
         # 1. Текстовый узел (Story)
         if node.node_type == "story":
-            # Автоматическая активация спрайта персонажа (Auto-Sprite Resolver)
-            speaker_name = node.title.strip()
-            if speaker_name and not speaker_name.startswith("#") and speaker_name not in ("Сцена", "Персонаж"):
-                sprite_path = node.custom_data.get("sprite_path")
-                if not sprite_path and node.custom_data.get("auto_sprite", True):
-                    emotion = node.custom_data.get("emotion", "")
-                    sprite_path = SpriteResolver.resolve_sprite(
-                        speaker_name,
-                        emotion,
-                        project_path=output_dir,
-                        editor=self.plugin_manager.editor if self.plugin_manager else None
-                    )
-
-                if sprite_path:
-                    rel_sprite = self.clean_rel_path(sprite_path, output_dir)
-                    pos = node.custom_data.get("sprite_position", "center")
-                    trans = node.custom_data.get("sprite_animation", "dissolve")
-                    with_clause = f" with {trans}" if trans and trans.lower() != "none" else ""
-
-                    if self._active_sprites.get(speaker_name) != rel_sprite:
-                        f.write(f'    show expression "{rel_sprite}" at {pos}{with_clause}\n')
-                        self._active_sprites[speaker_name] = rel_sprite
-
             if node.custom_data.get("pause_before"):
                 p_mode = node.custom_data.get("pause_before_mode", "click")
                 p_dur = node.custom_data.get("pause_before_duration", 1.0)

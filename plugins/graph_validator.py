@@ -8,21 +8,11 @@ class GraphValidatorPlugin(Plugin):
 
     def on_event(self, event_type, data=None):
         if event_type == 'setup_ui':
-            parent = getattr(self.editor, 'toolbar_right', data)
-            tk.Button(
-                parent,
-                text="🩺 Проверка сюжета",
-                command=self.run_diagnostics,
-                bg='#2c3e50',
-                activebackground='#34495e',
-                fg='#5dade2',
-                activeforeground='white',
-                relief='flat',
-                font=('Segoe UI', 9, 'bold'),
-                padx=8,
-                pady=3,
-                cursor='hand2'
-            ).pack(side=tk.RIGHT, padx=3)
+            if hasattr(self.editor, 'dev_menu') and self.editor.dev_menu:
+                self.editor.dev_menu.add_command(
+                    label="🩺 Проверка сюжета (Диагностика)",
+                    command=self.run_diagnostics
+                )
 
     def run_diagnostics(self):
         nodes = self.editor.nodes

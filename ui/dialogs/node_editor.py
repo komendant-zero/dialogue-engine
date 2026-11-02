@@ -288,9 +288,7 @@ class NodeEditorDialog:
             emotions = ["обычный", "радость", "грусть", "злость"]
 
         curr_emo = self.node.custom_data.get("emotion", "")
-        resolved_sprite = SpriteResolver.resolve_sprite(name, curr_emo, editor=self.editor)
-        if resolved_sprite:
-            self.node.custom_data["sprite_path"] = resolved_sprite
+        resolved_sprite = None
 
         tk.Label(
             self.emotion_frame, text="🎭 Эмоция:", bg=COLORS["bg"], fg="#888888", font=("Segoe UI", 8)

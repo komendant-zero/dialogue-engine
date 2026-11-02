@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#1e1e1e">
+  <title>Dialogue Engine - Коворк</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <!-- Верхняя панель (Desktop & Tablet) -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-icon">⚡</span>
+      <span class="brand-title">Dialogue Engine</span>
+      <span id="lblProjectTitle" class="project-title">Загрузка...</span>
+    </div>
+
+    <!-- Быстрое создание нод (Desktop) -->
+    <div class="topbar-actions topbar-center-buttons">
+      <button class="btn btn-primary" onclick="createNode('story')">📝 Сюжет</button>
+      <button class="btn" onclick="createNode('choice')">🔀 Выбор</button>
+      <button class="btn" onclick="createNode('condition')">⚡ Условие</button>
+    </div>
+
+    <!-- Участники коворка и действия -->
+    <div class="topbar-actions">
+      <div id="collaboratorsPill" class="collaborators-pill" onclick="toggleDrawer()">
+        <span>👥</span>
+        <span id="lblOnlineCount">1 онлайн</span>
+        <div id="avatarsContainer" class="collaborators-avatars"></div>
+      </div>
+
+      <button class="btn btn-success" onclick="saveProject()">
+        <span>💾</span> <span class="btn-text">Сохранить</span>
+      </button>
+
+      <button class="btn" onclick="resetZoom()" title="Сбросить масштаб (100%)">
+        <span>🔍</span> <span id="lblZoom">100%</span>
+      </button>
+
+      <button class="btn" onclick="toggleDrawer()">
+        <span>💬</span> <span class="btn-text">Чат</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Интерактивный холст -->
+  <main id="canvasContainer" class="canvas-container">
+    <div id="canvasWorld" class="canvas-world">
+      <!-- SVG слой соединений -->
+      <svg id="connectionsSvg" class="connections-svg">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#a9b7c6"/>
+          </marker>
+          <marker id="arrow-active" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#ffcc00"/>
+          </marker>
+        </defs>
+        <!-- Активная тянущаяся связь при создании -->
+        <path id="tempCable" class="connection-path connection-active" d="" style="display: none;"/>
+      </svg>
+
+      <!-- Контейнер блоков сценария -->
+      <div id="nodesContainer"></div>
+
+      <!-- Слой удаленных курсоров участников коворка -->
+      <div id="remoteCursorsContainer"></div>
+    </div>
+  </main>
+
+  <!-- Мобильная нижняя панель действий -->
+  <nav class="mobile-bottom-bar">
+    <button class="mobile-btn" onclick="createNode('story')">
+      <span class="mobile-btn-icon">📝</span>
+      <span>Сюжет</span>
+    </button>
+    <button class="mobile-btn" onclick="createNode('choice')">
+      <span class="mobile-btn-icon">🔀</span>
+      <span>Выбор</span>
+    </button>
+    <button class="mobile-btn" onclick="createNode('condition')">
+      <span class="mobile-btn-icon">⚡</span>
+      <span>Условие</span>
+    </button>
+    <button class="mobile-btn" onclick="saveProject()">
+      <span class="mobile-btn-icon">💾</span>
+      <span>Сохранить</span>
+    </button>
+    <button class="mobile-btn" onclick="toggleDrawer()">
+      <span class="mobile-btn-icon">👥</span>
+      <span>Коворк</span>
+    </button>
+  </nav>
+
+  <!-- Боковая панель: список участников и чат -->
+  <aside id="coworkDrawer" class="drawer">
+    <div class="drawer-header">
+      <span class="drawer-title">👥 Совместная работа (Коворк)</span>
+      <button class="btn" onclick="toggleDrawer()" style="padding: 2px 8px;">✕</button>
+    </div>
+    <div class="drawer-content">
+      <!-- Мой профиль -->
+      <div>
+        <label class="form-label">Ваше имя в коворке:</label>
+        <div style="display: flex; gap: 6px; margin-top: 4px;">
+          <input type="text" id="inputMyName" class="form-control" style="flex-grow: 1;" placeholder="Имя">
+          <button class="btn btn-primary" onclick="updateMyName()">OK</button>
+        </div>
+      </div>
+
+      <!-- Список участников онлайн -->
+      <div>
+        <label class="form-label">Участники онлайн:</label>
+        <div id="collaboratorsList" class="collaborators-list" style="margin-top: 6px;"></div>
+      </div>
+
+      <!-- Чат и журнал событий -->
+      <div style="flex-grow: 1; display: flex; flex-direction: column;">
+        <label class="form-label">Чат и журнал изменений:</label>
+        <div id="chatBox" class="chat-box" style="margin-top: 6px;"></div>
+        <div class="chat-input-row" style="margin-top: 6px;">
+          <input type="text" id="inputChatMsg" class="chat-input" placeholder="Напишите сообщение...">
+          <button class="btn btn-primary" onclick="sendChatMessage()">➤</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Модальное окно редактирования узла -->
+  <div id="nodeModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modalTitle" style="font-size: 15px;">Редактирование узла</h3>
+        <button class="btn" onclick="closeNodeModal()" style="padding: 2px 8px;">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editNodeId">
+
+        <div class="form-group">
+          <label class="form-label">Тип узла:</label>
+          <select id="editNodeType" class="form-control">
+            <option value="story">📝 Сюжетный блок (Story)</option>
+            <option value="choice">🔀 Развилка / Выбор (Choice)</option>
+            <option value="condition">⚡ Логическое условие (Condition)</option>
+            <option value="music">🎵 Музыка / Звук (Audio)</option>
+            <option value="label">🏷️ Метка / Сцена (Label)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Персонаж / Заголовок:</label>
+          <input type="text" id="editNodeTitle" class="form-control" placeholder="Имя говорящего персонажа или метка">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Текст реплики или сценария:</label>
+          <textarea id="editNodeContent" class="form-control" rows="5" placeholder="Введите диалог или текст..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Цвет блока:</label>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button type="button" class="btn" style="background: #4a90e2; color: white;" onclick="setEditColor('#4a90e2')">Синий</button>
+            <button type="button" class="btn" style="background: #e67e22; color: white;" onclick="setEditColor('#e67e22')">Оранжевый</button>
+            <button type="button" class="btn" style="background: #2ecc71; color: white;" onclick="setEditColor('#2ecc71')">Зеленый</button>
+            <button type="button" class="btn" style="background: #9b59b6; color: white;" onclick="setEditColor('#9b59b6')">Фиолетовый</button>
+            <button type="button" class="btn" style="background: #c0392b; color: white;" onclick="setEditColor('#c0392b')">Красный</button>
+          </div>
+          <input type="hidden" id="editNodeColor" value="">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" style="background: #c0392b; color: white; margin-right: auto;" onclick="deleteCurrentNode()">🗑️ Удалить</button>
+        <button class="btn" onclick="closeNodeModal()">Отмена</button>
+        <button class="btn btn-primary" onclick="saveNodeModal()">Готово</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

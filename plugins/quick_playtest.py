@@ -32,6 +32,13 @@ class QuickPlaytestPlugin(Plugin):
                 cursor='hand2'
             ).pack(side=tk.RIGHT, padx=3)
 
+            if hasattr(self.editor, 'dev_menu') and self.editor.dev_menu:
+                self.editor.dev_menu.add_separator()
+                self.editor.dev_menu.add_command(
+                    label="▶ Быстрый тест (Встроенный плеер)",
+                    command=self.start_playtest
+                )
+
     def start_playtest(self):
         nodes = self.editor.nodes
         connections = self.editor.connections
@@ -250,9 +257,10 @@ class PlaytestWindow(tk.Toplevel):
 
         emo = node.custom_data.get("emotion", "") if hasattr(node, "custom_data") and isinstance(node.custom_data, dict) else ""
         spr_path = node.custom_data.get("sprite_path") if hasattr(node, "custom_data") and isinstance(node.custom_data, dict) else ""
+        # Only show sprite if explicitly specified in custom_data
         if not spr_path:
-            editor = getattr(self.plugin, "editor", None)
-            spr_path = SpriteResolver.resolve_sprite(speaker, emo, editor=editor)
+            self.sprite_stage.delete("all")
+            return
 
         if spr_path and os.path.exists(spr_path) and HAS_PIL:
             try:

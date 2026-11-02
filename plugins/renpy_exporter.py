@@ -28,21 +28,16 @@ class RenpyExporterPlugin(Plugin):
             self.add_toolbar_button(data)
 
     def add_toolbar_button(self, toolbar: Any) -> None:
-        parent = getattr(self.editor, "toolbar_right", toolbar)
-        tk.Button(
-            parent,
-            text="⚙ Экспорт Ren'Py",
-            command=self.export_project,
-            bg="#8a2318",
-            activebackground="#a93226",
-            fg="white",
-            activeforeground="white",
-            relief="flat",
-            font=("Segoe UI", 9, "bold"),
-            padx=8,
-            pady=3,
-            cursor="hand2"
-        ).pack(side=tk.RIGHT, padx=3)
+        if hasattr(self.editor, "project_menu") and self.editor.project_menu:
+            self.editor.project_menu.add_command(
+                label="📤 Экспорт в Ren'Py...",
+                command=self.export_project
+            )
+        if hasattr(self.editor, "dev_menu") and self.editor.dev_menu:
+            self.editor.dev_menu.add_command(
+                label="📤 Экспорт в Ren'Py...",
+                command=self.export_project
+            )
 
     def export_project(self) -> None:
         nodes = getattr(self.editor, "nodes", [])
