@@ -743,7 +743,7 @@ function resolveSprite(characterName, emotion) {
   // 2. Встроенные пути для проекта Violant
   for (const cv of charVariants) {
     if (cv === "enjie" || cv === "энджи") {
-      return { url: "/sprites/enjie_neutral.png", file: "enjie_neutral.png", name: "enjie_neutral" };
+      return { url: "sprites/enjie_neutral.png", file: "enjie_neutral.png", name: "enjie_neutral" };
     }
     if (cv === "nika" || cv === "ника") {
       let poseId = "01";
@@ -758,7 +758,7 @@ function resolveSprite(characterName, emotion) {
           if (numM) poseId = String(parseInt(numM[0])).padStart(2, "0");
         }
       }
-      return { url: `/sprites/nika/nika_pose_${poseId}.png`, file: `nika_pose_${poseId}.png`, name: `nika_pose_${poseId}` };
+      return { url: `sprites/nika/nika_pose_${poseId}.png`, file: `nika_pose_${poseId}.png`, name: `nika_pose_${poseId}` };
     }
   }
 
