@@ -227,6 +227,24 @@ class ScenarioEditor(tk.Tk):
         self.lbl_path = tk.Label(self.nav_bar, text="Root", bg="#282828", fg="#4a90e2", font=("Segoe UI", 9, "bold"))
         self.lbl_path.pack(side=tk.LEFT, padx=10)
 
+        # Бейдж статуса коворка (справа на панели навигации)
+        self.btn_cowork_pill = tk.Button(
+            self.nav_bar,
+            text="🌐 Коворк (Офлайн)",
+            font=("Segoe UI", 8, "bold"),
+            bg="#333333",
+            fg="#aaaaaa",
+            activebackground="#444444",
+            activeforeground="#ffffff",
+            relief=tk.FLAT,
+            bd=0,
+            padx=10,
+            pady=1,
+            cursor="hand2",
+            command=self.open_cowork_dialog
+        )
+        self.btn_cowork_pill.pack(side=tk.RIGHT, padx=10, pady=2)
+
         # ── 1. Меню "Проект" (первое слева) ───────────────────────────────
         self.project_menu_btn = tk.Menubutton(self.toolbar_left, text="📁 Проект ▾", **BTN_NORMAL_STYLE)
         self.project_menu_btn.pack(side=tk.LEFT, padx=3)
@@ -731,12 +749,23 @@ class ScenarioEditor(tk.Tk):
             return
         self.save_state()
         if self.selected_connection:
+            conn_to_del = dict(self.selected_connection)
             if self.selected_connection in self.connections:
                 self.connections.remove(self.selected_connection)
             self.selected_connection = None
+            self.broadcast_cowork_event({
+                "type": "connection_delete",
+                "connection": {
+                    "from": str(conn_to_del.get("from", "")),
+                    "out_idx": int(conn_to_del.get("out_idx", 0)),
+                    "to": str(conn_to_del.get("to", ""))
+                }
+            })
 
         if self.selected_nodes:
             sel_ids = {n.id for n in self.selected_nodes}
+            for n in self.selected_nodes:
+                self.broadcast_cowork_event({"type": "node_delete", "id": n.id})
             self.nodes = [n for n in self.nodes if n not in self.selected_nodes]
             self.connections = [c for c in self.connections if c["from"] not in sel_ids and c["to"] not in sel_ids]
             self.selected_nodes = []
@@ -792,6 +821,11 @@ class ScenarioEditor(tk.Tk):
         self.redraw()
         self.plugin_manager.notify("node_added", node)
         self.set_dirty(True)
+        if save_history:
+            self.broadcast_cowork_event({
+                "type": "node_create",
+                "node": node.to_node_data().to_dict()
+            })
         return node
 
     def redraw(self) -> None:
@@ -938,6 +972,14 @@ class ScenarioEditor(tk.Tk):
                     "to": target.id
                 })
                 self.redraw()
+                self.broadcast_cowork_event({
+                    "type": "connection_create",
+                    "connection": {
+                        "from": str(self.conn_drag["start_node"].id),
+                        "out_idx": int(self.conn_drag["start_idx"]),
+                        "to": str(target.id)
+                    }
+                })
             else:
                 self.history_manager.pop_last_undo()
             self.conn_drag["active"] = False
@@ -962,6 +1004,13 @@ class ScenarioEditor(tk.Tk):
                 self.history_manager.pop_last_undo()
             else:
                 self.set_dirty(True)
+                for node in self.selected_nodes:
+                    self.broadcast_cowork_event({
+                        "type": "node_move",
+                        "id": node.id,
+                        "x": node.x,
+                        "y": node.y
+                    })
 
         self.drag_data["item"] = None
         self.drag_data["conn_pairs"] = None
@@ -1070,7 +1119,12 @@ class ScenarioEditor(tk.Tk):
 
     def edit_node(self, node: Node) -> None:
         self.save_state()
-        NodeEditorDialog(parent=self, node=node, editor=self)
+        def on_saved():
+            self.broadcast_cowork_event({
+                "type": "node_update",
+                "node": node.to_node_data().to_dict()
+            })
+        NodeEditorDialog(parent=self, node=node, editor=self, on_save=on_saved)
 
     def open_search_replace(self) -> None:
         SearchReplaceDialog(parent=self, editor=self)
@@ -1085,6 +1139,71 @@ class ScenarioEditor(tk.Tk):
     def open_cowork_dialog(self) -> None:
         """Открывает диалог управления сервером совместной работы (коворк)."""
         CoworkServerManagerDialog(self)
+
+    def update_cowork_status_ui(self) -> None:
+        """Обновляет индикатор статуса коворка в верхней панели редактора."""
+        if not hasattr(self, "btn_cowork_pill"):
+            return
+        client = getattr(self, "cowork_client", None)
+        if client and client.is_connected:
+            count = len(client.collaborators)
+            sid = client.session_id
+            self.btn_cowork_pill.configure(
+                text=f"🟢 Коворк: {sid} ({count} онл.)",
+                bg="#1b4d2e",
+                fg="#2ecc71"
+            )
+        elif client and client.state == "CONNECTING":
+            self.btn_cowork_pill.configure(
+                text="🟡 Подключение...",
+                bg="#4d3e1b",
+                fg="#f39c12"
+            )
+        elif client and client.state == "ERROR":
+            self.btn_cowork_pill.configure(
+                text="🔴 Ошибка коворка",
+                bg="#4d1b1b",
+                fg="#e74c3c"
+            )
+        else:
+            self.btn_cowork_pill.configure(
+                text="🌐 Коворк (Офлайн)",
+                bg="#333333",
+                fg="#aaaaaa"
+            )
+
+    def broadcast_cowork_event(self, data: dict[str, Any]) -> None:
+        """Отправляет событие на сервер коворка, если синхронизация активна."""
+        if getattr(self, "cowork_sync_enabled", False) and getattr(self, "cowork_client", None):
+            if self.cowork_client.is_connected:
+                self.cowork_client.send_event(data)
+
+    def load_project_from_dict(self, data: dict[str, Any]) -> None:
+        """Загружает проект из словаря данных, полученного с сервера."""
+        from core.serialization import ProjectSerializer
+        project = ProjectSerializer.deserialize_from_dict(data)
+        self._load_project_data(project)
+        self.set_dirty(False)
+
+    def get_project_as_dict(self) -> dict[str, Any]:
+        """Сериализует текущий открытый проект в формат словаря для сервера."""
+        from core.models import ProjectData, ProjectMetadata, ConnectionData
+        from core.serialization import ProjectSerializer
+        nodes_data = [n.to_node_data() for n in self.nodes]
+        conns_data = [
+            ConnectionData(from_node=str(c["from"]), out_idx=int(c.get("out_idx", 0)), to_node=str(c["to"]))
+            for c in self.connections
+        ]
+        proj = ProjectData(
+            metadata=ProjectMetadata(
+                title=os.path.splitext(os.path.basename(self.current_file or "violant.json"))[0],
+                version="2.2.0"
+            ),
+            nodes=nodes_data,
+            connections=conns_data,
+            characters=self.character_manager.list()
+        )
+        return ProjectSerializer.serialize_to_dict(proj)
 
     def open_scenario_audit(self) -> None:
         """Открывает интерактивное окно автоматического тестирования сценария и ассетов."""
@@ -1103,6 +1222,10 @@ class ScenarioEditor(tk.Tk):
                 self.selected_nodes.remove(node)
             self.redraw()
             self.plugin_manager.notify("node_deleted", node)
+            self.broadcast_cowork_event({
+                "type": "node_delete",
+                "id": node.id
+            })
 
     def set_nodes_color(self, nodes: list[Node], bg_color: str, header_color: str) -> None:
         if not nodes:
