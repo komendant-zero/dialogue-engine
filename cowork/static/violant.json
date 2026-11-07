@@ -1,0 +1,4771 @@
+{
+    "metadata": {
+        "format_version": "2.0",
+        "engine_version": "2.2.0",
+        "title": "Новый проект",
+        "created_at": 1793998053.1738634,
+        "modified_at": 1793998053.1750429
+    },
+    "nodes": [
+        {
+            "id": "2650546606768",
+            "x": 3646.100000000002,
+            "y": 971.0259999999996,
+            "title": "Имя метки (start)",
+            "content": "Фон Ривер сидит в своём кабинете смотря на монитор в котором открыты документы",
+            "type": "label",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#d35400",
+                "header_color": "#a04000",
+                "text_color": "#ffffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650546458128",
+            "x": -7119.831999999995,
+            "y": 610.9379999999999,
+            "title": "???",
+            "content": "Ну, привет",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#8000ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650546459408",
+            "x": -6630.391999999991,
+            "y": 610.9379999999999,
+            "title": "???",
+            "content": "Нужно сделать более интересную обстановку для тебя",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#8000ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650546266208",
+            "x": -6140.951999999992,
+            "y": 610.9379999999999,
+            "title": "double-fingersnap-reverb.wav",
+            "content": "🗣️ SFX\n📂: dustywind_double-fingersnap-reverb.ogg",
+            "type": "music",
+            "mode": "standard",
+            "custom_data": {
+                "music_mode": "sfx",
+                "music_file": "D:/projects/Violant/game/sound/dustywind_double-fingersnap-reverb.ogg",
+                "bg_color": "#196f3d",
+                "header_color": "#0d4528",
+                "text_color": "#ffffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650546266816",
+            "x": -5651.5119999999915,
+            "y": 610.9379999999999,
+            "title": "hello",
+            "content": "{\"image_path\": \"D:/projects/Violant/game/bg/hello.jpg\", \"mode\": \"background\", \"position\": \"center\", \"transition\": \"none\"}",
+            "type": "media",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": true
+        },
+        {
+            "id": "2650546970288",
+            "x": -5162.071999999993,
+            "y": 610.9379999999999,
+            "title": "???",
+            "content": "И последний штрих",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#8000ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650546412528",
+            "x": -4672.631999999992,
+            "y": 610.9379999999999,
+            "title": "dustywind_double-fingersnap-reverb.ogg",
+            "content": "🗣️ SFX\n📂: dustywind_double-fingersnap-reverb.ogg",
+            "type": "music",
+            "mode": "standard",
+            "custom_data": {
+                "music_mode": "sfx",
+                "music_file": "D:/projects/Violant/game/sound/dustywind_double-fingersnap-reverb.ogg",
+                "bg_color": "#196f3d",
+                "header_color": "#0d4528",
+                "text_color": "#ffffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650546413344",
+            "x": -4183.191999999994,
+            "y": 610.9379999999999,
+            "title": "hello.mp3",
+            "content": "🔁 BG\n📂: hello.mp3",
+            "type": "music",
+            "mode": "standard",
+            "custom_data": {
+                "music_mode": "bg",
+                "music_file": "D:/projects/Violant/game/music/hello.mp3",
+                "bg_color": "#196f3d",
+                "header_color": "#0d4528",
+                "text_color": "#ffffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650547107408",
+            "x": -3693.7519999999968,
+            "y": 610.9379999999999,
+            "title": "???",
+            "content": "Вот так лучше!",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#8000ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650547107920",
+            "x": -3204.3119999999944,
+            "y": 610.9379999999999,
+            "title": "???",
+            "content": "Перед тобой четвёртый таймлайн — альтернативная ветвь твоей реальности.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#8000ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650547125328",
+            "x": -2714.871999999994,
+            "y": 610.9379999999999,
+            "title": "???",
+            "content": "Этот мир почти неотличим от твоего, но в нём есть одно маленькое «но».",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#8000ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650586465056",
+            "x": -2225.4319999999934,
+            "y": 610.9379999999999,
+            "title": "warning",
+            "content": "{\"image_path\": \"D:/projects/Violant/game/bg/warning.gif\", \"mode\": \"background\", \"position\": \"center\", \"transition\": \"none\"}",
+            "type": "media",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": true
+        },
+        {
+            "id": "2650586453328",
+            "x": -1735.9919999999966,
+            "y": 610.9379999999999,
+            "title": "dustywind_double-fingersnap-reverb.ogg",
+            "content": "🗣️ SFX\n📂: dustywind_double-fingersnap-reverb.ogg",
+            "type": "music",
+            "mode": "standard",
+            "custom_data": {
+                "music_mode": "sfx",
+                "music_file": "D:/projects/Violant/game/sound/dustywind_double-fingersnap-reverb.ogg",
+                "bg_color": "#196f3d",
+                "header_color": "#0d4528",
+                "text_color": "#ffffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650586455344",
+            "x": -1246.5519999999924,
+            "y": 610.9379999999999,
+            "title": "hello",
+            "content": "{\"image_path\": \"D:/projects/Violant/game/bg/hello.jpg\", \"mode\": \"background\", \"position\": \"center\", \"transition\": \"none\"}",
+            "type": "media",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": true
+        },
+        {
+            "id": "2650547401392",
+            "x": -757.1119999999955,
+            "y": 610.9379999999999,
+            "title": "???",
+            "content": "Здесь законы привычной физики дали трещину.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#8000ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650545959760",
+            "x": -267.67199999999684,
+            "y": 610.9379999999999,
+            "title": "???",
+            "content": "Силы, которые люди привыкли считать мифом, здесь обрели плоть и форму. Но не будем забегать вперёд.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#8000ff",
+                "highlights": {
+                    "Свет": "#ffffff",
+                    "Тьма": "#000000"
+                }
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650545960144",
+            "x": 221.7680000000055,
+            "y": 610.9379999999999,
+            "title": "???",
+            "content": "Выбери, чьими глазами ты хочешь увидеть эту историю.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#8000ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650545960720",
+            "x": 711.2080000000042,
+            "y": 610.9379999999999,
+            "title": "???",
+            "content": "У тебя есть два пути.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#8000ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650545960912",
+            "x": 1200.6480000000029,
+            "y": 610.9379999999999,
+            "title": "Выбор",
+            "content": "Первая карта\nВторая карта\nТретья карта",
+            "type": "choice",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": true
+        },
+        {
+            "id": "2650545961104",
+            "x": 1690.0880000000025,
+            "y": 610.9379999999999,
+            "title": "???",
+            "content": "Что ж. Посмотрим на эту сторону.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#8000ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650545961296",
+            "x": 1690.0880000000025,
+            "y": 925.5779999999999,
+            "title": "???",
+            "content": "Серьёзно? Ладно",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#8000ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650545961488",
+            "x": 1690.0880000000025,
+            "y": 1240.2179999999996,
+            "title": "???",
+            "content": "Я же сказал, что у тебя только ДВА варианта",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#8000ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650545961680",
+            "x": 2179.528000000002,
+            "y": 610.9379999999999,
+            "title": "rain_ambient.wav",
+            "content": "🔁 BG\n📂: rain_ambient.wav",
+            "type": "music",
+            "mode": "standard",
+            "custom_data": {
+                "music_mode": "bg",
+                "music_file": "music/rain_ambient.wav",
+                "bg_color": "#196f3d",
+                "header_color": "#0d4528",
+                "text_color": "#ffffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650545961872",
+            "x": 2668.9680000000044,
+            "y": 610.9379999999999,
+            "title": "room_boxes",
+            "content": "{\"image_path\": \"D:/projects/Violant/game/bg/room_boxes.jpg\", \"mode\": \"background\", \"position\": \"center\", \"transition\": \"none\", \"animation\": \"dissolve\", \"animation_duration\": 1.0}",
+            "type": "media",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": true
+        },
+        {
+            "id": "2650545962256",
+            "x": 3158.408000000003,
+            "y": 610.9379999999999,
+            "title": "#Сцена",
+            "content": "Специальная зона «Южный Ренгок». 1 августа 2026 года. 22:47.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650545960528",
+            "x": 3647.848000000001,
+            "y": 610.9379999999999,
+            "title": "#Сцена",
+            "content": "Монотонный стук дождя по карнизу. Единственный звук в пустой съёмной комнате.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650545962064",
+            "x": 4137.288000000001,
+            "y": 610.9379999999999,
+            "title": "#Сцена",
+            "content": "Здесь, на стыке штатов, ливни не прекращаются неделями. Тяжёлый, сырой воздух пропитывает всё — от обоев до одежды.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650545962448",
+            "x": 4626.728000000002,
+            "y": 610.9379999999999,
+            "title": "#Сцена",
+            "content": "Чужой город. Чужая квартира, где даже скрип половицы кажется предупреждением.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650545962640",
+            "x": 5116.168000000002,
+            "y": 610.9379999999999,
+            "title": "#Сцена",
+            "content": "Два с половиной месяца жизни по фальшивым документам.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650545962832",
+            "x": 5605.608000000002,
+            "y": 610.9379999999999,
+            "title": "#Сцена",
+            "content": "КПП на въезде в буферную зону. Слепящий свет ламп, въедливый взгляд офицера и имя, к которому я до сих пор привыкаю.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586972240",
+            "x": 6095.048000000001,
+            "y": 610.9379999999999,
+            "title": "#Сцена",
+            "content": "«Цель визита?» — сухо спросил тогда пограничник, разглядывая пластиковую карточку.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586972432",
+            "x": 6584.487999999998,
+            "y": 610.9379999999999,
+            "title": "#Сцена",
+            "content": "Я не отвела глаз. Голос не дрогнул: «Стажировка».",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586972624",
+            "x": 7105.392000000003,
+            "y": 649.3939999999999,
+            "title": "#Сцена",
+            "content": "Штамп в паспорте. Ворота открылись. Но легче от этого не стало.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586972816",
+            "x": 7563.368,
+            "y": 610.9379999999999,
+            "title": "#Сцена",
+            "content": "Каждый шорох на лестничной клетке до сих пор заставляет замирать дыхание.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586973008",
+            "x": 8052.807999999998,
+            "y": 610.9379999999999,
+            "title": "#Сцена",
+            "content": "Потому что бежать можно сколько угодно, но от прошлого ещё никто не уходил.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586973200",
+            "x": 8542.248,
+            "y": 610.9379999999999,
+            "title": "#Сцена",
+            "content": "Особенно от того, во что никто в здравом уме не поверит.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586973392",
+            "x": 9031.687999999998,
+            "y": 610.9379999999999,
+            "title": "#Энджи",
+            "content": "Казалось, на другом краю мира всё наконец утихнет...",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#c060f8"
+            },
+            "is_character": false
+        },
+        {
+            "id": "2650586973584",
+            "x": 9521.128000000002,
+            "y": 610.9379999999999,
+            "title": "#Энджи",
+            "content": "Глупо было надеяться.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#c060f8"
+            },
+            "is_character": false
+        },
+        {
+            "id": "2650586973776",
+            "x": 10010.568,
+            "y": 610.9379999999999,
+            "title": "#Сцена",
+            "content": "В тишине слышно лишь ровное гудение старого холодильника.",
+            "type": "story",
+            "mode": "continue",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586973968",
+            "x": 10500.007999999998,
+            "y": 610.9379999999999,
+            "title": "#Сцена",
+            "content": "За окном — мокрый бетон типовых коробок и мутные пятна редких уличных фонарей.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586974160",
+            "x": 10989.448,
+            "y": 610.9379999999999,
+            "title": "#Сцена",
+            "content": "Слишком далеко от дома.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586974352",
+            "x": 11478.887999999997,
+            "y": 610.9379999999999,
+            "title": "#Сцена",
+            "content": "Слишком далеко от прежней жизни, которая закончилась за одну ночь.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586974544",
+            "x": 11968.327999999994,
+            "y": 610.9379999999999,
+            "title": "#Сцена",
+            "content": "Остались только обрывки памяти, от которых не спасает даже усталость.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586974736",
+            "x": 12457.767999999996,
+            "y": 610.9379999999999,
+            "title": "Enjie_diary",
+            "content": "{\"image_path\": \"D:/projects/Violant/game/bg/Enjie_diary.jpg\", \"mode\": \"background\", \"position\": \"center\", \"transition\": \"none\", \"animation\": \"dissolve\", \"animation_duration\": 0.8}",
+            "type": "media",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": true
+        },
+        {
+            "id": "2650586975120",
+            "x": 12947.207999999995,
+            "y": 610.9379999999999,
+            "title": "#Сцена",
+            "content": "На столе лежит распахнутая тетрадь. Несколько коротких заметок, выведенных мелким почерком.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586974928",
+            "x": 13436.648000000001,
+            "y": 610.9379999999999,
+            "title": "Энджи",
+            "content": "«День 74. На улицах спокойно. В новостях тишина...»",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#c060f8"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650586975312",
+            "x": 13926.087999999994,
+            "y": 610.9379999999999,
+            "title": "#Сцена",
+            "content": "Я перечитываю строчку и медленно опускаю ручку.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586975504",
+            "x": 14415.528000000002,
+            "y": 610.9379999999999,
+            "title": "Энджи",
+            "content": "(Кому я вообще это пишу?)",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#c060f8"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650586975696",
+            "x": 14904.967999999997,
+            "y": 610.9379999999999,
+            "title": "#Сцена",
+            "content": "Просто привычка цепляться за бумагу, чтобы окончательно не потерять рассудок в четырёх стенах.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586975888",
+            "x": 15394.407999999996,
+            "y": 610.9379999999999,
+            "title": "#Сцена",
+            "content": "Замки на двери заперты наглухо. Шторы задернуты.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586976080",
+            "x": 15883.847999999996,
+            "y": 610.9379999999999,
+            "title": "#Сцена",
+            "content": "Рядом лежит телефон — без сим-карты, экран мёртв уже больше месяца.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586976272",
+            "x": 16373.287999999997,
+            "y": 610.9379999999999,
+            "title": "#Сцена",
+            "content": "Любой сигнал в этой зоне — риск, на который я пока не готова пойти.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586976464",
+            "x": 16862.727999999996,
+            "y": 610.9379999999999,
+            "title": "#Сцена",
+            "content": "Я закрываю тетрадь. Пальцы от холода почти не слушаются.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586976656",
+            "x": 17352.167999999994,
+            "y": 610.9379999999999,
+            "title": "chair-rolling.wav",
+            "content": "🗣️ SFX\n📂: chair-rolling.wav",
+            "type": "music",
+            "mode": "standard",
+            "custom_data": {
+                "music_mode": "sfx",
+                "music_file": "sound/chair-rolling.wav",
+                "bg_color": "#196f3d",
+                "header_color": "#0d4528",
+                "text_color": "#ffffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650586976848",
+            "x": 17841.607999999993,
+            "y": 610.9379999999999,
+            "title": "room_window_rain",
+            "content": "{\"image_path\": \"D:/projects/Violant/game/bg/room_window_rain.jpg\", \"mode\": \"background\", \"position\": \"center\", \"transition\": \"none\", \"animation\": \"dissolve\", \"animation_duration\": 0.8}",
+            "type": "media",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": true
+        },
+        {
+            "id": "2650586977232",
+            "x": 18331.047999999995,
+            "y": 610.9379999999999,
+            "title": "Энджи",
+            "content": "Снова этот ливень... Кажется, он здесь никогда не кончится.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#c060f8"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650586977040",
+            "x": 18820.48799999999,
+            "y": 610.9379999999999,
+            "title": "Энджи",
+            "content": "В комнате нечем дышать.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#c060f8"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650586977424",
+            "x": 19309.927999999993,
+            "y": 610.9379999999999,
+            "title": "Энджи",
+            "content": "Эти стены начинают давить на виски.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#c060f8"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650586977616",
+            "x": 19799.367999999995,
+            "y": 610.9379999999999,
+            "title": "hallway_mirror_enjie",
+            "content": "{\"image_path\": \"D:/projects/Violant/game/bg/hallway_mirror_enjie..jpg\", \"mode\": \"background\", \"position\": \"center\", \"transition\": \"none\", \"animation\": \"dissolve\", \"animation_duration\": 0.8}",
+            "type": "media",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": true
+        },
+        {
+            "id": "2650586978000",
+            "x": 20288.808000000005,
+            "y": 610.9379999999999,
+            "title": "Энджи",
+            "content": "В зеркале у выхода — бледное лицо с тёмными тенями под глазами.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#c060f8"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650586977808",
+            "x": 20778.248,
+            "y": 610.9379999999999,
+            "title": "#Сцена",
+            "content": "Я подхожу к двери. Рука нерешительно замирает над защёлкой замка.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586978192",
+            "x": 21267.688000000002,
+            "y": 610.9379999999999,
+            "title": "#Сцена",
+            "content": "Остаться взаперти или выйти хоть на глоток свежего воздуха?",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586978384",
+            "x": 21757.127999999997,
+            "y": 610.9379999999999,
+            "title": "Главный выбор",
+            "content": "Остаться дома (Запереть дверь на все замки)\nВыйти на улицу (Спрятаться в стене дождя)",
+            "type": "choice",
+            "mode": "standard",
+            "custom_data": {
+                "highlights": {
+                    "Выйти на улицу (Спрятаться в стене дождя)": "#400080"
+                }
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650586978576",
+            "x": 22246.567999999992,
+            "y": 296.2980000000001,
+            "title": "# Установка переменных",
+            "content": "violant = 1",
+            "type": "variable",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#2980b9",
+                "header_color": "#1f618d",
+                "text_color": "#f4d03f"
+            },
+            "is_character": false
+        },
+        {
+            "id": "2650586978768",
+            "x": 22246.567999999992,
+            "y": 925.5779999999999,
+            "title": "# Установка переменных",
+            "content": "violant = 0",
+            "type": "variable",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#2980b9",
+                "header_color": "#1f618d",
+                "text_color": "#f4d03f"
+            },
+            "is_character": false
+        },
+        {
+            "id": "2650586978960",
+            "x": 22736.007999999994,
+            "y": 296.2980000000001,
+            "title": "Энджи",
+            "content": "Нет. Выходить ночью в незнакомый квартал — безумие.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#c060f8"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650586979152",
+            "x": 22736.007999999994,
+            "y": 925.5779999999999,
+            "title": "Энджи",
+            "content": "Если я проведу здесь ещё час в темноте — сойду с ума от этих мыслей.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#c060f8"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650586979344",
+            "x": 23225.448000000004,
+            "y": 296.2980000000001,
+            "title": "#Сцена",
+            "content": "Патрули в Ренгоке допрашивают каждого встречного без лишних церемоний.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586979536",
+            "x": 23225.448000000004,
+            "y": 925.5779999999999,
+            "title": "#Сцена",
+            "content": "Натягиваю куртку, накидываю капюшон и тихо выскальзываю в промозглый подъезд.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586979728",
+            "x": 23714.887999999995,
+            "y": 296.2980000000001,
+            "title": "#Сцена",
+            "content": "Проверяю цепочку и нижний засов. Холодный металл приятно отрезвляет.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586979920",
+            "x": 23714.887999999995,
+            "y": 925.5779999999999,
+            "title": "street_night_suburb",
+            "content": "{\"image_path\": \"D:/projects/Violant/game/bg/street_night_suburb.jpg\", \"mode\": \"background\", \"position\": \"center\", \"transition\": \"none\", \"animation\": \"dissolve\", \"animation_duration\": 0.8}",
+            "type": "media",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": true
+        },
+        {
+            "id": "2650586980304",
+            "x": 24204.32799999999,
+            "y": 296.2980000000001,
+            "title": "home-sweet-home.mp3",
+            "content": "🔁 BG\n📂: home-sweet-home.mp3",
+            "type": "music",
+            "mode": "standard",
+            "custom_data": {
+                "music_mode": "bg",
+                "music_file": "music/home-sweet-home.mp3",
+                "bg_color": "#196f3d",
+                "header_color": "#0d4528",
+                "text_color": "#ffffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650586980112",
+            "x": 24204.32799999999,
+            "y": 925.5779999999999,
+            "title": "#Сцена",
+            "content": "Улица встречает тяжёлыми каплями дождя и сырым порывистым ветром.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586980496",
+            "x": 24693.76800000001,
+            "y": 296.2980000000001,
+            "title": "#Сцена",
+            "content": "Гашу настольную лампу и ложусь прямо поверх покрывала, не раздеваясь.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586980688",
+            "x": 24693.76800000001,
+            "y": 925.5779999999999,
+            "title": "#Сцена",
+            "content": "Холодная вода бьёт в лицо, но после душной комнаты этот холод отрезвляет.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586980880",
+            "x": 25183.20799999999,
+            "y": 296.2980000000001,
+            "title": "#Сцена",
+            "content": "В темноте ровный гул ливня за стеклом постепенно заполняет всю комнату.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586981072",
+            "x": 25183.20799999999,
+            "y": 925.5779999999999,
+            "title": "#Сцена",
+            "content": "Дворы Южного Ренгока ночью абсолютно пусты. Мокрый асфальт блестит под редкими фонарями.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586981264",
+            "x": 25672.648,
+            "y": 296.2980000000001,
+            "title": "#Сцена",
+            "content": "Но сон не идёт. Мысли упрямо возвращаются к тому, от чего я бежала через океан.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586981456",
+            "x": 25672.648,
+            "y": 925.5779999999999,
+            "title": "#Сцена",
+            "content": "В паре кварталов тускло мерцает витрина круглосуточного мини-маркета.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586981648",
+            "x": 26162.087999999992,
+            "y": 296.2980000000001,
+            "title": "#Сцена",
+            "content": "К той дождливой ночи в Сибуе.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586981840",
+            "x": 26162.087999999992,
+            "y": 925.5779999999999,
+            "title": "#Сцена",
+            "content": "Толкаю стеклянную дверь под негромкий перезвон колокольчика над входом.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586982032",
+            "x": 26651.528,
+            "y": 296.2980000000001,
+            "title": "flashback1",
+            "content": "{\"image_path\": \"D:/projects/Violant/game/bg/flashback1.png\", \"mode\": \"background\", \"position\": \"center\", \"transition\": \"none\", \"animation\": \"dissolve\", \"animation_duration\": 0.8}",
+            "type": "media",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": true
+        },
+        {
+            "id": "2650586983952",
+            "x": 26651.528,
+            "y": 925.5779999999999,
+            "title": "#Сцена",
+            "content": "Сухой воздух пахнет дешёвым жареным кофе. Продавец за стойкой даже не поднимает глаз от телефона.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586982992",
+            "x": 27140.967999999997,
+            "y": 296.2980000000001,
+            "title": "heartbeat.wav",
+            "content": "🗣️ SFX\n📂: heartbeat.wav",
+            "type": "music",
+            "mode": "standard",
+            "custom_data": {
+                "music_mode": "sfx",
+                "music_file": "sound/heartbeat.wav",
+                "bg_color": "#196f3d",
+                "header_color": "#0d4528",
+                "text_color": "#ffffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650586984144",
+            "x": 27140.967999999997,
+            "y": 925.5779999999999,
+            "title": "Энджи",
+            "content": "Кофе. Чёрный, пожалуйста.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#c060f8"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650586984336",
+            "x": 27630.408,
+            "y": 296.2980000000001,
+            "title": "#Сцена",
+            "content": "Пятнадцатое июля. Полночь.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586984528",
+            "x": 27630.408,
+            "y": 925.5779999999999,
+            "title": "Телевизор",
+            "content": "Небольшой подвесной монитор под потолком крутит ночную сводку дорожных камер.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#66ccff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650586984720",
+            "x": 28119.848,
+            "y": 296.2980000000001,
+            "title": "#Сцена",
+            "content": "Мэй звонила трижды. Её сбивчивый, испуганный шепот в трубке: \"Энджи...мне нужна помощь...\"",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586984912",
+            "x": 28119.848,
+            "y": 925.5779999999999,
+            "title": "Телевизор",
+            "content": "«...Внимание дежурным службам сектора 4. В южном районе зафиксированы локальные аномальные помехи...»",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#66ccff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650586985104",
+            "x": 28609.288,
+            "y": 296.2980000000001,
+            "title": "#Сцена",
+            "content": "Когда я добежала до того глухого тупика — ливень уже смывал следы.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586985296",
+            "x": 28609.288,
+            "y": 925.5779999999999,
+            "title": "#Сцена",
+            "content": "Изображение на экране на миг сминается, распадаясь на ряды фиолетовых полос.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586985488",
+            "x": 29098.728,
+            "y": 296.2980000000001,
+            "title": "#Сцена",
+            "content": "Мёртвая, неестественная тишина на залитом водой асфальте.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586985680",
+            "x": 29098.728,
+            "y": 925.5779999999999,
+            "title": "#Сцена",
+            "content": "Я бросаю купюру на прилавок, забираю стакан и спешно выхожу обратно в сырую темноту.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586985872",
+            "x": 29588.168000000005,
+            "y": 296.2980000000001,
+            "title": "#Сцена",
+            "content": "Тело Мэй... и это пульсирующее фиолетовое свечение на её шее.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586986064",
+            "x": 29588.168000000005,
+            "y": 925.5779999999999,
+            "title": "#Сцена",
+            "content": "Тёмный переулок за магазином кажется неестественно глухим. Позади раздаётся тихий шорох.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586986256",
+            "x": 30077.608,
+            "y": 296.2980000000001,
+            "title": "#Сцена",
+            "content": "Словно метка, выжженная прямо под кожей. Я пыталась нащупать пульс, но пальцы соскальзывали...",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586986448",
+            "x": 30077.608,
+            "y": 925.5779999999999,
+            "title": "Энджи",
+            "content": "Кто здесь?..",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#c060f8"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650586986640",
+            "x": 30567.047999999988,
+            "y": 296.2980000000001,
+            "title": "#Сцена",
+            "content": "А потом — ослепляющие фары полицейского патруля и чужие крики, требовавшие лечь на землю.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586986832",
+            "x": 30567.047999999988,
+            "y": 925.5779999999999,
+            "title": "#Сцена",
+            "content": "Ответа нет. И в этот миг шум ливня вокруг внезапно стихает. Беззвучно.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586987024",
+            "x": 31056.488,
+            "y": 296.2980000000001,
+            "title": "#Сцена",
+            "content": "Они даже не слушали меня. Для них всё было очевидно с первой секунды.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586987216",
+            "x": 31056.488,
+            "y": 925.5779999999999,
+            "title": "#Сцена",
+            "content": "Капли воды больше не падают. Они застыли в воздухе, неподвижно повиснув в свете фонаря.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586987408",
+            "x": 31545.927999999993,
+            "y": 296.2980000000001,
+            "title": "1.ogg",
+            "content": "🗣️ VOICE\n📂: glitch.wav",
+            "type": "music",
+            "mode": "standard",
+            "custom_data": {
+                "music_mode": "voice",
+                "music_file": "D:/projects/Violant/game/sound/glitch.wav",
+                "bg_color": "#196f3d",
+                "header_color": "#0d4528",
+                "text_color": "#ffffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650586987600",
+            "x": 31545.927999999993,
+            "y": 925.5779999999999,
+            "title": "1.ogg",
+            "content": "🗣️ VOICE\n📂: glitch.wav",
+            "type": "music",
+            "mode": "standard",
+            "custom_data": {
+                "music_mode": "voice",
+                "music_file": "D:/projects/Violant/game/sound/glitch.wav",
+                "bg_color": "#196f3d",
+                "header_color": "#0d4528",
+                "text_color": "#ffffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650586987792",
+            "x": 32035.367999999988,
+            "y": 296.2980000000001,
+            "title": "???",
+            "content": "И ты просто сбежала.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#8000ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650586987984",
+            "x": 32035.367999999988,
+            "y": 925.5779999999999,
+            "title": "???",
+            "content": "Ты действительно думала, что улица укроет тебя надёжнее четырёх стен?",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#8000ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650586988176",
+            "x": 32524.80799999999,
+            "y": 296.2980000000001,
+            "title": "#Сцена",
+            "content": "Я резко распахиваю глаза в темноте спальни. По коже бежит ледяная волна.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650586988368",
+            "x": 33014.24799999999,
+            "y": 296.2980000000001,
+            "title": "Энджи",
+            "content": "(Этот голос... Он звучит не снаружи. Он звучит прямо в моей голове.)",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#c060f8"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587398224",
+            "x": 33503.687999999995,
+            "y": 610.9379999999999,
+            "title": "glitch.wav",
+            "content": "🗣️ SFX\n📂: glitch.wav",
+            "type": "music",
+            "mode": "standard",
+            "custom_data": {
+                "music_mode": "sfx",
+                "music_file": "sound/glitch.wav",
+                "bg_color": "#196f3d",
+                "header_color": "#0d4528",
+                "text_color": "#ffffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587398416",
+            "x": 33993.128,
+            "y": 610.9379999999999,
+            "title": "star_preview",
+            "content": "{\"image_path\": \"D:/projects/Violant/game/bg/star_preview.gif\", \"mode\": \"background\", \"position\": \"center\", \"transition\": \"none\"}",
+            "type": "media",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": true
+        },
+        {
+            "id": "2650587399376",
+            "x": 34482.568,
+            "y": 610.9379999999999,
+            "title": "???",
+            "content": "Ты продолжаешь бежать.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#8000ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587399184",
+            "x": 34972.00799999999,
+            "y": 610.9379999999999,
+            "title": "???",
+            "content": "Шаг за шагом. Из города в город. Через океан.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#8000ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587398608",
+            "x": 35461.447999999975,
+            "y": 610.9379999999999,
+            "title": "???",
+            "content": "Но",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#8000ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587398800",
+            "x": 35950.88799999999,
+            "y": 610.9379999999999,
+            "title": "???",
+            "content": "От",
+            "type": "story",
+            "mode": "continue",
+            "custom_data": {
+                "header_text_color": "#8000ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587398992",
+            "x": 36440.327999999994,
+            "y": 610.9379999999999,
+            "title": "???",
+            "content": "Кого?",
+            "type": "story",
+            "mode": "continue",
+            "custom_data": {
+                "header_text_color": "#8000ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587399568",
+            "x": 36929.768,
+            "y": 610.9379999999999,
+            "title": "#Сцена",
+            "content": "Воздух звенит. Горло сжимает спазм — тело отказывается слушаться, словно закованное в лед.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650587399760",
+            "x": 37419.208,
+            "y": 610.9379999999999,
+            "title": "#Сцена",
+            "content": "Прямо передо мной из темноты проступает пульсирующий контур четырёхконечной фиолетовой звезды.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650587399952",
+            "x": 37908.647999999994,
+            "y": 610.9379999999999,
+            "title": "#Сцена",
+            "content": "Точно такое же свечение... которое я видела на теле Мэй в ту ночь.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650587400144",
+            "x": 38398.08799999998,
+            "y": 610.9379999999999,
+            "title": "???",
+            "content": "Ты пытаешься притвориться частью этого хрупкого, привычного мира.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#8000ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587400336",
+            "x": 38887.52799999999,
+            "y": 610.9379999999999,
+            "title": "???",
+            "content": "Но граница давно стёрта, Энджи.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#8000ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587400528",
+            "x": 39376.967999999986,
+            "y": 610.9379999999999,
+            "title": "???",
+            "content": "Добро пожаловать по ту сторону зеркала.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#8000ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587400720",
+            "x": 39866.40799999998,
+            "y": 610.9379999999999,
+            "title": "Violant main theme.mp3",
+            "content": "🔁 BG\n📂: glitch.wav",
+            "type": "music",
+            "mode": "standard",
+            "custom_data": {
+                "music_mode": "bg",
+                "music_file": "D:/projects/Violant/game/sound/glitch.wav",
+                "bg_color": "#196f3d",
+                "header_color": "#0d4528",
+                "text_color": "#ffffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587400912",
+            "x": 40390.847999999976,
+            "y": 401.9379999999999,
+            "title": "#Сцена",
+            "content": "VIOLANT — Глава 0: Эхо за стеклом. Конец пролога. Продолжение следует...",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650587401104",
+            "x": 2231.9680000000044,
+            "y": 965.7819999999997,
+            "title": "???",
+            "content": "Начнём же!",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#8000ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587401296",
+            "x": 2663.724000000003,
+            "y": 958.7899999999998,
+            "title": "dustywind_double-fingersnap-reverb.ogg",
+            "content": "🗣️ SFX\n📂: dustywind_double-fingersnap-reverb.ogg",
+            "type": "music",
+            "mode": "standard",
+            "custom_data": {
+                "music_mode": "sfx",
+                "music_file": "D:/projects/Violant/game/sound/dustywind_double-fingersnap-reverb.ogg",
+                "bg_color": "#196f3d",
+                "header_color": "#0d4528",
+                "text_color": "#ffffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587401488",
+            "x": 3175.8880000000045,
+            "y": 993.7500000000002,
+            "title": "Animation",
+            "content": "{\"animation\": \"fade to black\", \"duration\": 5.0, \"target\": \"screen\"}",
+            "type": "animation",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": true
+        },
+        {
+            "id": "2650587401680",
+            "x": 4198.468000000001,
+            "y": 995.4979999999999,
+            "title": "Имя метки (start)",
+            "content": "спокойная мелодия для изучения документов на компьютере Ривера",
+            "type": "label",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#d35400",
+                "header_color": "#a04000",
+                "text_color": "#ffffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587401872",
+            "x": 4880.188,
+            "y": 1037.4499999999998,
+            "title": "сюжетный дкумент",
+            "content": "# Пишите код здесь\npass",
+            "type": "python_code",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#2c3e50",
+                "header_color": "#34495e",
+                "text_color": "#2ecc71"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587402064",
+            "x": 5588.128000000002,
+            "y": 1056.6779999999997,
+            "title": "Ривер",
+            "content": "Звезда в небе? Серьёзно?",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587402256",
+            "x": 6149.236000000003,
+            "y": 1058.426,
+            "title": "Ривер",
+            "content": "Звёздами должны заниматься астрономы, а не исследователи аномалий...",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587402448",
+            "x": 6797.744000000001,
+            "y": 1063.67,
+            "title": "Ривер",
+            "content": "Пойду спрошу Джена об этом",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587402640",
+            "x": 7432.268000000001,
+            "y": 1051.4339999999997,
+            "title": "Ривер",
+            "content": "И почему придурки оказываются на руководящих должностях?",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587402832",
+            "x": 8091.264000000003,
+            "y": 1061.9219999999996,
+            "title": "door-close.mp3",
+            "content": "🗣️ SFX\n📂: door-close.mp3",
+            "type": "music",
+            "mode": "standard",
+            "custom_data": {
+                "music_mode": "sfx",
+                "music_file": "D:/projects/Violant/game/sound/door-close.mp3",
+                "bg_color": "#196f3d",
+                "header_color": "#0d4528",
+                "text_color": "#ffffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587403024",
+            "x": 8575.460000000006,
+            "y": 1093.3859999999997,
+            "title": "Имя метки (start)",
+            "content": "фон коридора места работы Ривера",
+            "type": "label",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#d35400",
+                "header_color": "#a04000",
+                "text_color": "#ffffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587403216",
+            "x": 9390.027999999997,
+            "y": 1096.8819999999992,
+            "title": "#Сцена",
+            "content": "И вот в коридоре я увидел Джена",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650587403408",
+            "x": 9870.728,
+            "y": 1096.8819999999992,
+            "title": "#Сцена",
+            "content": "Или же он увидел меня",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650587403600",
+            "x": 10601.392000000003,
+            "y": 1044.442,
+            "title": "Media Event",
+            "content": "{\"image_path\": \"\", \"mode\": \"sprite\", \"position\": \"center\", \"animation\": \"none\", \"animation_duration\": 0.5}",
+            "type": "media",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": true
+        },
+        {
+            "id": "2650587403792",
+            "x": 10099.715999999999,
+            "y": 1296.1539999999995,
+            "title": "Имя метки (start)",
+            "content": "серьёзный спрайт Джена",
+            "type": "label",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#d35400",
+                "header_color": "#a04000",
+                "text_color": "#ffffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587403984",
+            "x": 11279.615999999998,
+            "y": 1103.8739999999998,
+            "title": "Ривер",
+            "content": "И что я уже сделал?",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587404176",
+            "x": 11914.139999999996,
+            "y": 1102.126,
+            "title": "Джен",
+            "content": "Ты ещё спрашиваешь?! Ты в своём уме, Ривер?!",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#ffff00"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587404368",
+            "x": 12664.031999999996,
+            "y": 1140.5819999999994,
+            "title": "Джен",
+            "content": "Ты загрузил мне на терминал вирус! Устроил прямой саботаж!",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#ffff00"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587404560",
+            "x": 13419.167999999996,
+            "y": 1186.0299999999997,
+            "title": "Джен",
+            "content": "Думаешь, если ты бывший безопасник, тебе позволено устраивать бардак на моем рабочем месте?!",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#ffff00"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587404752",
+            "x": 8991.484000000002,
+            "y": 1018.2219999999996,
+            "title": "hallway",
+            "content": "{\"image_path\": \"D:/projects/Violant/game/bg/hallway.jpg\", \"mode\": \"background\", \"position\": \"center\", \"transition\": \"none\"}",
+            "type": "media",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": true
+        },
+        {
+            "id": "2650587405136",
+            "x": 13982.024000000001,
+            "y": 1215.7459999999999,
+            "title": "Ривер",
+            "content": "Какой ещё вирус? Я три часа без перерыва разбирал твои отчёты по аномальным звёздам.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587404944",
+            "x": 14660.247999999994,
+            "y": 1247.2099999999996,
+            "title": "Джен",
+            "content": "Не делай из меня идиота! Твои отчёты сейчас никого не волнуют!",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#ffff00"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587405328",
+            "x": 15355.951999999997,
+            "y": 1297.902,
+            "title": "Джен",
+            "content": "Терминал завис намертво! На экране — фиолетовая звезда с твоей личной подписью! Ты мне в лицо плюнуть решил?!",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#ffff00"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587405520",
+            "x": 16021.94,
+            "y": 1311.8859999999997,
+            "title": "Выбор",
+            "content": "Поставить на место\nПросто узнать в чём дело",
+            "type": "choice",
+            "mode": "standard",
+            "custom_data": {
+                "highlights": {
+                    "Поставить на место": "#8000ff"
+                }
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587405712",
+            "x": 16853.987999999994,
+            "y": 1187.7779999999993,
+            "title": "#Сцена",
+            "content": "Терпение лопнуло. С меня хватит этих истерик.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650587405904",
+            "x": 17623.107999999997,
+            "y": 1217.494,
+            "title": "#Сцена",
+            "content": "Я сделал шаг вперёд, глядя Джену прямо в глаза.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650587406096",
+            "x": 18268.11999999999,
+            "y": 1224.4859999999999,
+            "title": "# Установка переменных",
+            "content": "violant_river = 1",
+            "type": "variable",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#2980b9",
+                "header_color": "#1f618d",
+                "text_color": "#f4d03f"
+            },
+            "is_character": false
+        },
+        {
+            "id": "2650587406288",
+            "x": 19026.752,
+            "y": 1245.4619999999995,
+            "title": "Ривер",
+            "content": "Джен. Замолчи и послушай меня внимательно.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587406480",
+            "x": 19687.495999999992,
+            "y": 1308.3899999999994,
+            "title": "Ривер",
+            "content": "Если бы я решил положить сеть Организации, ты бы до сих пор думал, что у тебя перегорел блок питания. Без всяких подписей.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587406672",
+            "x": 20419.90800000001,
+            "y": 1388.7979999999993,
+            "title": "#Сцена",
+            "content": "Джен осёкся. Мой ледяной тон подействовал на него как ушат холодной воды.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650587406864",
+            "x": 21173.295999999995,
+            "y": 1395.79,
+            "title": "#Сцена",
+            "content": "Впрочем, я и сам не ожидал от себя такого спокойствия.",
+            "type": "story",
+            "mode": "continue",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650587407056",
+            "x": 22040.30400000001,
+            "y": 1448.229999999999,
+            "title": "Джен",
+            "content": "Ты... ты не имеешь права так со мной разговаривать! Я начальник отдела!",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#ffff00"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587407248",
+            "x": 22631.127999999997,
+            "y": 1558.3539999999994,
+            "title": "Ривер",
+            "content": "Имей уважение к себе и перестань орать на весь коридор.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587407440",
+            "x": -3896.519999999993,
+            "y": 315.526,
+            "title": "Пауза",
+            "content": "Задержка: 5.0 сек",
+            "type": "pause",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#4a235a",
+                "header_color": "#2e113a",
+                "text_color": "#d2b4de",
+                "pause_mode": "time",
+                "pause_duration": 5.0
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587407632",
+            "x": 23269.148,
+            "y": 1514.6539999999995,
+            "title": "Ривер",
+            "content": "Пойдём. Покажешь, что там случилось с твоим терминалом.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587407824",
+            "x": 24122.171999999995,
+            "y": 1408.0259999999992,
+            "title": "Имя метки (start)",
+            "content": "воспроизведение звука шагов",
+            "type": "label",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#d35400",
+                "header_color": "#a04000",
+                "text_color": "#ffffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587408016",
+            "x": 24707.751999999986,
+            "y": 1222.7379999999994,
+            "title": "Animation",
+            "content": "{\"animation\": \"fade to black\", \"duration\": 0.5, \"target\": \"screen\"}",
+            "type": "animation",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": true
+        },
+        {
+            "id": "2650587408208",
+            "x": 25214.671999999995,
+            "y": 1255.9499999999998,
+            "title": "Имя метки (start)",
+            "content": "фон кабинета Джена слабо освещён на мониторе четырёхконечная фиолетовая звезда",
+            "type": "label",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#d35400",
+                "header_color": "#a04000",
+                "text_color": "#ffffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587408400",
+            "x": 25669.151999999995,
+            "y": 1637.0139999999994,
+            "title": "#Сцена",
+            "content": "Зайдя в тёмный кабинет я действительно увидел на мониторе изображение фиолетовой четырёхконечной звезды",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650587408592",
+            "x": 26282.7,
+            "y": 1556.6059999999998,
+            "title": "Ривер",
+            "content": "Вау...а ты не врал",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587408784",
+            "x": 26917.223999999995,
+            "y": 1607.2979999999993,
+            "title": "Джен",
+            "content": "Я? Врать? Как тебе это в голову приходит вообще?",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#ffff00"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587408976",
+            "x": 27471.33999999999,
+            "y": 1556.6059999999998,
+            "title": "Ривер",
+            "content": "Ты же как-то дослужился до главы отдела",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587409168",
+            "x": 27990.49599999999,
+            "y": 1430.75,
+            "title": "Джен",
+            "content": "Не замечал в тебе раньше хамства и зависти Ривер",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#ffff00"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587409552",
+            "x": 16840.004,
+            "y": 1416.7659999999996,
+            "title": "Джен",
+            "content": "А вот и правильные действия с твоей стороны",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#ffff00"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587409936",
+            "x": 17603.880000000005,
+            "y": 1420.2619999999997,
+            "title": "Ривер",
+            "content": "Я просто не вижу смысла спорить с такими как ты",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587410896",
+            "x": 18275.111999999994,
+            "y": 1427.2539999999995,
+            "title": "#Сцена",
+            "content": "Джен промолчал поняв мою интонацию",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650587412048",
+            "x": 19028.49999999999,
+            "y": 1507.6619999999994,
+            "title": "#Сцена",
+            "content": "Через несколько секунд молчания мы пошли в кабинет к Джену.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650587500010",
+            "x": 28539.367999999995,
+            "y": 1572.3379999999997,
+            "title": "#Сцена",
+            "content": "Я подошёл к столу и сел в рабочее кресло перед заблокированным компьютером.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650587500020",
+            "x": 29028.80799999999,
+            "y": 1572.3379999999997,
+            "title": "Ривер",
+            "content": "Это не обычный вирус... Структура кода не похожа ни на одну известную сигнатуру Организации.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587500030",
+            "x": 29518.247999999996,
+            "y": 1572.3379999999997,
+            "title": "Ривер",
+            "content": "Слишком много входящих пакетов телеметрии из внешнего сектора. Данные повреждены помехами.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587500040",
+            "x": 30007.68799999999,
+            "y": 1572.3379999999997,
+            "title": "#Сцена",
+            "content": "В этот момент приоткрытая дверь кабинета негромко скрипнула.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650587500050",
+            "x": 30497.127999999997,
+            "y": 1572.3379999999997,
+            "title": "Ника",
+            "content": "Мальчики, вы так шумите на весь коридор, что вас в архиве на первом этаже слышно. Опять не поделили отчёты?",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#00ffcc"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587500060",
+            "x": 30986.567999999992,
+            "y": 1572.3379999999997,
+            "title": "#Сцена",
+            "content": "В кабинет заглянула Ника с папкой документов. Её мягкий, спокойный голос мгновенно остудил напряжение в комнате.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650587500070",
+            "x": 31476.007999999994,
+            "y": 1572.3379999999997,
+            "title": "Джен",
+            "content": "Ника, у нас тут саботаж! Терминал заблокирован, а этот бывший безопасник делает вид, что он ни при чём!",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#ffff00"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587500080",
+            "x": 31965.447999999997,
+            "y": 1572.3379999999997,
+            "title": "Ника",
+            "content": "Джен, сделай вдох. Если бы Ривер хотел сломать систему, он бы сделал это так, что никто бы даже не догадался.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#00ffcc"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587500090",
+            "x": 32454.887999999995,
+            "y": 1572.3379999999997,
+            "title": "Ривер",
+            "content": "(Я невольно усмехнулся. Только у Ники получалось осадить Джена одной фразой, не повышая голоса.)",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587500100",
+            "x": 32944.328,
+            "y": 1572.3379999999997,
+            "title": "#Сцена",
+            "content": "Ника подошла ближе и окинула взглядом монитор. Её лицо стало сосредоточенным.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650587500110",
+            "x": 33433.768,
+            "y": 1572.3379999999997,
+            "title": "Ника",
+            "content": "Постойте... Фиолетовая четырёхконечная звезда? Это же в точности совпадает со срочной сводкой из Южного Ренгока.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#00ffcc"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587500120",
+            "x": 33923.208,
+            "y": 1572.3379999999997,
+            "title": "Ривер",
+            "content": "Сводка из Ренгока? Что там произошло, Ник?",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587500130",
+            "x": 34412.647999999994,
+            "y": 1572.3379999999997,
+            "title": "Ника",
+            "content": "Полчаса назад на КПП зафиксировали сигнал неизвестной аномалии.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#00ffcc"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587500140",
+            "x": 35146.80799999999,
+            "y": 1483.1899999999998,
+            "title": "Ника",
+            "content": "Руководство просило не поднимать шум, но... почему этот же символ появился прямо у нас на терминале?",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#00ffcc"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587500150",
+            "x": 35512.139999999985,
+            "y": 1547.8659999999995,
+            "title": "Джен",
+            "content": "Вот именно! Ривер, выясняй источник сигнала, а не сиди сложа руки! Ника, отдай мне сводку!",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#ffff00"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587500160",
+            "x": 35970.115999999995,
+            "y": 1565.346,
+            "title": "Ника",
+            "content": "Держи. И будьте осторожнее, ладно? Не накручивайте себя.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#00ffcc"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2650587500170",
+            "x": 36370.407999999996,
+            "y": 1572.3379999999997,
+            "title": "#Сцена",
+            "content": "Ника слегка улыбнулась мне перед уходом. От этой тёплой улыбки внутри почему-то стало спокойнее.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "2650587500180",
+            "x": 36859.84799999999,
+            "y": 1572.3379999999997,
+            "title": "Ривер",
+            "content": "(В такие моменты начинаешь ценить, что в этой сумасшедшей Организации ещё остались нормальные люди.)",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "b72b479ffaea",
+            "x": 34788.46799999999,
+            "y": 1556.6059999999998,
+            "title": "Ника",
+            "content": "Говорят о беглянке из Токио... и странных вспышках света в жилом квартале.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#00ffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "f059ee659506",
+            "x": 37351.0,
+            "y": 1658.0,
+            "title": "Ривер",
+            "content": "Надо подумать...",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "b353e24b7e6b",
+            "x": 37636.0,
+            "y": 1578.0,
+            "title": "Джен",
+            "content": "Что тут думать Ривер?",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#ffff00"
+            },
+            "is_character": true
+        },
+        {
+            "id": "5e0c8e0b1e29",
+            "x": 38003.0,
+            "y": 1628.0,
+            "title": "Джен",
+            "content": "У нас завёлся предатель!",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#ffff00"
+            },
+            "is_character": true
+        },
+        {
+            "id": "47e423aa03b1",
+            "x": 38364.0,
+            "y": 1517.0,
+            "title": "Ривер",
+            "content": "И кому это выгодно?",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "6f7c81532789",
+            "x": 38723.0,
+            "y": 1568.0,
+            "title": "Ривер",
+            "content": "Тебе? Мне? Или вообще Нике?",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "526d6cac5f42",
+            "x": 39178.0,
+            "y": 1505.0,
+            "title": "Ривер",
+            "content": "Ты подключался к интернету со своего компьютера?",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "95496a895f3e",
+            "x": 39564.0,
+            "y": 1548.0,
+            "title": "Джен",
+            "content": "Я весь день фильтровал отчёты с вашего отдела да и зачем мне интернет здесь?",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#ffff00"
+            },
+            "is_character": true
+        },
+        {
+            "id": "61176965b5af",
+            "x": 39994.0,
+            "y": 1504.0,
+            "title": "Джен",
+            "content": "Мне кажется это кто-то из безопасников ведь это они отвечают за нашу сеть а ты говорил что вирус пошёл через неё",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#ffff00"
+            },
+            "is_character": true
+        },
+        {
+            "id": "147ac1634aa0",
+            "x": 39725.0,
+            "y": 1430.0,
+            "title": "Имя метки (start)",
+            "content": "Изменить Возможно разделить реплику на несколько частей",
+            "type": "label",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#d35400",
+                "header_color": "#a04000",
+                "text_color": "#ffffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "b9548124ec83",
+            "x": 40465.0,
+            "y": 1527.0,
+            "title": "Ривер",
+            "content": "У безопасников новый специалист устроился но новостей по поводу него я не слышал",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "5427bf309bc5",
+            "x": 40179.0,
+            "y": 1354.0,
+            "title": "Имя метки (start)",
+            "content": "Возможно разделить реплику на несколько частей",
+            "type": "label",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#d35400",
+                "header_color": "#a04000",
+                "text_color": "#ffffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "5fa969b0cec8",
+            "x": 40839.0,
+            "y": 1473.0,
+            "title": "Ривер",
+            "content": "Пойду спрошу у Ники она же специалист по слухам",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "8e81db8e2336",
+            "x": 41224.0,
+            "y": 1518.0,
+            "title": "Джен",
+            "content": "А с чего это вдруг ты пойдёшь?",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#ffff00"
+            },
+            "is_character": true
+        },
+        {
+            "id": "fd2ba8e017ac",
+            "x": 41627.0,
+            "y": 1499.0,
+            "title": "Условие",
+            "content": "violant_river == 1",
+            "type": "condition",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#1b4f72",
+                "header_color": "#154360",
+                "text_color": "#58d68d"
+            },
+            "is_character": true
+        },
+        {
+            "id": "36d294a2c773",
+            "x": 42138.0,
+            "y": 1402.0,
+            "title": "Ривер",
+            "content": "Потому что нытик мне в команду не нужен",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "83fa07f8acd9",
+            "x": 42168.0,
+            "y": 1552.0,
+            "title": "Ривер",
+            "content": "Ты сам знаешь как Ника относится к крикам и приказному тону",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "8844a6d8c2b8",
+            "x": 42454.0,
+            "y": 1592.0,
+            "title": "Ривер",
+            "content": "Медиков сюда особо не вызвать",
+            "type": "story",
+            "mode": "continue",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "21878f4c77e0",
+            "x": 42760.0,
+            "y": 1610.0,
+            "title": "Джен",
+            "content": "Ладно ладно говорить будешь ты ТАК УЖ И БЫТЬ",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#ffff00"
+            },
+            "is_character": true
+        },
+        {
+            "id": "88cf72491667",
+            "x": 43041.0,
+            "y": 1547.0,
+            "title": "#Сцена",
+            "content": "Иногда я жалею о том что не отвечаю таким людям как Джен...",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "1a2ae1ec841a",
+            "x": 42469.0,
+            "y": 1371.0,
+            "title": "Джен",
+            "content": "Какую ещё команду!?",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#ffff00"
+            },
+            "is_character": true
+        },
+        {
+            "id": "4e79fd004d27",
+            "x": 42797.0,
+            "y": 1314.0,
+            "title": "Джен",
+            "content": "Я буквально твой начальник!",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#ffff00"
+            },
+            "is_character": true
+        },
+        {
+            "id": "400f27db7614",
+            "x": 43117.0,
+            "y": 1366.0,
+            "title": "Ривер",
+            "content": "Сейчас ты просто человек, который знает слишком много.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "600b2a3e1339",
+            "x": 43430.0,
+            "y": 1336.0,
+            "title": "#Сцена",
+            "content": "Я вышел в коридор кажется хлопнув дверью а затем спустился на этаж к Нике",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "651d69e71822",
+            "x": 44092.0,
+            "y": 1214.0,
+            "title": "Ривер",
+            "content": "Выделить целый этаж под гигантский архив, в котором работает ровно один человек...",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "bf2494d31ab9",
+            "x": 44326.0,
+            "y": 1196.0,
+            "title": "Ривер",
+            "content": "Наше руководство определённо знает толк в оптимизации пространства.",
+            "type": "story",
+            "mode": "continue",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "7e667a6957c1",
+            "x": 44439.0,
+            "y": 1415.0,
+            "title": "#Сцена",
+            "content": "Я невольно усмехнулся, вдыхая знакомый запах старой бумаги и кофе.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "03e08a56213e",
+            "x": 43630.0,
+            "y": 1253.0,
+            "title": "Media Event",
+            "content": "{\"image_path\": \"\", \"mode\": \"background\", \"position\": \"center\", \"animation\": \"dissolve\", \"animation_duration\": 0.5}",
+            "type": "media",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": true
+        },
+        {
+            "id": "40a3bd9cd299",
+            "x": 43276.0,
+            "y": 1192.0,
+            "title": "Имя метки (start)",
+            "content": "Этаж Ники Похож на гигантских размеров библиотеку",
+            "type": "label",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#d35400",
+                "header_color": "#a04000",
+                "text_color": "#ffffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "403618a8e503",
+            "x": 44789.0,
+            "y": 1359.0,
+            "title": "Ника",
+            "content": "Это не оптимизация, Ривер. Это всего лишь парочка контролируемых пространственных аномалий.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#00ffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "75c0fcd89216",
+            "x": 45238.0,
+            "y": 1468.0,
+            "title": "Ника",
+            "content": "Но тс-с! Руководству ни слова, это наш архивный секрет.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#00ffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2d3a0d74083d",
+            "x": 45456.0,
+            "y": 1340.0,
+            "title": "#Сцена",
+            "content": "Стоило остаться наедине с Никой среди тихих стеллажей, как раздражение после скандала с Дженом начало отступать.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "4346bc7987c0",
+            "x": 45769.0,
+            "y": 1414.0,
+            "title": "Ривер",
+            "content": "Могила. Я слишком ценю твой кофе, чтобы сдавать тебя начальству.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "5e5efd80caff",
+            "x": 46146.0,
+            "y": 1404.0,
+            "title": "Ника",
+            "content": "Вот и умница!",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#00ffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "fa366fc2b3e8",
+            "x": 46480.0,
+            "y": 1441.0,
+            "title": "#Сцена",
+            "content": "Ника лукаво улыбнулась и тут же попыталась сделать максимально строгое, деловое лицо, но не выдержала и тихо фыркнула.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "0d3ab50747b4",
+            "x": 46844.0,
+            "y": 1381.0,
+            "title": "Ника",
+            "content": "Ну вот, хоть улыбнулся. А то зашёл с таким видом, будто пришёл ликвидировать катастрофу.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#00ffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "b3a6fc490468",
+            "x": 47237.0,
+            "y": 1448.0,
+            "title": "Ривер",
+            "content": "И всё же я пришёл к тебе по делу",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "54c179579e65",
+            "x": 47616.0,
+            "y": 1364.0,
+            "title": "Ника",
+            "content": "Я уже поняла!",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#00ffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "6f15ac613a32",
+            "x": 47963.0,
+            "y": 1443.0,
+            "title": "Ника",
+            "content": "Так что ты хочешь узнать?",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#00ffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "b3c64d5f6e08",
+            "x": 48225.0,
+            "y": 1359.0,
+            "title": "Выбор",
+            "content": "О странной звезде \nО беглянке из Токио\nО тебе",
+            "type": "choice",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": true
+        },
+        {
+            "id": "8f287cc2eba1",
+            "x": 48561.0,
+            "y": 1462.0,
+            "title": "Ника",
+            "content": "Обо мне?!",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#00ffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "4e80044d8250",
+            "x": 48858.0,
+            "y": 1436.0,
+            "title": "#Сцена",
+            "content": "Ника явно смутилась от такой просьбы",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "f3c1566b2123",
+            "x": 49155.0,
+            "y": 1483.0,
+            "title": "Ника",
+            "content": "Я не особо хочу говорить об этом",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#00ffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "2667711085808",
+            "x": 5234.158000000001,
+            "y": 1047.0639999999999,
+            "title": "Covert Affair.mp3",
+            "content": "🗣️ BG MUSIC 📂: Covert Affair.mp3",
+            "type": "music",
+            "mode": "standard",
+            "custom_data": {
+                "music_mode": "bg",
+                "music_file": "music/Covert Affair.mp3",
+                "bg_color": "#196f3d",
+                "header_color": "#0d4528",
+                "text_color": "#ffffff",
+                "fadein": 2.0,
+                "fadeout": 1.5
+            },
+            "is_character": true
+        },
+        {
+            "id": "1014021715279",
+            "x": 23470.167999999998,
+            "y": 925.5779999999999,
+            "title": "Heartbreaking.mp3",
+            "content": "🗣️ BG MUSIC 📂: Heartbreaking.mp3",
+            "type": "music",
+            "mode": "standard",
+            "custom_data": {
+                "music_mode": "bg",
+                "music_file": "music/Heartbreaking.mp3",
+                "bg_color": "#196f3d",
+                "header_color": "#0d4528",
+                "text_color": "#ffffff",
+                "fadein": 2.0,
+                "fadeout": 1.5
+            },
+            "is_character": true
+        },
+        {
+            "id": "2525602902398",
+            "x": 26406.807999999997,
+            "y": 296.2980000000001,
+            "title": "Sad Trio.mp3",
+            "content": "🗣️ BG MUSIC 📂: Sad Trio.mp3",
+            "type": "music",
+            "mode": "standard",
+            "custom_data": {
+                "music_mode": "bg",
+                "music_file": "music/Sad Trio.mp3",
+                "bg_color": "#196f3d",
+                "header_color": "#0d4528",
+                "text_color": "#ffffff",
+                "fadein": 1.0,
+                "fadeout": 1.0
+            },
+            "is_character": true
+        },
+        {
+            "id": "d507d95f5d58",
+            "x": 43848.0,
+            "y": 1326.0,
+            "title": "hey!.mp3",
+            "content": "🔁 BG\n📂: hey!.mp3",
+            "type": "music",
+            "mode": "standard",
+            "custom_data": {
+                "music_mode": "bg",
+                "music_file": "D:/projects/Violant/game/music/hey!.mp3",
+                "bg_color": "#196f3d",
+                "header_color": "#0d4528",
+                "text_color": "#ffffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "3dc3947c7db2",
+            "x": 48543.0,
+            "y": 1311.0,
+            "title": "Ника",
+            "content": "О фиолетовой я полагаю?",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#00ffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "aefabc496d16",
+            "x": 48846.0,
+            "y": 1319.0,
+            "title": "Ривер",
+            "content": "А есть ещё какие-то?",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "90acb93cf1d4",
+            "x": 49170.0,
+            "y": 1250.0,
+            "title": "Ника",
+            "content": "Ага! На любой вкус и цвет как говорится",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#00ffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "136c99a0ad18",
+            "x": 49499.0,
+            "y": 1283.0,
+            "title": "Ривер",
+            "content": "Я не переживу и ДВУХ аномальных звёзд",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "5133da836b19",
+            "x": 49816.0,
+            "y": 1230.0,
+            "title": "Ника",
+            "content": "А кто сказал что звёзды аномальны?",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#00ffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "a1886103ef5c",
+            "x": 50166.0,
+            "y": 1267.0,
+            "title": "Ника",
+            "content": "Очень даже красивые",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#00ffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "58508d4b1bb2",
+            "x": 50525.0,
+            "y": 1233.0,
+            "title": "Ника",
+            "content": "Тебе просто нужно отдохнуть Ривер",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#00ffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "51b7ade3c8ec",
+            "x": 50842.0,
+            "y": 1301.0,
+            "title": "Ривер",
+            "content": "Тяжело отдыхать когда \"знаешь слишком много\"",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "3cb3d7a785f3",
+            "x": 51169.0,
+            "y": 1271.0,
+            "title": "Ника",
+            "content": "Мы сами выбрали такую работу",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#00ffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "6be0929c8b3f",
+            "x": 51482.0,
+            "y": 1331.0,
+            "title": "Ривер",
+            "content": "Эх...",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "b12d19bd0b0a",
+            "x": 51825.0,
+            "y": 1293.0,
+            "title": "Ривер",
+            "content": "Ладно давай уже к делу",
+            "type": "story",
+            "mode": "continue",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "5a2f2ed7ed69",
+            "x": 52115.0,
+            "y": 1336.0,
+            "title": "Ника",
+            "content": "Честно говоря я и сама какой-то особой информацией не располагаю",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#00ffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "f402d4aa7ce7",
+            "x": 52472.0,
+            "y": 1275.0,
+            "title": "Ника",
+            "content": "Знаю только что это фиолетовая четырёхконечная звезда которая оказывает психологическое влияние на некоторых людей",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#00ffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "bdf4881c4684",
+            "x": 43384.0,
+            "y": 1624.0,
+            "title": "Ривер",
+            "content": "Пошли уже",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "8c0d067423ab",
+            "x": 43779.0,
+            "y": 1587.0,
+            "title": "Ривер",
+            "content": "Как раз расскажешь Нике о своих чувствах",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "e5584fe3519e",
+            "x": 44129.0,
+            "y": 1685.0,
+            "title": "#Сцена ",
+            "content": "Джен лишь театрально вздохнул, пытаясь вызвать у меня хоть каплю раскаяния за подобные подколы.",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "1e5ab1ad1ddc",
+            "x": 45008.0,
+            "y": 1506.0,
+            "title": "Условие",
+            "content": "river_violant == 1",
+            "type": "condition",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#1b4f72",
+                "header_color": "#154360",
+                "text_color": "#58d68d"
+            },
+            "is_character": true
+        },
+        {
+            "id": "202be9a80050",
+            "x": 45253.0,
+            "y": 1611.0,
+            "title": "#Сцена ",
+            "content": "Заметив Джена Ника устало вздохнула",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "fa49688c4513",
+            "x": 45479.0,
+            "y": 1572.0,
+            "title": "Ривер ",
+            "content": "И снова привет Ника",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "f8a95be1f24a",
+            "x": 45828.0,
+            "y": 1639.0,
+            "title": "Ника",
+            "content": "Давно не виделись!",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#00ffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "9b6070e8c671",
+            "x": 46137.0,
+            "y": 1568.0,
+            "title": "#Сцена ",
+            "content": "Она слегка улыбнулась",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "9282f45c612a",
+            "x": 46441.0,
+            "y": 1638.0,
+            "title": "#Сцена ",
+            "content": "Джен же заговорил с каким-то теплом смешаным с его типичной \"рабочей интонацией\"",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": false
+        },
+        {
+            "id": "7b83c2b365ac",
+            "x": 46850.0,
+            "y": 1581.0,
+            "title": "Джен ",
+            "content": "Мы хотим узнать про фиолетовую четырёхконечную звезду",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#ffff00"
+            },
+            "is_character": true
+        },
+        {
+            "id": "ae719de95284",
+            "x": 47234.0,
+            "y": 1602.0,
+            "title": "Media Event",
+            "content": "{\"image_path\": \"\", \"mode\": \"sprite\", \"position\": \"center\", \"animation\": \"none\", \"animation_duration\": 0.5}",
+            "type": "media",
+            "mode": "standard",
+            "custom_data": {},
+            "is_character": true
+        },
+        {
+            "id": "2ad9e7b50a85",
+            "x": 46976.0,
+            "y": 1690.0,
+            "title": "Имя метки (start)",
+            "content": "Катсцена анимация в небе над Токио среди сотен и тысяч звёзд появляется фиолетовая четырёхконечная звезда далее переход на эмблему культа \"книга звёзд\" название культа возможно поменяю и эмблема \"ЧВК Аметист\" на территории Южного Ренгока название ЧВК также возможно изменю или его не будет в игре в целом",
+            "type": "label",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#d35400",
+                "header_color": "#a04000",
+                "text_color": "#ffffff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "0bc5e13bfc4b",
+            "x": 39636.0,
+            "y": 594.0,
+            "title": "???",
+            "content": "А с тобой я ещё повеселюсь наблюдатель",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#8000ff"
+            },
+            "is_character": true
+        },
+        {
+            "id": "fa779748fff4",
+            "x": 40113.0,
+            "y": 584.0,
+            "title": "Музыка",
+            "content": "🔁 BG\n📂: dustywind_double-fingersnap-reverb.ogg",
+            "type": "music",
+            "mode": "standard",
+            "custom_data": {
+                "bg_color": "#196f3d",
+                "header_color": "#0d4528",
+                "text_color": "#ffffff",
+                "music_mode": "bg",
+                "music_file": "D:/projects/Violant/game/sound/dustywind_double-fingersnap-reverb.ogg"
+            },
+            "is_character": true
+        },
+        {
+            "id": "865fec1d4149",
+            "x": 52869.0,
+            "y": 1367.0,
+            "title": "Ривер",
+            "content": "Всё равно спасибо Ник",
+            "type": "story",
+            "mode": "standard",
+            "custom_data": {
+                "header_text_color": "#0080ff"
+            },
+            "is_character": true
+        }
+    ],
+    "connections": [
+        {
+            "from": "2650545961680",
+            "out_idx": 0,
+            "to": "2650545961872"
+        },
+        {
+            "from": "2650545961872",
+            "out_idx": 0,
+            "to": "2650545962256"
+        },
+        {
+            "from": "2650545962256",
+            "out_idx": 0,
+            "to": "2650545960528"
+        },
+        {
+            "from": "2650545960528",
+            "out_idx": 0,
+            "to": "2650545962064"
+        },
+        {
+            "from": "2650545962064",
+            "out_idx": 0,
+            "to": "2650545962448"
+        },
+        {
+            "from": "2650545962448",
+            "out_idx": 0,
+            "to": "2650545962640"
+        },
+        {
+            "from": "2650545962640",
+            "out_idx": 0,
+            "to": "2650545962832"
+        },
+        {
+            "from": "2650545962832",
+            "out_idx": 0,
+            "to": "2650586972240"
+        },
+        {
+            "from": "2650586972240",
+            "out_idx": 0,
+            "to": "2650586972432"
+        },
+        {
+            "from": "2650586972432",
+            "out_idx": 0,
+            "to": "2650586972624"
+        },
+        {
+            "from": "2650586972624",
+            "out_idx": 0,
+            "to": "2650586972816"
+        },
+        {
+            "from": "2650586972816",
+            "out_idx": 0,
+            "to": "2650586973008"
+        },
+        {
+            "from": "2650586973008",
+            "out_idx": 0,
+            "to": "2650586973200"
+        },
+        {
+            "from": "2650586973200",
+            "out_idx": 0,
+            "to": "2650586973392"
+        },
+        {
+            "from": "2650586973392",
+            "out_idx": 0,
+            "to": "2650586973584"
+        },
+        {
+            "from": "2650586973584",
+            "out_idx": 0,
+            "to": "2650586973776"
+        },
+        {
+            "from": "2650586973776",
+            "out_idx": 0,
+            "to": "2650586973968"
+        },
+        {
+            "from": "2650586973968",
+            "out_idx": 0,
+            "to": "2650586974160"
+        },
+        {
+            "from": "2650586974160",
+            "out_idx": 0,
+            "to": "2650586974352"
+        },
+        {
+            "from": "2650586974352",
+            "out_idx": 0,
+            "to": "2650586974544"
+        },
+        {
+            "from": "2650586974544",
+            "out_idx": 0,
+            "to": "2650586974736"
+        },
+        {
+            "from": "2650586974736",
+            "out_idx": 0,
+            "to": "2650586975120"
+        },
+        {
+            "from": "2650586975120",
+            "out_idx": 0,
+            "to": "2650586974928"
+        },
+        {
+            "from": "2650586974928",
+            "out_idx": 0,
+            "to": "2650586975312"
+        },
+        {
+            "from": "2650586975312",
+            "out_idx": 0,
+            "to": "2650586975504"
+        },
+        {
+            "from": "2650586975504",
+            "out_idx": 0,
+            "to": "2650586975696"
+        },
+        {
+            "from": "2650586975696",
+            "out_idx": 0,
+            "to": "2650586975888"
+        },
+        {
+            "from": "2650586975888",
+            "out_idx": 0,
+            "to": "2650586976080"
+        },
+        {
+            "from": "2650586976080",
+            "out_idx": 0,
+            "to": "2650586976272"
+        },
+        {
+            "from": "2650586976272",
+            "out_idx": 0,
+            "to": "2650586976464"
+        },
+        {
+            "from": "2650586976464",
+            "out_idx": 0,
+            "to": "2650586976656"
+        },
+        {
+            "from": "2650586976656",
+            "out_idx": 0,
+            "to": "2650586976848"
+        },
+        {
+            "from": "2650586976848",
+            "out_idx": 0,
+            "to": "2650586977232"
+        },
+        {
+            "from": "2650586977232",
+            "out_idx": 0,
+            "to": "2650586977040"
+        },
+        {
+            "from": "2650586977040",
+            "out_idx": 0,
+            "to": "2650586977424"
+        },
+        {
+            "from": "2650586977424",
+            "out_idx": 0,
+            "to": "2650586977616"
+        },
+        {
+            "from": "2650586977616",
+            "out_idx": 0,
+            "to": "2650586978000"
+        },
+        {
+            "from": "2650586978000",
+            "out_idx": 0,
+            "to": "2650586977808"
+        },
+        {
+            "from": "2650586977808",
+            "out_idx": 0,
+            "to": "2650586978192"
+        },
+        {
+            "from": "2650586978192",
+            "out_idx": 0,
+            "to": "2650586978384"
+        },
+        {
+            "from": "2650586978384",
+            "out_idx": 0,
+            "to": "2650586978576"
+        },
+        {
+            "from": "2650586978576",
+            "out_idx": 0,
+            "to": "2650586978960"
+        },
+        {
+            "from": "2650586978960",
+            "out_idx": 0,
+            "to": "2650586979344"
+        },
+        {
+            "from": "2650586979344",
+            "out_idx": 0,
+            "to": "2650586979728"
+        },
+        {
+            "from": "2650586979728",
+            "out_idx": 0,
+            "to": "2650586980304"
+        },
+        {
+            "from": "2650586980304",
+            "out_idx": 0,
+            "to": "2650586980496"
+        },
+        {
+            "from": "2650586980496",
+            "out_idx": 0,
+            "to": "2650586980880"
+        },
+        {
+            "from": "2650586980880",
+            "out_idx": 0,
+            "to": "2650586981264"
+        },
+        {
+            "from": "2650586981264",
+            "out_idx": 0,
+            "to": "2650586981648"
+        },
+        {
+            "from": "2650586982032",
+            "out_idx": 0,
+            "to": "2650586982992"
+        },
+        {
+            "from": "2650586982992",
+            "out_idx": 0,
+            "to": "2650586984336"
+        },
+        {
+            "from": "2650586984336",
+            "out_idx": 0,
+            "to": "2650586984720"
+        },
+        {
+            "from": "2650586984720",
+            "out_idx": 0,
+            "to": "2650586985104"
+        },
+        {
+            "from": "2650586985104",
+            "out_idx": 0,
+            "to": "2650586985488"
+        },
+        {
+            "from": "2650586985488",
+            "out_idx": 0,
+            "to": "2650586985872"
+        },
+        {
+            "from": "2650586985872",
+            "out_idx": 0,
+            "to": "2650586986256"
+        },
+        {
+            "from": "2650586986256",
+            "out_idx": 0,
+            "to": "2650586986640"
+        },
+        {
+            "from": "2650586986640",
+            "out_idx": 0,
+            "to": "2650586987024"
+        },
+        {
+            "from": "2650586987024",
+            "out_idx": 0,
+            "to": "2650586987408"
+        },
+        {
+            "from": "2650586987408",
+            "out_idx": 0,
+            "to": "2650586987792"
+        },
+        {
+            "from": "2650586987792",
+            "out_idx": 0,
+            "to": "2650586988176"
+        },
+        {
+            "from": "2650586988176",
+            "out_idx": 0,
+            "to": "2650586988368"
+        },
+        {
+            "from": "2650586978384",
+            "out_idx": 1,
+            "to": "2650586978768"
+        },
+        {
+            "from": "2650586978768",
+            "out_idx": 0,
+            "to": "2650586979152"
+        },
+        {
+            "from": "2650586979152",
+            "out_idx": 0,
+            "to": "2650586979536"
+        },
+        {
+            "from": "2650586979920",
+            "out_idx": 0,
+            "to": "2650586980112"
+        },
+        {
+            "from": "2650586980112",
+            "out_idx": 0,
+            "to": "2650586980688"
+        },
+        {
+            "from": "2650586980688",
+            "out_idx": 0,
+            "to": "2650586981072"
+        },
+        {
+            "from": "2650586981072",
+            "out_idx": 0,
+            "to": "2650586981456"
+        },
+        {
+            "from": "2650586981456",
+            "out_idx": 0,
+            "to": "2650586981840"
+        },
+        {
+            "from": "2650586981840",
+            "out_idx": 0,
+            "to": "2650586983952"
+        },
+        {
+            "from": "2650586983952",
+            "out_idx": 0,
+            "to": "2650586984144"
+        },
+        {
+            "from": "2650586984144",
+            "out_idx": 0,
+            "to": "2650586984528"
+        },
+        {
+            "from": "2650586984528",
+            "out_idx": 0,
+            "to": "2650586984912"
+        },
+        {
+            "from": "2650586985296",
+            "out_idx": 0,
+            "to": "2650586985680"
+        },
+        {
+            "from": "2650586985680",
+            "out_idx": 0,
+            "to": "2650586986064"
+        },
+        {
+            "from": "2650586986064",
+            "out_idx": 0,
+            "to": "2650586986448"
+        },
+        {
+            "from": "2650586986448",
+            "out_idx": 0,
+            "to": "2650586986832"
+        },
+        {
+            "from": "2650586986832",
+            "out_idx": 0,
+            "to": "2650586987216"
+        },
+        {
+            "from": "2650586987216",
+            "out_idx": 0,
+            "to": "2650586987600"
+        },
+        {
+            "from": "2650586987600",
+            "out_idx": 0,
+            "to": "2650586987984"
+        },
+        {
+            "from": "2650586988368",
+            "out_idx": 0,
+            "to": "2650587398224"
+        },
+        {
+            "from": "2650586987984",
+            "out_idx": 0,
+            "to": "2650587398224"
+        },
+        {
+            "from": "2650587398224",
+            "out_idx": 0,
+            "to": "2650587398416"
+        },
+        {
+            "from": "2650587398416",
+            "out_idx": 0,
+            "to": "2650587399376"
+        },
+        {
+            "from": "2650587399376",
+            "out_idx": 0,
+            "to": "2650587399184"
+        },
+        {
+            "from": "2650587399184",
+            "out_idx": 0,
+            "to": "2650587398608"
+        },
+        {
+            "from": "2650587398608",
+            "out_idx": 0,
+            "to": "2650587398800"
+        },
+        {
+            "from": "2650587398800",
+            "out_idx": 0,
+            "to": "2650587398992"
+        },
+        {
+            "from": "2650587398992",
+            "out_idx": 0,
+            "to": "2650587399568"
+        },
+        {
+            "from": "2650587399568",
+            "out_idx": 0,
+            "to": "2650587399760"
+        },
+        {
+            "from": "2650587399760",
+            "out_idx": 0,
+            "to": "2650587399952"
+        },
+        {
+            "from": "2650587399952",
+            "out_idx": 0,
+            "to": "2650587400144"
+        },
+        {
+            "from": "2650587400144",
+            "out_idx": 0,
+            "to": "2650587400336"
+        },
+        {
+            "from": "2650587400336",
+            "out_idx": 0,
+            "to": "2650587400528"
+        },
+        {
+            "from": "2650546458128",
+            "out_idx": 0,
+            "to": "2650546459408"
+        },
+        {
+            "from": "2650546459408",
+            "out_idx": 0,
+            "to": "2650546266208"
+        },
+        {
+            "from": "2650546266208",
+            "out_idx": 0,
+            "to": "2650546266816"
+        },
+        {
+            "from": "2650546266816",
+            "out_idx": 0,
+            "to": "2650546970288"
+        },
+        {
+            "from": "2650546970288",
+            "out_idx": 0,
+            "to": "2650546412528"
+        },
+        {
+            "from": "2650546412528",
+            "out_idx": 0,
+            "to": "2650546413344"
+        },
+        {
+            "from": "2650547107408",
+            "out_idx": 0,
+            "to": "2650547107920"
+        },
+        {
+            "from": "2650547107920",
+            "out_idx": 0,
+            "to": "2650547125328"
+        },
+        {
+            "from": "2650547125328",
+            "out_idx": 0,
+            "to": "2650586465056"
+        },
+        {
+            "from": "2650586465056",
+            "out_idx": 0,
+            "to": "2650586453328"
+        },
+        {
+            "from": "2650586453328",
+            "out_idx": 0,
+            "to": "2650586455344"
+        },
+        {
+            "from": "2650586455344",
+            "out_idx": 0,
+            "to": "2650547401392"
+        },
+        {
+            "from": "2650547401392",
+            "out_idx": 0,
+            "to": "2650545959760"
+        },
+        {
+            "from": "2650545959760",
+            "out_idx": 0,
+            "to": "2650545960144"
+        },
+        {
+            "from": "2650545960912",
+            "out_idx": 0,
+            "to": "2650545961104"
+        },
+        {
+            "from": "2650545960912",
+            "out_idx": 1,
+            "to": "2650545961296"
+        },
+        {
+            "from": "2650545960144",
+            "out_idx": 0,
+            "to": "2650545960720"
+        },
+        {
+            "from": "2650545960720",
+            "out_idx": 0,
+            "to": "2650545960912"
+        },
+        {
+            "from": "2650545960912",
+            "out_idx": 2,
+            "to": "2650545961488"
+        },
+        {
+            "from": "2650545961104",
+            "out_idx": 0,
+            "to": "2650545961680"
+        },
+        {
+            "from": "2650545961296",
+            "out_idx": 0,
+            "to": "2650587401104"
+        },
+        {
+            "from": "2650587401104",
+            "out_idx": 0,
+            "to": "2650587401296"
+        },
+        {
+            "from": "2650587401296",
+            "out_idx": 0,
+            "to": "2650587401488"
+        },
+        {
+            "from": "2650587401488",
+            "out_idx": 0,
+            "to": "2650546606768"
+        },
+        {
+            "from": "2650546606768",
+            "out_idx": 0,
+            "to": "2650587401680"
+        },
+        {
+            "from": "2650587401680",
+            "out_idx": 0,
+            "to": "2650587401872"
+        },
+        {
+            "from": "2650587402064",
+            "out_idx": 0,
+            "to": "2650587402256"
+        },
+        {
+            "from": "2650587402256",
+            "out_idx": 0,
+            "to": "2650587402448"
+        },
+        {
+            "from": "2650587402448",
+            "out_idx": 0,
+            "to": "2650587402640"
+        },
+        {
+            "from": "2650587402640",
+            "out_idx": 0,
+            "to": "2650587402832"
+        },
+        {
+            "from": "2650587402832",
+            "out_idx": 0,
+            "to": "2650587403024"
+        },
+        {
+            "from": "2650587403216",
+            "out_idx": 0,
+            "to": "2650587403408"
+        },
+        {
+            "from": "2650587403408",
+            "out_idx": 0,
+            "to": "2650587403600"
+        },
+        {
+            "from": "2650587403792",
+            "out_idx": 0,
+            "to": "2650587403600"
+        },
+        {
+            "from": "2650587403600",
+            "out_idx": 0,
+            "to": "2650587403984"
+        },
+        {
+            "from": "2650587403984",
+            "out_idx": 0,
+            "to": "2650587404176"
+        },
+        {
+            "from": "2650587404176",
+            "out_idx": 0,
+            "to": "2650587404368"
+        },
+        {
+            "from": "2650587404368",
+            "out_idx": 0,
+            "to": "2650587404560"
+        },
+        {
+            "from": "2650587403024",
+            "out_idx": 0,
+            "to": "2650587404752"
+        },
+        {
+            "from": "2650587404752",
+            "out_idx": 0,
+            "to": "2650587403216"
+        },
+        {
+            "from": "2650587404560",
+            "out_idx": 0,
+            "to": "2650587405136"
+        },
+        {
+            "from": "2650587405136",
+            "out_idx": 0,
+            "to": "2650587404944"
+        },
+        {
+            "from": "2650587404944",
+            "out_idx": 0,
+            "to": "2650587405328"
+        },
+        {
+            "from": "2650587405328",
+            "out_idx": 0,
+            "to": "2650587405520"
+        },
+        {
+            "from": "2650587405520",
+            "out_idx": 0,
+            "to": "2650587405712"
+        },
+        {
+            "from": "2650587405712",
+            "out_idx": 0,
+            "to": "2650587405904"
+        },
+        {
+            "from": "2650587405904",
+            "out_idx": 0,
+            "to": "2650587406096"
+        },
+        {
+            "from": "2650587406096",
+            "out_idx": 0,
+            "to": "2650587406288"
+        },
+        {
+            "from": "2650587406288",
+            "out_idx": 0,
+            "to": "2650587406480"
+        },
+        {
+            "from": "2650587406480",
+            "out_idx": 0,
+            "to": "2650587406672"
+        },
+        {
+            "from": "2650587406672",
+            "out_idx": 0,
+            "to": "2650587406864"
+        },
+        {
+            "from": "2650587406864",
+            "out_idx": 0,
+            "to": "2650587407056"
+        },
+        {
+            "from": "2650587407056",
+            "out_idx": 0,
+            "to": "2650587407248"
+        },
+        {
+            "from": "2650546413344",
+            "out_idx": 0,
+            "to": "2650587407440"
+        },
+        {
+            "from": "2650587407440",
+            "out_idx": 0,
+            "to": "2650547107408"
+        },
+        {
+            "from": "2650587407248",
+            "out_idx": 0,
+            "to": "2650587407632"
+        },
+        {
+            "from": "2650587407632",
+            "out_idx": 0,
+            "to": "2650587407824"
+        },
+        {
+            "from": "2650587407824",
+            "out_idx": 0,
+            "to": "2650587408016"
+        },
+        {
+            "from": "2650587408016",
+            "out_idx": 0,
+            "to": "2650587408208"
+        },
+        {
+            "from": "2650587408208",
+            "out_idx": 0,
+            "to": "2650587408400"
+        },
+        {
+            "from": "2650587408400",
+            "out_idx": 0,
+            "to": "2650587408592"
+        },
+        {
+            "from": "2650587408592",
+            "out_idx": 0,
+            "to": "2650587408784"
+        },
+        {
+            "from": "2650587408784",
+            "out_idx": 0,
+            "to": "2650587408976"
+        },
+        {
+            "from": "2650587408976",
+            "out_idx": 0,
+            "to": "2650587409168"
+        },
+        {
+            "from": "2650587405520",
+            "out_idx": 1,
+            "to": "2650587409552"
+        },
+        {
+            "from": "2650587409552",
+            "out_idx": 0,
+            "to": "2650587409936"
+        },
+        {
+            "from": "2650587409936",
+            "out_idx": 0,
+            "to": "2650587410896"
+        },
+        {
+            "from": "2650587410896",
+            "out_idx": 0,
+            "to": "2650587412048"
+        },
+        {
+            "from": "2650587409168",
+            "out_idx": 0,
+            "to": "2650587500010"
+        },
+        {
+            "from": "2650587412048",
+            "out_idx": 0,
+            "to": "2650587408400"
+        },
+        {
+            "from": "2650587500010",
+            "out_idx": 0,
+            "to": "2650587500020"
+        },
+        {
+            "from": "2650587500020",
+            "out_idx": 0,
+            "to": "2650587500030"
+        },
+        {
+            "from": "2650587500030",
+            "out_idx": 0,
+            "to": "2650587500040"
+        },
+        {
+            "from": "2650587500040",
+            "out_idx": 0,
+            "to": "2650587500050"
+        },
+        {
+            "from": "2650587500050",
+            "out_idx": 0,
+            "to": "2650587500060"
+        },
+        {
+            "from": "2650587500060",
+            "out_idx": 0,
+            "to": "2650587500070"
+        },
+        {
+            "from": "2650587500070",
+            "out_idx": 0,
+            "to": "2650587500080"
+        },
+        {
+            "from": "2650587500080",
+            "out_idx": 0,
+            "to": "2650587500090"
+        },
+        {
+            "from": "2650587500090",
+            "out_idx": 0,
+            "to": "2650587500100"
+        },
+        {
+            "from": "2650587500100",
+            "out_idx": 0,
+            "to": "2650587500110"
+        },
+        {
+            "from": "2650587500110",
+            "out_idx": 0,
+            "to": "2650587500120"
+        },
+        {
+            "from": "2650587500120",
+            "out_idx": 0,
+            "to": "2650587500130"
+        },
+        {
+            "from": "2650587500140",
+            "out_idx": 0,
+            "to": "2650587500150"
+        },
+        {
+            "from": "2650587500150",
+            "out_idx": 0,
+            "to": "2650587500160"
+        },
+        {
+            "from": "2650587500160",
+            "out_idx": 0,
+            "to": "2650587500170"
+        },
+        {
+            "from": "2650587500170",
+            "out_idx": 0,
+            "to": "2650587500180"
+        },
+        {
+            "from": "2650587500130",
+            "out_idx": 0,
+            "to": "b72b479ffaea"
+        },
+        {
+            "from": "b72b479ffaea",
+            "out_idx": 0,
+            "to": "2650587500140"
+        },
+        {
+            "from": "2650587500180",
+            "out_idx": 0,
+            "to": "f059ee659506"
+        },
+        {
+            "from": "f059ee659506",
+            "out_idx": 0,
+            "to": "b353e24b7e6b"
+        },
+        {
+            "from": "b353e24b7e6b",
+            "out_idx": 0,
+            "to": "5e0c8e0b1e29"
+        },
+        {
+            "from": "5e0c8e0b1e29",
+            "out_idx": 0,
+            "to": "47e423aa03b1"
+        },
+        {
+            "from": "47e423aa03b1",
+            "out_idx": 0,
+            "to": "6f7c81532789"
+        },
+        {
+            "from": "6f7c81532789",
+            "out_idx": 0,
+            "to": "526d6cac5f42"
+        },
+        {
+            "from": "526d6cac5f42",
+            "out_idx": 0,
+            "to": "95496a895f3e"
+        },
+        {
+            "from": "95496a895f3e",
+            "out_idx": 0,
+            "to": "61176965b5af"
+        },
+        {
+            "from": "147ac1634aa0",
+            "out_idx": 0,
+            "to": "61176965b5af"
+        },
+        {
+            "from": "61176965b5af",
+            "out_idx": 0,
+            "to": "b9548124ec83"
+        },
+        {
+            "from": "5427bf309bc5",
+            "out_idx": 0,
+            "to": "b9548124ec83"
+        },
+        {
+            "from": "b9548124ec83",
+            "out_idx": 0,
+            "to": "5fa969b0cec8"
+        },
+        {
+            "from": "5fa969b0cec8",
+            "out_idx": 0,
+            "to": "8e81db8e2336"
+        },
+        {
+            "from": "fd2ba8e017ac",
+            "out_idx": 0,
+            "to": "36d294a2c773"
+        },
+        {
+            "from": "fd2ba8e017ac",
+            "out_idx": 1,
+            "to": "83fa07f8acd9"
+        },
+        {
+            "from": "83fa07f8acd9",
+            "out_idx": 0,
+            "to": "8844a6d8c2b8"
+        },
+        {
+            "from": "8e81db8e2336",
+            "out_idx": 0,
+            "to": "fd2ba8e017ac"
+        },
+        {
+            "from": "8844a6d8c2b8",
+            "out_idx": 0,
+            "to": "21878f4c77e0"
+        },
+        {
+            "from": "21878f4c77e0",
+            "out_idx": 0,
+            "to": "88cf72491667"
+        },
+        {
+            "from": "36d294a2c773",
+            "out_idx": 0,
+            "to": "1a2ae1ec841a"
+        },
+        {
+            "from": "1a2ae1ec841a",
+            "out_idx": 0,
+            "to": "4e79fd004d27"
+        },
+        {
+            "from": "4e79fd004d27",
+            "out_idx": 0,
+            "to": "400f27db7614"
+        },
+        {
+            "from": "400f27db7614",
+            "out_idx": 0,
+            "to": "600b2a3e1339"
+        },
+        {
+            "from": "651d69e71822",
+            "out_idx": 0,
+            "to": "bf2494d31ab9"
+        },
+        {
+            "from": "bf2494d31ab9",
+            "out_idx": 0,
+            "to": "7e667a6957c1"
+        },
+        {
+            "from": "600b2a3e1339",
+            "out_idx": 0,
+            "to": "03e08a56213e"
+        },
+        {
+            "from": "40a3bd9cd299",
+            "out_idx": 0,
+            "to": "03e08a56213e"
+        },
+        {
+            "from": "7e667a6957c1",
+            "out_idx": 0,
+            "to": "403618a8e503"
+        },
+        {
+            "from": "75c0fcd89216",
+            "out_idx": 0,
+            "to": "2d3a0d74083d"
+        },
+        {
+            "from": "2d3a0d74083d",
+            "out_idx": 0,
+            "to": "4346bc7987c0"
+        },
+        {
+            "from": "4346bc7987c0",
+            "out_idx": 0,
+            "to": "5e5efd80caff"
+        },
+        {
+            "from": "5e5efd80caff",
+            "out_idx": 0,
+            "to": "fa366fc2b3e8"
+        },
+        {
+            "from": "fa366fc2b3e8",
+            "out_idx": 0,
+            "to": "0d3ab50747b4"
+        },
+        {
+            "from": "0d3ab50747b4",
+            "out_idx": 0,
+            "to": "b3a6fc490468"
+        },
+        {
+            "from": "b3a6fc490468",
+            "out_idx": 0,
+            "to": "54c179579e65"
+        },
+        {
+            "from": "54c179579e65",
+            "out_idx": 0,
+            "to": "6f15ac613a32"
+        },
+        {
+            "from": "6f15ac613a32",
+            "out_idx": 0,
+            "to": "b3c64d5f6e08"
+        },
+        {
+            "from": "b3c64d5f6e08",
+            "out_idx": 2,
+            "to": "8f287cc2eba1"
+        },
+        {
+            "from": "8f287cc2eba1",
+            "out_idx": 0,
+            "to": "4e80044d8250"
+        },
+        {
+            "from": "4e80044d8250",
+            "out_idx": 0,
+            "to": "f3c1566b2123"
+        },
+        {
+            "from": "2650587401872",
+            "out_idx": 0,
+            "to": "2667711085808"
+        },
+        {
+            "from": "2667711085808",
+            "out_idx": 0,
+            "to": "2650587402064"
+        },
+        {
+            "from": "2650586979536",
+            "out_idx": 0,
+            "to": "1014021715279"
+        },
+        {
+            "from": "1014021715279",
+            "out_idx": 0,
+            "to": "2650586979920"
+        },
+        {
+            "from": "2650586981648",
+            "out_idx": 0,
+            "to": "2525602902398"
+        },
+        {
+            "from": "2525602902398",
+            "out_idx": 0,
+            "to": "2650586982032"
+        },
+        {
+            "from": "03e08a56213e",
+            "out_idx": 0,
+            "to": "d507d95f5d58"
+        },
+        {
+            "from": "d507d95f5d58",
+            "out_idx": 0,
+            "to": "651d69e71822"
+        },
+        {
+            "from": "b3c64d5f6e08",
+            "out_idx": 0,
+            "to": "3dc3947c7db2"
+        },
+        {
+            "from": "3dc3947c7db2",
+            "out_idx": 0,
+            "to": "aefabc496d16"
+        },
+        {
+            "from": "aefabc496d16",
+            "out_idx": 0,
+            "to": "90acb93cf1d4"
+        },
+        {
+            "from": "90acb93cf1d4",
+            "out_idx": 0,
+            "to": "136c99a0ad18"
+        },
+        {
+            "from": "136c99a0ad18",
+            "out_idx": 0,
+            "to": "5133da836b19"
+        },
+        {
+            "from": "5133da836b19",
+            "out_idx": 0,
+            "to": "a1886103ef5c"
+        },
+        {
+            "from": "a1886103ef5c",
+            "out_idx": 0,
+            "to": "58508d4b1bb2"
+        },
+        {
+            "from": "58508d4b1bb2",
+            "out_idx": 0,
+            "to": "51b7ade3c8ec"
+        },
+        {
+            "from": "51b7ade3c8ec",
+            "out_idx": 0,
+            "to": "3cb3d7a785f3"
+        },
+        {
+            "from": "3cb3d7a785f3",
+            "out_idx": 0,
+            "to": "6be0929c8b3f"
+        },
+        {
+            "from": "6be0929c8b3f",
+            "out_idx": 0,
+            "to": "b12d19bd0b0a"
+        },
+        {
+            "from": "b12d19bd0b0a",
+            "out_idx": 0,
+            "to": "5a2f2ed7ed69"
+        },
+        {
+            "from": "5a2f2ed7ed69",
+            "out_idx": 0,
+            "to": "f402d4aa7ce7"
+        },
+        {
+            "from": "88cf72491667",
+            "out_idx": 0,
+            "to": "bdf4881c4684"
+        },
+        {
+            "from": "bdf4881c4684",
+            "out_idx": 0,
+            "to": "8c0d067423ab"
+        },
+        {
+            "from": "8c0d067423ab",
+            "out_idx": 0,
+            "to": "e5584fe3519e"
+        },
+        {
+            "from": "e5584fe3519e",
+            "out_idx": 0,
+            "to": "03e08a56213e"
+        },
+        {
+            "from": "403618a8e503",
+            "out_idx": 0,
+            "to": "1e5ab1ad1ddc"
+        },
+        {
+            "from": "1e5ab1ad1ddc",
+            "out_idx": 0,
+            "to": "75c0fcd89216"
+        },
+        {
+            "from": "1e5ab1ad1ddc",
+            "out_idx": 1,
+            "to": "202be9a80050"
+        },
+        {
+            "from": "202be9a80050",
+            "out_idx": 0,
+            "to": "fa49688c4513"
+        },
+        {
+            "from": "fa49688c4513",
+            "out_idx": 0,
+            "to": "f8a95be1f24a"
+        },
+        {
+            "from": "f8a95be1f24a",
+            "out_idx": 0,
+            "to": "9b6070e8c671"
+        },
+        {
+            "from": "9b6070e8c671",
+            "out_idx": 0,
+            "to": "9282f45c612a"
+        },
+        {
+            "from": "9282f45c612a",
+            "out_idx": 0,
+            "to": "7b83c2b365ac"
+        },
+        {
+            "from": "7b83c2b365ac",
+            "out_idx": 0,
+            "to": "ae719de95284"
+        },
+        {
+            "from": "2ad9e7b50a85",
+            "out_idx": 0,
+            "to": "ae719de95284"
+        },
+        {
+            "from": "2650586984912",
+            "out_idx": 0,
+            "to": "2650586985296"
+        },
+        {
+            "from": "2650587400528",
+            "out_idx": 0,
+            "to": "0bc5e13bfc4b"
+        },
+        {
+            "from": "0bc5e13bfc4b",
+            "out_idx": 0,
+            "to": "2650587400720"
+        },
+        {
+            "from": "2650587400720",
+            "out_idx": 0,
+            "to": "fa779748fff4"
+        },
+        {
+            "from": "fa779748fff4",
+            "out_idx": 0,
+            "to": "2650587402064"
+        },
+        {
+            "from": "f402d4aa7ce7",
+            "out_idx": 0,
+            "to": "865fec1d4149"
+        }
+    ],
+    "characters": [
+        {
+            "name": "???",
+            "color": "#8000ff",
+            "header_color": "",
+            "bg_color": "",
+            "avatar_path": "",
+            "emotions": [
+                "обычный",
+                "радость",
+                "грусть",
+                "злость",
+                "удивление",
+                "смущение"
+            ],
+            "description": "",
+            "custom_data": {}
+        },
+        {
+            "name": "Энджи",
+            "color": "#c060f8",
+            "header_color": "",
+            "bg_color": "",
+            "avatar_path": "",
+            "emotions": [
+                "обычный",
+                "радость",
+                "грусть",
+                "злость",
+                "удивление",
+                "смущение"
+            ],
+            "description": "",
+            "custom_data": {}
+        },
+        {
+            "name": "Телевизор",
+            "color": "#66ccff",
+            "header_color": "",
+            "bg_color": "",
+            "avatar_path": "",
+            "emotions": [
+                "обычный",
+                "радость",
+                "грусть",
+                "злость",
+                "удивление",
+                "смущение"
+            ],
+            "description": "",
+            "custom_data": {}
+        },
+        {
+            "name": "Ривер",
+            "color": "#0080ff",
+            "header_color": "",
+            "bg_color": "",
+            "avatar_path": "",
+            "emotions": [
+                "обычный",
+                "радость",
+                "грусть",
+                "злость",
+                "удивление",
+                "смущение"
+            ],
+            "description": "",
+            "custom_data": {}
+        },
+        {
+            "name": "Джен",
+            "color": "#ffff00",
+            "header_color": "",
+            "bg_color": "",
+            "avatar_path": "",
+            "emotions": [
+                "обычный",
+                "радость",
+                "грусть",
+                "злость",
+                "удивление",
+                "смущение"
+            ],
+            "description": "",
+            "custom_data": {}
+        },
+        {
+            "name": "Ника",
+            "color": "#00ffcc",
+            "header_color": "",
+            "bg_color": "",
+            "avatar_path": "",
+            "emotions": [
+                "обычный",
+                "радость",
+                "грусть",
+                "злость",
+                "удивление",
+                "смущение"
+            ],
+            "description": "",
+            "custom_data": {}
+        }
+    ]
+}

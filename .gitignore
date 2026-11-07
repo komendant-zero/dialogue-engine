@@ -21,6 +21,11 @@ Save/
 *.json
 !plugins/fs_settings.json
 !examples/*.json
+!docs/app/*.json
+!cowork/static/*.json
+
+# GitHub workflows (requires workflow scope on token if pushed)
+.github/
 
 # OS
 .DS_Store

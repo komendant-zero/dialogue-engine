@@ -53,19 +53,22 @@ class Tooltip:
 
 class WordCountPlugin(Plugin):
     name = "Word Counter"
-    version = "1.2"
+    version = "1.3"
 
     def __init__(self, editor):
         super().__init__(editor)
         self.label = None
         self.tooltip = None
         self.running = True
-        self.show_only_story = False  # По умолчанию показывает все слова, клик переключает на только сюжет/текст
+        self.show_only_story = False
 
     def on_enable(self):
-        self.update_loop()
+        self.running = True
 
-    def on_event(self, event_type, data):
+    def on_disable(self):
+        self.running = False
+
+    def on_event(self, event_type, data=None):
         if event_type == 'setup_ui':
             parent = getattr(self.editor, 'toolbar_right', data)
             tk.Label(parent, text="|", bg='#1e1e1e', fg='#555555').pack(side=tk.RIGHT, padx=4)
@@ -85,7 +88,8 @@ class WordCountPlugin(Plugin):
             self.label.bind("<Button-1>", self.toggle_mode)
             self.update_count()
 
-        elif event_type in ['node_added', 'node_edit_save']:
+        elif event_type in ['node_added', 'node_deleted', 'node_edit_save', 'project_loaded']:
+            # Реактивное обновление по событиям без холостого хода CPU
             self.update_count()
 
     def toggle_mode(self, event=None):
@@ -93,7 +97,7 @@ class WordCountPlugin(Plugin):
         self.update_count()
 
     def update_count(self):
-        """Подсчитывает слова во всех узлах с разделением по типам"""
+        """Подсчитывает слова во всех узлах с разделением по типам."""
         if not self.label:
             return
 
@@ -102,12 +106,12 @@ class WordCountPlugin(Plugin):
         choice_words = 0
         system_words = 0
         
-        # Перебираем все узлы редактора
-        for node in self.editor.nodes:
-            if not node.content:
+        for node in getattr(self.editor, 'nodes', []):
+            content = getattr(node, 'content', '')
+            if not content:
                 continue
             
-            cnt = len(node.content.split())
+            cnt = len(content.split())
             total_words += cnt
             
             ntype = getattr(node, 'node_type', '')
@@ -136,14 +140,3 @@ class WordCountPlugin(Plugin):
                 f"Режим: {mode_hint}"
             )
             self.tooltip.set_text(tip)
-
-    def update_loop(self):
-        if not self.running:
-            return
-            
-        try:
-            if self.editor.winfo_exists():
-                self.update_count()
-                self.editor.after(500, self.update_loop)
-        except Exception:
-            pass

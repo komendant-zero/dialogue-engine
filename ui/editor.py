@@ -57,6 +57,7 @@ from ui.dialogs.node_editor import NodeEditorDialog
 from ui.dialogs.search_replace import SearchReplaceDialog
 from ui.dialogs.update_dialog import ManualUpdateDialog
 from ui.dialogs.cowork_dialog import CoworkServerManagerDialog
+from ui.dialogs.audit_dialog import ScenarioAuditDialog
 from ui.node_view import Node
 from ui.theme import (
     BTN_ACTION_STYLE,
@@ -237,6 +238,7 @@ class ScenarioEditor(tk.Tk):
         self.project_menu.add_separator()
         self.project_menu.add_command(label="👥 База персонажей... (Ctrl+Shift+C)", command=self.open_character_manager)
         self.project_menu.add_command(label="🔍 Поиск и замена (Ctrl+F)", command=self.open_search_replace)
+        self.project_menu.add_command(label="🧪 Авто-тест сценария (Harness)...", command=self.open_scenario_audit)
         self.project_menu.add_separator()
         self.project_menu.add_command(label="🌐 Совместная работа (Коворк)...", command=self.open_cowork_dialog)
         self.project_menu.add_command(label="🚀 Проверить обновления GitHub...", command=self.open_update_dialog)
@@ -267,6 +269,8 @@ class ScenarioEditor(tk.Tk):
         self.dev_menu_btn.pack(side=tk.RIGHT, padx=3)
         self.dev_menu = tk.Menu(self.dev_menu_btn, **MENU_CFG_STYLE)
         self.dev_menu_btn["menu"] = self.dev_menu
+        self.dev_menu.add_command(label="🧪 Авто-тест сценария (Harness)...", command=self.open_scenario_audit)
+        self.dev_menu.add_separator()
         self.dev_menu.add_command(label="🌐 Совместная работа (Коворк)...", command=self.open_cowork_dialog)
         self.dev_menu.add_command(label="🚀 Обновить движок из GitHub...", command=self.open_update_dialog)
         self.dev_menu.add_separator()
@@ -1081,6 +1085,10 @@ class ScenarioEditor(tk.Tk):
     def open_cowork_dialog(self) -> None:
         """Открывает диалог управления сервером совместной работы (коворк)."""
         CoworkServerManagerDialog(self)
+
+    def open_scenario_audit(self) -> None:
+        """Открывает интерактивное окно автоматического тестирования сценария и ассетов."""
+        ScenarioAuditDialog(parent=self, editor=self)
 
     def on_characters_changed(self) -> None:
         self.set_dirty(True)

@@ -4,14 +4,19 @@ Dialogue Engine - Network & System IP Utilities.
 """
 
 from __future__ import annotations
+import os
 import socket
 
 
 def get_lan_ip() -> str:
     """
-    Определяет локальный IP-адрес компьютера в локальной сети (Wi-Fi/LAN).
-    Работает на стандартной библиотеке socket без внешних пакетов.
+    Определяет локальный IP-адрес компьютера в локальной сети (Wi-Fi/LAN)
+    или возвращает PUBLIC_HOST из переменных окружения (для работы на сервере).
     """
+    pub = os.getenv("PUBLIC_HOST")
+    if pub:
+        return pub
+
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         # Подключение к внешнему шлюзу без отправки пакетов для определения рабочего сетевого интерфейса

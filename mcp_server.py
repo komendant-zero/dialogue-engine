@@ -790,15 +790,22 @@ class DialogueEngineMCPServer:
     # ─── Валидация и экспорт ──────────────────────────────────────────────────
 
     def tool_validate_graph(self, args: Dict[str, Any]) -> str:  # noqa: ARG002
-        issues = self.graph.validate()
-        if not issues:
-            return "✅ Граф прошёл проверку: ошибок не обнаружено."
+        try:
+            from harness.scenario_auditor import ScenarioAuditor
+            proj_data = self.graph.to_project_data()
+            auditor = ScenarioAuditor(proj_data, project_file_path=self.project_path)
+            report = auditor.run_full_audit()
+            return report.to_text()
+        except Exception as e:
+            issues = self.graph.validate()
+            if not issues:
+                return "✅ Граф прошёл проверку: ошибок не обнаружено."
 
-        lines = [f"Найдено замечаний: {len(issues)}\n"]
-        for issue in issues:
-            nid = f"[{issue.node_id}] " if issue.node_id else ""
-            lines.append(f"  [{issue.level.upper():>7}] {nid}{issue.message}")
-        return "\n".join(lines)
+            lines = [f"Найдено замечаний: {len(issues)} (резервный валидатор: {e})\n"]
+            for issue in issues:
+                nid = f"[{issue.node_id}] " if issue.node_id else ""
+                lines.append(f"  [{issue.level.upper():>7}] {nid}{issue.message}")
+            return "\n".join(lines)
 
     def tool_export_renpy(self, args: Dict[str, Any]) -> str:
         output_dir = args.get("output_dir")

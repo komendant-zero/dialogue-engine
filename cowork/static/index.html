@@ -5,46 +5,107 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#1e1e1e">
-  <title>Dialogue Engine - Коворк</title>
-  <link rel="stylesheet" href="/static/style.css">
+  <meta name="theme-color" content="#121318">
+  <title>Dialogue Engine Studio - Коворк 24/7</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 </head>
 <body>
 
-  <!-- Верхняя панель (Desktop & Tablet) -->
+  <!-- Верхняя панель (Studio Topbar) -->
   <header class="topbar">
     <div class="brand">
       <span class="brand-icon">⚡</span>
       <span class="brand-title">Dialogue Engine</span>
-      <span id="lblProjectTitle" class="project-title">Загрузка...</span>
+      <span id="lblProjectTitle" class="project-title">violant.json</span>
+      <span id="lblNodeCount" style="font-size: 11px; padding: 2px 8px; background: rgba(79, 140, 255, 0.2); color: #60a5fa; border-radius: 12px; font-weight: 700; border: 1px solid rgba(79, 140, 255, 0.3);">262 узла</span>
+      
+      <!-- Индикатор и переключатель сессии (у каждой сессии своя ссылка) -->
+      <button class="btn session-pill-btn" onclick="openSessionModal()" title="Текущая сессия. Нажмите, чтобы скопировать ссылку, сменить или создать новую">
+        <span>🏷️</span>
+        <span id="sessionNameDisplay" style="font-weight: 700; color: #60a5fa;">violant</span>
+      </button>
+
+      <div class="online-indicator">
+        <span class="online-indicator-dot"></span>
+        <span>Онлайн</span>
+      </div>
     </div>
 
     <!-- Быстрое создание нод (Desktop) -->
     <div class="topbar-actions topbar-center-buttons">
       <button class="btn btn-primary" onclick="createNode('story')">📝 Сюжет</button>
-      <button class="btn" onclick="createNode('choice')">🔀 Выбор</button>
-      <button class="btn" onclick="createNode('condition')">⚡ Условие</button>
+      <button class="btn" onclick="createNode('choice')" style="border-color: #f59e0b; color: #fde68a;">🔀 Выбор</button>
+      <button class="btn" onclick="createNode('condition')" style="border-color: #8b5cf6; color: #ddd6fe;">⚡ Условие</button>
+      <button class="btn" onclick="createNode('music')" style="border-color: #10b981; color: #a7f3d0;">🎵 Музыка</button>
+      <button class="btn" onclick="createNode('media')" style="border-color: #06b6d4; color: #a5f3fc;">🖼️ Медиа</button>
     </div>
 
-    <!-- Участники коворка и действия -->
+    <!-- Инструменты и плагины движка -->
     <div class="topbar-actions">
-      <div id="collaboratorsPill" class="collaborators-pill" onclick="toggleDrawer()">
+      <!-- Плагин: Быстрый тест новеллы -->
+      <button class="btn btn-plugin-play" onclick="startQuickPlaytest()" title="Запустить быстрый тест сценария (Пробел)">
+        <span>▶</span> <span>Тест</span>
+      </button>
+
+      <!-- Плагин: Авто-расстановка узлов -->
+      <button class="btn btn-plugin-layout" onclick="runAutoLayout()" title="Автоматически выровнять граф слева направо (Ctrl+L)">
+        <span>📐</span> <span>Выровнять</span>
+      </button>
+
+      <!-- Плагин: Диагностика сюжета -->
+      <button class="btn btn-plugin-audit" onclick="openGraphAuditModal()" title="Проверка связей и тупиков сюжета">
+        <span>🩺</span> <span>Аудит</span>
+      </button>
+
+      <!-- Плагин: Счетчик слов и статистика -->
+      <button class="btn btn-plugin-stats" onclick="openWordStatsModal()" title="Статистика слов и персонажей">
+        <span>📊</span> <span>Слова</span>
+      </button>
+
+      <!-- База персонажей и спрайты -->
+      <button class="btn" onclick="openCharactersModal()" title="База персонажей, цвета реплик и спрайты" style="border-color: #a855f7; color: #d8b4fe;">
+        <span>👥</span> <span>Герои</span>
+      </button>
+
+      <!-- Плагин: Экспорт в Ren'Py -->
+      <button class="btn" onclick="openRenPyExportModal()" title="Сгенерировать и скачать Ren'Py script.rpy" style="border-color: #f43f5e; color: #fda4af;">
+        <span>💾</span> <span>RPY</span>
+      </button>
+
+      <!-- Быстрый поиск и обзор -->
+      <button class="btn" onclick="openNodeSearchModal()" title="Поиск реплики или персонажа (Ctrl+F)">
+        <span>🔍</span>
+      </button>
+
+      <button class="btn" onclick="fitViewToNodes()" title="Уместить все узлы на экране (0)">
+        <span>🎯</span>
+      </button>
+
+      <!-- Поделиться ссылкой на сессию -->
+      <button class="btn btn-primary" onclick="copySessionShareLink()" title="Скопировать персональную ссылку на эту сессию">
+        <span>🔗</span> <span>Поделиться</span>
+      </button>
+
+      <!-- Развертывание в GitHub репозиторий -->
+      <button class="btn" onclick="openGitHubModal()" title="Развертывание и экспорт в GitHub репозиторий" style="border-color: #f43f5e; color: #fda4af;">
+        <span>🐙</span> <span>GitHub</span>
+      </button>
+
+      <button class="btn btn-success" onclick="saveProject()" title="Сохранить проект на сервере (Ctrl+S)">
+        <span>💾</span>
+      </button>
+
+      <button class="btn" onclick="downloadProjectJson()" title="Скачать violant.json на устройство">
+        <span>📥</span>
+      </button>
+
+      <!-- Участники коворка -->
+      <div id="collaboratorsPill" class="collaborators-pill" onclick="toggleDrawer()" title="Участники и чат">
         <span>👥</span>
-        <span id="lblOnlineCount">1 онлайн</span>
+        <span id="lblOnlineCount">1</span>
         <div id="avatarsContainer" class="collaborators-avatars"></div>
       </div>
-
-      <button class="btn btn-success" onclick="saveProject()">
-        <span>💾</span> <span class="btn-text">Сохранить</span>
-      </button>
-
-      <button class="btn" onclick="resetZoom()" title="Сбросить масштаб (100%)">
-        <span>🔍</span> <span id="lblZoom">100%</span>
-      </button>
-
-      <button class="btn" onclick="toggleDrawer()">
-        <span>💬</span> <span class="btn-text">Чат</span>
-      </button>
     </div>
   </header>
 
@@ -55,21 +116,39 @@
       <svg id="connectionsSvg" class="connections-svg">
         <defs>
           <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M 0 1 L 10 5 L 0 9 z" fill="#a9b7c6"/>
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748b"/>
           </marker>
           <marker id="arrow-active" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
             <path d="M 0 1 L 10 5 L 0 9 z" fill="#ffcc00"/>
           </marker>
         </defs>
-        <!-- Активная тянущаяся связь при создании -->
+        <!-- Активная тянущаяся связь при соединении -->
         <path id="tempCable" class="connection-path connection-active" d="" style="display: none;"/>
       </svg>
 
       <!-- Контейнер блоков сценария -->
       <div id="nodesContainer"></div>
 
-      <!-- Слой удаленных курсоров участников коворка -->
+      <!-- Слой удаленных курсоров участников -->
       <div id="remoteCursorsContainer"></div>
+    </div>
+
+    <!-- Подсказка по управлению стрелочками -->
+    <div class="keyboard-hints-pill">
+      <span>Навигация:</span>
+      <span class="key-kbd">←</span>
+      <span class="key-kbd">↑</span>
+      <span class="key-kbd">→</span>
+      <span class="key-kbd">↓</span>
+      <span>или <span class="key-kbd">W</span><span class="key-kbd">A</span><span class="key-kbd">S</span><span class="key-kbd">D</span></span>
+      <span>• <span class="key-kbd">Shift</span> Ускорение</span>
+      <span>• <span class="key-kbd">Пробел</span> Тест</span>
+    </div>
+
+    <!-- Миникарта всего сценария -->
+    <div class="minimap-panel" id="minimapPanel" title="Кликните на миникарту для быстрого перехода">
+      <span class="minimap-header">Миникарта</span>
+      <canvas id="minimapCanvas" class="minimap-canvas"></canvas>
     </div>
   </main>
 
@@ -83,9 +162,17 @@
       <span class="mobile-btn-icon">🔀</span>
       <span>Выбор</span>
     </button>
-    <button class="mobile-btn" onclick="createNode('condition')">
-      <span class="mobile-btn-icon">⚡</span>
-      <span>Условие</span>
+    <button class="mobile-btn" onclick="startQuickPlaytest()">
+      <span class="mobile-btn-icon" style="color: #10b981;">▶</span>
+      <span>Тест</span>
+    </button>
+    <button class="mobile-btn" onclick="fitViewToNodes()">
+      <span class="mobile-btn-icon">🎯</span>
+      <span>Обзор</span>
+    </button>
+    <button class="mobile-btn" onclick="openNodeSearchModal()">
+      <span class="mobile-btn-icon">🔍</span>
+      <span>Поиск</span>
     </button>
     <button class="mobile-btn" onclick="saveProject()">
       <span class="mobile-btn-icon">💾</span>
@@ -93,14 +180,14 @@
     </button>
     <button class="mobile-btn" onclick="toggleDrawer()">
       <span class="mobile-btn-icon">👥</span>
-      <span>Коворк</span>
+      <span>Чат</span>
     </button>
   </nav>
 
   <!-- Боковая панель: список участников и чат -->
   <aside id="coworkDrawer" class="drawer">
     <div class="drawer-header">
-      <span class="drawer-title">👥 Совместная работа (Коворк)</span>
+      <span class="drawer-title">👥 Участники и Коворк-чат</span>
       <button class="btn" onclick="toggleDrawer()" style="padding: 2px 8px;">✕</button>
     </div>
     <div class="drawer-content">
@@ -113,48 +200,268 @@
         </div>
       </div>
 
-      <!-- Список участников онлайн -->
+      <!-- Список активных соавторов -->
       <div>
-        <label class="form-label">Участники онлайн:</label>
-        <div id="collaboratorsList" class="collaborators-list" style="margin-top: 6px;"></div>
+        <label class="form-label">Сейчас в сессии (<span id="drawerOnlineCount">1</span>):</label>
+        <div id="collaboratorsList" style="margin-top: 6px; display: flex; flex-direction: column; gap: 6px;"></div>
       </div>
 
-      <!-- Чат и журнал событий -->
+      <!-- Чат -->
       <div style="flex-grow: 1; display: flex; flex-direction: column;">
-        <label class="form-label">Чат и журнал изменений:</label>
+        <label class="form-label">Чат коворка:</label>
         <div id="chatBox" class="chat-box" style="margin-top: 6px;"></div>
-        <div class="chat-input-row" style="margin-top: 6px;">
-          <input type="text" id="inputChatMsg" class="chat-input" placeholder="Напишите сообщение...">
-          <button class="btn btn-primary" onclick="sendChatMessage()">➤</button>
+        <div style="display: flex; gap: 6px; margin-top: 8px;">
+          <input type="text" id="inputChatMsg" class="form-control" style="flex-grow: 1;" placeholder="Написать сообщение...">
+          <button class="btn btn-primary" onclick="sendChatMessage()">Отправить</button>
         </div>
       </div>
     </div>
   </aside>
 
-  <!-- Модальное окно редактирования узла -->
-  <div id="nodeModal" class="modal-overlay">
-    <div class="modal-box">
+  <!-- ==========================================================================
+       ПЛАГИН 1: РЕЖИМ БЫСТРОГО ТЕСТА НОВЕЛЛЫ (QUICK PLAYTEST)
+       ========================================================================== -->
+  <div id="playtestModal" class="playtest-overlay">
+    <div class="playtest-topbar">
+      <div class="playtest-info">
+        <span style="color: #10b981; font-weight: 700;">▶ ТЕСТИРОВАНИЕ СЦЕНАРИЯ</span>
+        <span>•</span>
+        <span id="playtestNodeId" style="font-family: monospace; color: #94a3b8;">Узел #...</span>
+        <span>•</span>
+        <span style="font-size: 11px; color: #64748b;">Пробел / Enter / Клик для продолжения</span>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn" onclick="playtestRestart()" title="Начать сначала">⏮ Сначала</button>
+        <button class="btn" onclick="playtestBack()" title="Предыдущая реплика">◀ Назад</button>
+        <button class="btn btn-primary" onclick="playtestNext()" title="Следующая реплика">Вперед ▶</button>
+        <button class="btn" onclick="stopQuickPlaytest()" style="background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #fca5a5;">✕ Выход</button>
+      </div>
+    </div>
+
+    <!-- Центральная сцена: фоны, метки, развилки -->
+    <div class="playtest-center-stage" id="playtestCenterStage">
+      <div id="playtestSceneLabel" class="playtest-scene-label"></div>
+      <div id="playtestChoicesBox" class="playtest-choices-box" style="display: none;"></div>
+    </div>
+
+    <!-- Нижняя диалоговая плашка новеллы -->
+    <div class="playtest-textbox" onclick="playtestNext()">
+      <div id="playtestSpeakerTag" class="playtest-speaker-tag">Спикер</div>
+      <div id="playtestDialogueText" class="playtest-dialogue-text">Текст диалога...</div>
+      <div class="playtest-advance-hint">▼ Кликните для продолжения</div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       ПЛАГИН 2: ДИАГНОСТИКА СЮЖЕТА (GRAPH VALIDATOR)
+       ========================================================================== -->
+  <div id="auditModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 650px; max-height: 85vh;">
       <div class="modal-header">
-        <h3 id="modalTitle" style="font-size: 15px;">Редактирование узла</h3>
+        <h3 style="margin: 0; font-size: 16px; color: #f59e0b;">🩺 Диагностика сценария и проверка связей</h3>
+        <button class="btn" onclick="closeGraphAuditModal()" style="padding: 2px 8px;">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 14px 18px;">
+        <div id="auditSummaryBar" style="display: flex; gap: 12px; margin-bottom: 12px; font-size: 13px;"></div>
+        <div id="auditIssuesList" style="display: flex; flex-direction: column; gap: 8px; max-height: 50vh; overflow-y: auto;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeGraphAuditModal()">Закрыть</button>
+        <button class="btn btn-primary" onclick="runGraphAudit()">Обновить аудит 🔄</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       ПЛАГИН 3: СТАТИСТИКА СЛОВ И ПЕРСОНАЖЕЙ (WORD COUNTER)
+       ========================================================================== -->
+  <div id="statsModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 620px; max-height: 85vh;">
+      <div class="modal-header">
+        <h3 style="margin: 0; font-size: 16px; color: #a78bfa;">📊 Статистика слов и персонажей</h3>
+        <button class="btn" onclick="closeWordStatsModal()" style="padding: 2px 8px;">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 16px 18px;">
+        <!-- Карточки ключевых метрик -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px;">
+          <div style="background: rgba(255,255,255,0.04); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid var(--border);">
+            <div id="statTotalWords" style="font-size: 20px; font-weight: 800; color: #4f8cff;">0</div>
+            <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">Всего слов</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.04); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid var(--border);">
+            <div id="statTotalChars" style="font-size: 20px; font-weight: 800; color: #10b981;">0</div>
+            <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">Символов</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.04); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid var(--border);">
+            <div id="statTotalNodes" style="font-size: 20px; font-weight: 800; color: #f59e0b;">0</div>
+            <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">Узлов сценария</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.04); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid var(--border);">
+            <div id="statReadingTime" style="font-size: 20px; font-weight: 800; color: #ec4899;">0 мин</div>
+            <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">Время чтения</div>
+          </div>
+        </div>
+
+        <h4 style="font-size: 13px; color: #cbd5e1; margin-bottom: 8px;">Реплики по персонажам:</h4>
+        <div id="statCharactersTable" style="display: flex; flex-direction: column; gap: 8px; max-height: 40vh; overflow-y: auto;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="closeWordStatsModal()">Понятно</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       ПЛАГИН 4: ЭКСПОРТ В REN'PY (.RPY)
+       ========================================================================== -->
+  <div id="renpyModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 680px; max-height: 85vh;">
+      <div class="modal-header">
+        <h3 style="margin: 0; font-size: 16px; color: #f43f5e;">💾 Экспорт в Ren'Py (script.rpy)</h3>
+        <button class="btn" onclick="closeRenPyExportModal()" style="padding: 2px 8px;">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 14px 18px;">
+        <p style="font-size: 13px; color: #94a3b8; margin-bottom: 10px;">
+          Чистый скрипт Ren'Py со всеми метками, диалогами, персонажами и развилками menus:
+        </p>
+        <textarea id="renpyCodePreview" class="form-control" style="font-family: monospace; font-size: 12px; height: 320px; white-space: pre;" readonly></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="copyRenPyCode()">📋 Скопировать код</button>
+        <button class="btn btn-success" onclick="downloadRenPyFile()">📥 Скачать script.rpy</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       ПОИСК УЗЛОВ СЦЕНАРИЯ
+       ========================================================================== -->
+  <div id="searchModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 600px; max-height: 85vh;">
+      <div class="modal-header">
+        <h3 style="margin: 0; font-size: 16px;">🔍 Поиск по сценарию (<span id="searchResultCount">0</span> узлов)</h3>
+        <button class="btn" onclick="closeNodeSearchModal()" style="padding: 2px 8px;">✕</button>
+      </div>
+      <div style="padding: 12px 16px; border-bottom: 1px solid var(--border);">
+        <input type="text" id="nodeSearchInput" class="form-control" placeholder="Поиск по персонажу, тексту реплики или ID..." oninput="filterNodeList(this.value)">
+      </div>
+      <div id="nodeSearchResults" style="overflow-y: auto; flex-grow: 1; padding: 10px 16px; display: flex; flex-direction: column; gap: 8px; max-height: 50vh;"></div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       АВТОРИЗАЦИЯ (ПАРОЛЬ)
+       ========================================================================== -->
+  <div id="authModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 360px; text-align: center; border: 1px solid #333;">
+      <div style="font-size: 38px; margin-bottom: 8px;">🔒</div>
+      <h2 style="margin: 0 0 6px 0; font-size: 19px; color: #fff;">Dialogue Engine</h2>
+      <p style="color: #888; font-size: 13px; margin: 0 0 18px 0;">Введите пароль для доступа к коворку</p>
+
+      <div class="form-group" style="margin-bottom: 14px;">
+        <input type="password" id="authPasswordInput" class="form-control" placeholder="Пароль..." style="font-size: 16px; text-align: center; letter-spacing: 2px;" onkeydown="if(event.key==='Enter')submitAuthPassword()">
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 18px; font-size: 13px; color: #aaa;">
+        <input type="checkbox" id="authRememberMe" checked>
+        <label for="authRememberMe">Запомнить на этом устройстве</label>
+      </div>
+
+      <div id="authErrorMsg" style="color: #ff5555; font-size: 13px; margin-bottom: 12px; display: none;"></div>
+
+      <button class="btn btn-primary" onclick="submitAuthPassword()" style="width: 100%; padding: 10px; font-size: 15px; border-radius: 6px;">
+        Войти 🚀
+      </button>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       РЕДАКТИРОВАНИЕ УЗЛА
+       ========================================================================== -->
+  <div id="nodeModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 620px; width: 95%;">
+      <div class="modal-header">
+        <h3 id="modalNodeTitle" style="margin: 0; font-size: 16px;">Редактировать узел</h3>
         <button class="btn" onclick="closeNodeModal()" style="padding: 2px 8px;">✕</button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" style="max-height: 75vh; overflow-y: auto;">
         <input type="hidden" id="editNodeId">
 
         <div class="form-group">
           <label class="form-label">Тип узла:</label>
-          <select id="editNodeType" class="form-control">
-            <option value="story">📝 Сюжетный блок (Story)</option>
-            <option value="choice">🔀 Развилка / Выбор (Choice)</option>
-            <option value="condition">⚡ Логическое условие (Condition)</option>
-            <option value="music">🎵 Музыка / Звук (Audio)</option>
-            <option value="label">🏷️ Метка / Сцена (Label)</option>
+          <select id="editNodeType" class="form-control" onchange="onNodeTypeChanged(this.value)">
+            <option value="story">📝 Сюжет / Диалог</option>
+            <option value="choice">🔀 Выбор / Развилка</option>
+            <option value="condition">⚡ Условие (If / Else)</option>
+            <option value="music">🎵 Музыка / Звук</option>
+            <option value="media">🖼️ Медиа / Фон / Спрайт</option>
+            <option value="label">🏷️ Метка сцены (Label)</option>
+            <option value="pause">⏱️ Пауза</option>
+            <option value="variable">📦 Переменная</option>
+            <option value="animation">✨ Анимация</option>
+            <option value="python_code">🐍 Python код</option>
           </select>
         </div>
 
+        <!-- Поле заголовка / имени говорящего -->
         <div class="form-group">
-          <label class="form-label">Персонаж / Заголовок:</label>
-          <input type="text" id="editNodeTitle" class="form-control" placeholder="Имя говорящего персонажа или метка">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <label class="form-label" style="margin: 0;">Персонаж / Заголовок:</label>
+            <button type="button" class="btn" onclick="setNarratorTitle()" style="font-size: 11px; padding: 2px 8px; color: #94a3b8;">💭 Слова автора (#)</button>
+          </div>
+          <!-- Быстрый выбор героев -->
+          <div id="charQuickPills" style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px;"></div>
+          <input type="text" id="editNodeTitle" class="form-control" placeholder="Например: Ника (pose_01) или Ривер" oninput="onNodeTitleInput(this.value)">
+        </div>
+
+        <!-- 1. ЦВЕТ ИМЕНИ ПЕРСОНАЖА -->
+        <div class="form-group" id="nodeHeaderTextColorGroup">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label class="form-label" style="margin: 0;">🎨 Цвет имени говорящего (в шапке блока):</label>
+            <span id="charColorPreview" style="font-weight: 700; font-size: 13px; padding: 2px 10px; border-radius: 4px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1);">Имя персонажа</span>
+          </div>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+            <button type="button" class="char-color-pill" style="background: #0080ff;" onclick="setCharTextColor('#0080ff')" title="Синий (Ривер)"></button>
+            <button type="button" class="char-color-pill" style="background: #00ffcc;" onclick="setCharTextColor('#00ffcc')" title="Бирюзовый (Ника)"></button>
+            <button type="button" class="char-color-pill" style="background: #ffff00;" onclick="setCharTextColor('#ffff00')" title="Жёлтый (Джен)"></button>
+            <button type="button" class="char-color-pill" style="background: #c060f8;" onclick="setCharTextColor('#c060f8')" title="Фиолетовый (Энджи)"></button>
+            <button type="button" class="char-color-pill" style="background: #8000ff;" onclick="setCharTextColor('#8000ff')" title="Пурпурный (???)"></button>
+            <button type="button" class="char-color-pill" style="background: #66ccff;" onclick="setCharTextColor('#66ccff')" title="Голубой (Телевизор)"></button>
+            <button type="button" class="char-color-pill" style="background: #ffffff;" onclick="setCharTextColor('#ffffff')" title="Белый"></button>
+            <button type="button" class="char-color-pill" style="background: #e74c3c;" onclick="setCharTextColor('#e74c3c')" title="Рубиновый"></button>
+            <button type="button" class="char-color-pill" style="background: #2ecc71;" onclick="setCharTextColor('#2ecc71')" title="Изумрудный"></button>
+            <input type="color" id="editNodeHeaderTextColorPicker" onchange="setCharTextColor(this.value)" style="width: 32px; height: 28px; padding: 0; border: none; border-radius: 4px; cursor: pointer; background: transparent;">
+            <input type="text" id="editNodeHeaderTextColor" class="form-control" style="width: 90px; height: 28px; font-family: monospace; font-size: 12px; padding: 2px 6px;" placeholder="#ffffff" oninput="setCharTextColor(this.value)">
+          </div>
+        </div>
+
+        <!-- 2. ЭМОЦИЯ И СПРАЙТ ПЕРСОНАЖА -->
+        <div class="form-group" id="nodeEmotionGroup">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label class="form-label" style="margin: 0;">🎭 Эмоция / Поза спрайта:</label>
+            <span style="font-size: 11px; color: #94a3b8;">(прописывается в заголовке: <code>Имя (эмоция)</code>)</span>
+          </div>
+          <div id="nodeEmotionPills" style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px;"></div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="text" id="editNodeEmotion" class="form-control" placeholder="Например: радость или pose_01" oninput="onEmotionInputChanged(this.value)" style="flex: 1;">
+            <button type="button" class="btn" style="padding: 4px 10px; font-size: 12px;" onclick="clearEmotion()">✕ Сброс</button>
+          </div>
+        </div>
+
+        <!-- 3. ПРЕВЬЮ СПРАЙТА В МОДАЛКЕ -->
+        <div id="nodeSpritePreviewContainer" class="node-sprite-preview-box">
+          <div class="node-sprite-preview-img-wrap">
+            <img id="nodeModalSpriteImg" src="" alt="Спрайт" style="display: none;">
+            <div id="nodeModalSpritePlaceholder" class="sprite-placeholder">
+              <span>🧍</span>
+              <span style="font-size: 11px; color: #64748b;">Нет файла</span>
+            </div>
+          </div>
+          <div class="node-sprite-preview-info">
+            <div id="nodeModalSpriteTitle" style="font-weight: 600; color: #f8fafc; font-size: 13px;">Персонаж не выбран</div>
+            <div id="nodeModalSpriteFile" style="font-size: 11px; color: #10b981; font-family: monospace;">—</div>
+            <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Спрайт связывается автоматически по эмоции из заголовка</div>
+          </div>
         </div>
 
         <div class="form-group">
@@ -162,26 +469,168 @@
           <textarea id="editNodeContent" class="form-control" rows="5" placeholder="Введите диалог или текст..."></textarea>
         </div>
 
+        <!-- 4. ЦВЕТ ШАПКИ / ФОНА БЛОКА -->
         <div class="form-group">
-          <label class="form-label">Цвет блока:</label>
-          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <button type="button" class="btn" style="background: #4a90e2; color: white;" onclick="setEditColor('#4a90e2')">Синий</button>
-            <button type="button" class="btn" style="background: #e67e22; color: white;" onclick="setEditColor('#e67e22')">Оранжевый</button>
-            <button type="button" class="btn" style="background: #2ecc71; color: white;" onclick="setEditColor('#2ecc71')">Зеленый</button>
-            <button type="button" class="btn" style="background: #9b59b6; color: white;" onclick="setEditColor('#9b59b6')">Фиолетовый</button>
-            <button type="button" class="btn" style="background: #c0392b; color: white;" onclick="setEditColor('#c0392b')">Красный</button>
+          <label class="form-label">Цвет фона шапки блока:</label>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+            <button type="button" class="btn" style="background: #4f8cff; color: white;" onclick="setEditColor('#4f8cff')">Синий</button>
+            <button type="button" class="btn" style="background: #f59e0b; color: white;" onclick="setEditColor('#f59e0b')">Оранжевый</button>
+            <button type="button" class="btn" style="background: #10b981; color: white;" onclick="setEditColor('#10b981')">Зеленый</button>
+            <button type="button" class="btn" style="background: #8b5cf6; color: white;" onclick="setEditColor('#8b5cf6')">Фиолетовый</button>
+            <button type="button" class="btn" style="background: #ef4444; color: white;" onclick="setEditColor('#ef4444')">Красный</button>
+            <button type="button" class="btn" style="background: #334155; color: white;" onclick="setEditColor('')">По умолчанию</button>
+            <input type="color" id="editNodeColorPicker" onchange="setEditColor(this.value)" style="width: 32px; height: 28px; padding: 0; border: none; border-radius: 4px; cursor: pointer; background: transparent;">
           </div>
           <input type="hidden" id="editNodeColor" value="">
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn" style="background: #c0392b; color: white; margin-right: auto;" onclick="deleteCurrentNode()">🗑️ Удалить</button>
+        <button class="btn" style="background: #ef4444; color: white; margin-right: auto;" onclick="deleteCurrentNode()">🗑️ Удалить</button>
         <button class="btn" onclick="closeNodeModal()">Отмена</button>
         <button class="btn btn-primary" onclick="saveNodeModal()">Готово</button>
       </div>
     </div>
   </div>
 
-  <script src="/static/app.js"></script>
+  <!-- ==========================================================================
+       БАЗА ПЕРСОНАЖЕЙ (CHARACTER MANAGER)
+       ========================================================================== -->
+  <div id="charactersModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 760px; width: 95%;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 22px;">👥</span>
+          <div>
+            <h3 style="margin: 0; font-size: 16px;">База персонажей (Character Manager)</h3>
+            <div style="font-size: 11px; color: #94a3b8;">Цвета имен реплик, пресеты эмоций, аватары и автоподстановка</div>
+          </div>
+        </div>
+        <button class="btn" onclick="closeCharactersModal()" style="padding: 2px 8px;">✕</button>
+      </div>
+      <div class="modal-body" style="max-height: 72vh; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 8px; flex-wrap: wrap;">
+          <button class="btn btn-primary" onclick="openAddCharacterPrompt()" style="font-size: 12px; padding: 5px 12px;">➕ Добавить персонажа</button>
+          <button class="btn" onclick="scanCharactersFromGraph()" style="font-size: 12px; padding: 5px 12px; border-color: #3b82f6; color: #93c5fd;" title="Найти всех персонажей из сценария">🔄 Сканировать из сценария</button>
+        </div>
+        <div id="charactersListContainer" style="display: flex; flex-direction: column; gap: 10px;">
+          <!-- Карточки персонажей формируются в app.js -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeCharactersModal()">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       УПРАВЛЕНИЕ СЕССИЯМИ (У КАЖДОЙ СЕССИИ СВОЯ ССЫЛКА)
+       ========================================================================== -->
+  <div id="sessionModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 620px; width: 95%;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 22px;">🏷️</span>
+          <div>
+            <h3 style="margin: 0; font-size: 16px;">Сессии и совместные комнаты</h3>
+            <div style="font-size: 11px; color: #94a3b8;">У каждой сессии своя персональная ссылка для совместной работы</div>
+          </div>
+        </div>
+        <button class="btn" onclick="closeSessionModal()" style="padding: 2px 8px;">✕</button>
+      </div>
+      <div class="modal-body">
+        <!-- Текущая ссылка на сессию -->
+        <div class="form-group">
+          <label class="form-label">🔗 Персональная ссылка на текущую сессию:</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="sessionShareLinkInput" class="form-control" readonly style="font-family: monospace; font-size: 12px; background: #12141a; color: #38bdf8;">
+            <button class="btn btn-primary" onclick="copySessionShareLink()" style="white-space: nowrap;">📋 Копировать</button>
+          </div>
+          <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">Любой, кто перейдет по этой ссылке, сразу подключится к редактированию этого проекта.</div>
+        </div>
+
+        <!-- Создание новой сессии / переход в другую -->
+        <div class="form-group" style="padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08);">
+          <label class="form-label">➕ Создать новую комнату или перейти по имени:</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="newSessionNameInput" class="form-control" placeholder="Например: chapter2, test_room, prologue">
+            <button class="btn btn-success" onclick="createNewSessionFromModal()" style="white-space: nowrap;">Перейти 🚀</button>
+          </div>
+        </div>
+
+        <!-- Список известных сессий -->
+        <div class="form-group" style="margin-top: 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label class="form-label" style="margin: 0;">📁 Доступные комнаты:</label>
+            <button class="btn" onclick="refreshSessionsList()" style="font-size: 11px; padding: 2px 8px;">🔄 Обновить</button>
+          </div>
+          <div id="sessionsListContainer" style="display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto;">
+            <!-- Список генерируется через JS -->
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeSessionModal()">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       РАЗВЕРТЫВАНИЕ В GITHUB РЕПОЗИТОРИЙ
+       ========================================================================== -->
+  <div id="githubModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 680px; width: 95%;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 24px;">🐙</span>
+          <div>
+            <h3 style="margin: 0; font-size: 16px;">Развертывание в GitHub репозиторий</h3>
+            <div style="font-size: 11px; color: #94a3b8;">Хостинг на GitHub Pages, CI/CD деплой и экспорт без необходимости в VPS сервере</div>
+          </div>
+        </div>
+        <button class="btn" onclick="closeGitHubModal()" style="padding: 2px 8px;">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 14px; margin-bottom: 14px;">
+          <div style="font-weight: 700; color: #f8fafc; font-size: 14px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+            <span>🌐 Онлайн-версия на GitHub Pages:</span>
+            <span class="online-indicator-dot" style="display: inline-block;"></span>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <a id="githubPagesUrl" href="https://komendant-zero.github.io/dialogue-engine/app/" target="_blank" class="form-control" style="font-family: monospace; font-size: 12px; color: #38bdf8; text-decoration: none; display: flex; align-items: center;">
+              https://komendant-zero.github.io/dialogue-engine/app/
+            </a>
+            <button class="btn btn-primary" onclick="copyGitHubPagesLink()" style="white-space: nowrap;">📋 Копировать</button>
+          </div>
+          <div style="font-size: 12px; color: #94a3b8; margin-top: 8px;">
+            Вся веб-студия развернута напрямую на GitHub Pages. Сценарии, авто-расстановка, плеер новеллы, спрайты и коворк работают прямо в браузере.
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+          <div style="background: rgba(18, 20, 26, 0.9); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 12px;">
+            <div style="font-weight: 600; font-size: 13px; color: #cbd5e1; margin-bottom: 6px;">📦 Исходный репозиторий</div>
+            <a href="https://github.com/komendant-zero/dialogue-engine" target="_blank" class="btn" style="width: 100%; text-align: center; font-size: 12px; display: block;">Открыть на GitHub</a>
+          </div>
+          <div style="background: rgba(18, 20, 26, 0.9); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 12px;">
+            <div style="font-weight: 600; font-size: 13px; color: #cbd5e1; margin-bottom: 6px;">💾 Экспорт проекта</div>
+            <button class="btn btn-success" onclick="downloadProjectJson()" style="width: 100%; font-size: 12px;">Скачать JSON сценария</button>
+          </div>
+        </div>
+
+        <div style="background: #11141b; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 12px; color: #94a3b8; border: 1px solid rgba(255,255,255,0.06);">
+          <div style="color: #cbd5e1; font-weight: bold; margin-bottom: 4px;">🚀 Быстрый деплой новых изменений в репозиторий:</div>
+          <div style="color: #38bdf8;">git add .</div>
+          <div style="color: #38bdf8;">git commit -m "update web studio"</div>
+          <div style="color: #38bdf8;">git push origin master</div>
+          <div style="color: #64748b; margin-top: 4px;"># GitHub Actions автоматически развернет обновленную студию на GitHub Pages!</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeGitHubModal()">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
 </body>
 </html>

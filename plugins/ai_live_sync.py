@@ -9,8 +9,9 @@ from __future__ import annotations
 import json
 import socket
 import threading
+import time
 import tkinter as tk
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 from core.models import ConnectionData, NodeData
 from plugin_system.base import Plugin
@@ -22,7 +23,7 @@ DEFAULT_LIVE_PORT = 48123
 
 class AILiveSyncPlugin(Plugin):
     name = "Real-Time AI Live Sync"
-    version = "1.0"
+    version = "1.1"
     author = "Dialogue Engine Team"
     description = "Прямое отображение генерации узлов нейросетью на холсте в реальном времени"
 
@@ -31,6 +32,8 @@ class AILiveSyncPlugin(Plugin):
         self.server_thread: Optional[threading.Thread] = None
         self.server_socket: Optional[socket.socket] = None
         self.is_running = False
+        self.event_log: List[Dict[str, Any]] = []
+        self.on_log_callback: Optional[Callable[[Dict[str, Any]], None]] = None
 
     def on_enable(self) -> None:
         self.start_server()
@@ -53,6 +56,12 @@ class AILiveSyncPlugin(Plugin):
             except Exception:
                 pass
             self.server_socket = None
+
+    def restart_server(self) -> bool:
+        self.stop_server()
+        time.sleep(0.1)
+        self.start_server()
+        return self.is_running
 
     def _server_loop(self) -> None:
         try:
@@ -105,6 +114,8 @@ class AILiveSyncPlugin(Plugin):
     def _handle_ai_event(self, event: Dict[str, Any]) -> None:
         """Обработка события в главном потоке редактора."""
         action = event.get("action")
+        t_str = time.strftime("%H:%M:%S")
+        log_text = f"[{t_str}] Событие: {action}"
 
         # 1. Добавление нового узла в реальном времени
         if action == "node_spawn":
@@ -116,17 +127,18 @@ class AILiveSyncPlugin(Plugin):
             n_data = NodeData.from_dict(node_data_dict)
             existing = self.editor.find_node_by_id(n_data.id)
             if existing:
-                # Если узел уже есть, обновляем
                 existing.title = n_data.title
                 existing.content = n_data.content
                 existing.calculate_size()
                 node_to_pulse = existing
+                log_text = f"[{t_str}] 🔄 Обновлен сгенерированный узел: {n_data.id} ('{n_data.title}')"
             else:
                 new_node = Node.from_node_data(self.editor, n_data)
                 new_node.is_new = False
                 new_node.calculate_size()
                 self.editor.nodes.append(new_node)
                 node_to_pulse = new_node
+                log_text = f"[{t_str}] 🟢 AI создал узел: {n_data.id} [{n_data.node_type}] ('{n_data.title}')"
 
             # Добавляем связь, если указана
             if conn_dict and isinstance(conn_dict, dict):
@@ -134,7 +146,6 @@ class AILiveSyncPlugin(Plugin):
                 to_id = conn_dict.get("to")
                 out_idx = int(conn_dict.get("out_idx", 0))
                 if from_id and to_id:
-                    # Убираем старую связь с этого выхода
                     self.editor.connections = [
                         c for c in self.editor.connections
                         if not (c["from"] == from_id and c["out_idx"] == out_idx)
@@ -144,6 +155,7 @@ class AILiveSyncPlugin(Plugin):
                         "out_idx": out_idx,
                         "to": to_id
                     })
+                    log_text += f" -> связь {from_id} [{out_idx}] -> {to_id}"
 
             # Перерисовываем холст
             self.editor.redraw()
@@ -153,7 +165,6 @@ class AILiveSyncPlugin(Plugin):
                 self.editor.canvas.center_on_node(node_to_pulse)
                 self._animate_ai_spawn(node_to_pulse)
 
-            # Статус бар
             if hasattr(self.editor, "status_bar"):
                 spk = n_data.title or "Сцена"
                 self.editor.status_bar.config(text=f"✨ AI сгенерировал блок [{spk}]: {n_data.content[:45]}...")
@@ -178,6 +189,7 @@ class AILiveSyncPlugin(Plugin):
                 node.calculate_size()
                 self.editor.redraw()
                 self._animate_ai_spawn(node)
+                log_text = f"[{t_str}] 🟡 AI обновил узел {node_id} ('{node.title}')"
 
         # 3. Удаление узла
         elif action == "node_delete":
@@ -187,6 +199,7 @@ class AILiveSyncPlugin(Plugin):
                 self.editor.nodes.remove(node)
                 self.editor.connections = [c for c in self.editor.connections if c["from"] != node_id and c["to"] != node_id]
                 self.editor.redraw()
+                log_text = f"[{t_str}] 🔴 AI удалил узел {node_id}"
 
         # 4. Создание отдельной связи
         elif action == "connection_add":
@@ -201,6 +214,19 @@ class AILiveSyncPlugin(Plugin):
                 ]
                 self.editor.connections.append({"from": from_id, "out_idx": out_idx, "to": to_id})
                 self.editor.redraw()
+                log_text = f"[{t_str}] 🔗 AI соединил узлы: {from_id} -> {to_id}"
+
+        # Сохранение в лог событий
+        entry = {"time": t_str, "action": action, "text": log_text, "event": event}
+        self.event_log.append(entry)
+        if len(self.event_log) > 200:
+            self.event_log.pop(0)
+
+        if callable(self.on_log_callback):
+            try:
+                self.on_log_callback(entry)
+            except Exception:
+                pass
 
     def _animate_ai_spawn(self, node: Node) -> None:
         """Анимация неонового фиолетово-бирюзового свечения вокруг появившегося блока."""

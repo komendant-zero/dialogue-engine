@@ -213,6 +213,19 @@ class CoworkSession:
                 "color": sender.get("color")
             }, exclude_client=client_id)
 
+        # 1b. Пакетное перемещение узлов (Auto-Layout)
+        elif mtype == "batch_move":
+            moves = msg.get("moves", [])
+            moves_dict = {str(m.get("id")): (float(m.get("x", 0)), float(m.get("y", 0))) for m in moves}
+            for n in self.project_data.nodes:
+                if n.id in moves_dict:
+                    n.x, n.y = moves_dict[n.id]
+            self.is_dirty = True
+            await self.broadcast({
+                "type": "batch_move",
+                "moves": moves
+            }, exclude_client=client_id)
+
         # 2. Создание нового узла
         elif mtype == "node_create":
             nd = msg.get("node")
@@ -335,6 +348,51 @@ class CoworkSession:
                 "text": f"💾 Проект сохранен на сервере ({os.path.basename(saved_path)})"
             })
 
+        # 10. Создание / обновление персонажа
+        elif mtype == "character_update":
+            cd = msg.get("character")
+            if cd and isinstance(cd, dict):
+                cname = str(cd.get("name", "")).strip()
+                if cname:
+                    updated = False
+                    for i, ch in enumerate(self.project_data.characters):
+                        if ch.name.strip().lower() == cname.lower():
+                            self.project_data.characters[i] = CharacterData.from_dict(cd)
+                            updated = True
+                            break
+                    if not updated:
+                        self.project_data.characters.append(CharacterData.from_dict(cd))
+                    self.is_dirty = True
+                    await self.broadcast({
+                        "type": "characters_list_updated",
+                        "characters": [c.to_dict() for c in self.project_data.characters],
+                        "updated_character": cd,
+                        "sender": sender.get("name")
+                    })
+
+        # 11. Пакетное применение цвета ко всем репликам персонажа
+        elif mtype == "character_batch_apply_color":
+            cname = str(msg.get("name", "")).strip().lower()
+            color = str(msg.get("color", "")).strip()
+            header_color = msg.get("header_color")
+            if cname and color:
+                updated_nodes = []
+                for n in self.project_data.nodes:
+                    title_raw = (n.title or "").strip()
+                    base_name = title_raw.split("(")[0].split("[")[0].strip().lower()
+                    if base_name == cname:
+                        n.custom_data = n.custom_data or {}
+                        n.custom_data["header_text_color"] = color
+                        if header_color:
+                            n.custom_data["header_color"] = header_color
+                        updated_nodes.append(n.to_dict())
+                self.is_dirty = True
+                await self.broadcast({
+                    "type": "batch_nodes_updated",
+                    "nodes": updated_nodes,
+                    "sender": sender.get("name")
+                })
+
     def save_to_disk(self) -> str:
         """Сохраняет текущее состояние проекта на сервере."""
         try:
@@ -358,3 +416,72 @@ class CoworkSession:
                     self.save_to_disk()
         except asyncio.CancelledError:
             pass
+
+
+class SessionManager:
+    """Менеджер множественных комнат/сессий коворка. У каждой сессии своя ссылка и файл проекта."""
+
+    def __init__(self, default_project_path: Optional[str] = None):
+        self.default_project_path = default_project_path or os.path.join(ENGINE_DIR, "data", "violant.json")
+        self.data_dir = os.path.dirname(os.path.abspath(self.default_project_path))
+        os.makedirs(self.data_dir, exist_ok=True)
+        self.sessions: Dict[str, CoworkSession] = {}
+        self.default_session_id = "violant"
+        self._get_or_create(self.default_session_id, self.default_project_path)
+
+    def _sanitize_session_id(self, session_id: str) -> str:
+        safe = "".join(c for c in (session_id or "").strip() if c.isalnum() or c in ("-", "_")).lower()
+        return safe or self.default_session_id
+
+    def get_session_file_path(self, session_id: str) -> str:
+        safe_id = self._sanitize_session_id(session_id)
+        if safe_id == self.default_session_id and os.path.exists(self.default_project_path):
+            return self.default_project_path
+        return os.path.join(self.data_dir, f"{safe_id}.json")
+
+    def _get_or_create(self, session_id: str, custom_path: Optional[str] = None) -> CoworkSession:
+        safe_id = self._sanitize_session_id(session_id)
+        if safe_id not in self.sessions:
+            path = custom_path or self.get_session_file_path(safe_id)
+            sess = CoworkSession(project_path=path)
+            if not os.path.exists(path) and safe_id != self.default_session_id:
+                sess.project_data.metadata.title = f"Сессия {safe_id}"
+            self.sessions[safe_id] = sess
+            logger.info(f"SessionManager: Registered session '{safe_id}' with file {path}")
+        return self.sessions[safe_id]
+
+    def get_session(self, session_id: str = "violant") -> CoworkSession:
+        return self._get_or_create(session_id)
+
+    def list_sessions(self) -> List[Dict[str, Any]]:
+        results = []
+        seen = set()
+        for sid, sess in self.sessions.items():
+            seen.add(sid)
+            results.append({
+                "id": sid,
+                "title": sess.project_data.metadata.title or sid,
+                "nodes_count": len(sess.project_data.nodes),
+                "active_users": len(sess.clients),
+                "collaborators": [c.get("name") for c in sess.clients.values()]
+            })
+
+        if os.path.isdir(self.data_dir):
+            for f in sorted(os.listdir(self.data_dir)):
+                if f.endswith(".json") and not f.endswith(".bak"):
+                    sid = os.path.splitext(f)[0]
+                    if sid not in seen:
+                        seen.add(sid)
+                        results.append({
+                            "id": sid,
+                            "title": sid,
+                            "nodes_count": 0,
+                            "active_users": 0,
+                            "collaborators": []
+                        })
+        return results
+
+    async def save_all(self) -> None:
+        for sid, sess in list(self.sessions.items()):
+            if sess.is_dirty:
+                sess.save_to_disk()
